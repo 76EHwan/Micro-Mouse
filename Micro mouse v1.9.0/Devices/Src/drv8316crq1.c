@@ -53,7 +53,7 @@ static HAL_StatusTypeDef DRV8316C_SPI_TxRx(DRV8316C_Handle_t *hdrv,
 	// Transmit 2 bytes (Size = 2).
 	// HAL_SPI_TransmitReceive handles sending pTxData[0] then pTxData[1].
 	status = HAL_SPI_TransmitReceive(hdrv->hspi, pTxData, pRxData, 2,
-			HAL_MAX_DELAY);
+			100);
 
 	DRV8316C_CS_HIGH(hdrv); // Deactivate Chip Select (HIGH)
 

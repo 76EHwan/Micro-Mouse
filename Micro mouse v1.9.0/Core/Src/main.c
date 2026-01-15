@@ -141,16 +141,16 @@ int main(void) {
 		/* USER CODE END WHILE */
 
 		SPI1_Config_For_DRV8316();
-		DRV8316C_ReadRegister(&DRV8316C_L, DRV_REG_IC_STATUS, pData1);
+		DRV8316C_ReadRegister(&DRV8316C_L, DRV_REG_STATUS_2, pData1);
 		TRIG_OFF;
-		DRV8316C_ReadRegister(&DRV8316C_L, DRV_REG_STATUS_1, pData2);
-		DRV8316C_ReadRegister(&DRV8316C_L, DRV_REG_STATUS_2, pData3);
+		DRV8316C_ReadRegister(&DRV8316C_L, DRV_REG_CTRL_2, pData2);
+		DRV8316C_ReadRegister(&DRV8316C_L, DRV_REG_CTRL_3, pData3);
 		SPI1_Config_For_ST7735();
-		LCD_Printf(0, 1, "%02x%02x", pData1[0], pData1[1]);
-		LCD_Printf(0, 2, "%02x%02x", pData2[0], pData2[1]);
-		LCD_Printf(0, 3, "%02x%02x", pData3[0], pData3[1]);
+		LCD_Printf(0, 1, "%02x %02x%02x", DRV_REG_STATUS_2, pData1[0], pData1[1]);
+		LCD_Printf(0, 2, "%02x %02x%02x", DRV_REG_CTRL_2, pData2[0], pData2[1]);
+		LCD_Printf(0, 3, "%02x %02x%02x", DRV_REG_CTRL_3, pData3[0], pData3[1]);
 
-		HAL_Delay(1000);
+		HAL_Delay(100);
 
 		/* USER CODE BEGIN 3 */
 

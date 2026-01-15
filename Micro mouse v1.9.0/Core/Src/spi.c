@@ -250,7 +250,7 @@ void SPI1_Config_For_DRV8316(void)
     // CPOL은 0이므로 SPI_POLARITY_LOW (비트 설정 안 함)
 
     // 4. SPI 다시 활성화
-    __HAL_SPI_ENABLE(&hspi1);
+//    __HAL_SPI_ENABLE(&hspi1);
 }
 
 /**
@@ -271,7 +271,7 @@ void SPI1_Config_For_ST7735(void)
     // 별도 비트 OR 연산 필요 없음 (둘 다 0)
 
     // 4. SPI 다시 활성화
-    __HAL_SPI_ENABLE(&hspi1);
+//    __HAL_SPI_ENABLE(&hspi1);
 }
 
 
