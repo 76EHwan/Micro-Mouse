@@ -46,7 +46,9 @@ extern "C" {
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
-
+#define TRIG_ON		HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET)
+#define TRIG_OFF	HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET)
+#define TRIG_TOGGLE HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin)
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/

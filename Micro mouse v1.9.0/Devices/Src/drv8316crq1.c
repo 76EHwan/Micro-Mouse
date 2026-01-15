@@ -255,8 +255,10 @@ void MX_DRV8316C_Init() {
 	DRV8316C_LockRegister(&DRV8316C_R);
 
 	if (DRV8316C_VerifyConfig(&DRV8316C_L) != REG_OK) {
+		TRIG_OFF;
 	}
 	if (DRV8316C_VerifyConfig(&DRV8316C_R) != REG_OK) {
+		TRIG_OFF;
 	}
 
 	SPI1_Config_For_ST7735();
