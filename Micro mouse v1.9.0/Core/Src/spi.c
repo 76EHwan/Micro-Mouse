@@ -235,7 +235,7 @@ void SPI1_Config_For_DRV8316(void)
 {
     // 1. SPI가 현재 전송 중인지 확인 (Busy 플래그 체크)
     // H5 시리즈는 TXC(Transmission Complete) 플래그 등을 확인하는 것이 안전함
-    while (hspi1.State == HAL_SPI_STATE_BUSY);
+    while (hspi1.State != HAL_SPI_STATE_READY);
 
     // 2. SPI 비활성화 (설정 변경을 위해 필수)
     __HAL_SPI_DISABLE(&hspi1);
@@ -250,7 +250,7 @@ void SPI1_Config_For_DRV8316(void)
     // CPOL은 0이므로 SPI_POLARITY_LOW (비트 설정 안 함)
 
     // 4. SPI 다시 활성화
-//    __HAL_SPI_ENABLE(&hspi1);
+    __HAL_SPI_ENABLE(&hspi1);
 }
 
 /**
@@ -259,7 +259,7 @@ void SPI1_Config_For_DRV8316(void)
 void SPI1_Config_For_ST7735(void)
 {
     // 1. SPI Busy 확인
-    while (hspi1.State == HAL_SPI_STATE_BUSY);
+    while (hspi1.State != HAL_SPI_STATE_READY);
 
     // 2. SPI 비활성화
     __HAL_SPI_DISABLE(&hspi1);
@@ -271,7 +271,7 @@ void SPI1_Config_For_ST7735(void)
     // 별도 비트 OR 연산 필요 없음 (둘 다 0)
 
     // 4. SPI 다시 활성화
-//    __HAL_SPI_ENABLE(&hspi1);
+    __HAL_SPI_ENABLE(&hspi1);
 }
 
 

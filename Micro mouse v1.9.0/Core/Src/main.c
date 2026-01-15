@@ -48,7 +48,7 @@
 /* USER CODE BEGIN PM */
 #define TRIG_ON		HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET)
 #define TRIG_OFF	HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET)
-
+#define TRIG_TOGGLE HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin)
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -122,7 +122,6 @@ int main(void) {
 	MX_TIM12_Init();
 	/* USER CODE BEGIN 2 */
 //	MX_DRV8316C_Init();
-	HAL_GPIO_WritePin(MTR_nSLEEP_GPIO_Port, MTR_nSLEEP_Pin, GPIO_PIN_SET);
 	MX_DRV8316C_Init();
 	LCD_Test();
 
@@ -141,19 +140,32 @@ int main(void) {
 		/* USER CODE END WHILE */
 
 		SPI1_Config_For_DRV8316();
-		DRV8316C_ReadRegister(&DRV8316C_L, DRV_REG_STATUS_2, pData1);
-		TRIG_OFF;
-		DRV8316C_ReadRegister(&DRV8316C_L, DRV_REG_CTRL_2, pData2);
-		DRV8316C_ReadRegister(&DRV8316C_L, DRV_REG_CTRL_3, pData3);
+		HAL_Delay(10);
+		DRV8316C_ReadRegister(&DRV8316C_L, DRV_REG_IC_STATUS, pData1);
+		DRV8316C_ReadRegister(&DRV8316C_L, DRV_REG_STATUS_1, pData2);
+		DRV8316C_ReadRegister(&DRV8316C_L, DRV_REG_STATUS_2, pData3);
+		HAL_Delay(10);
 		SPI1_Config_For_ST7735();
-		LCD_Printf(0, 1, "%02x %02x%02x", DRV_REG_STATUS_2, pData1[0], pData1[1]);
-		LCD_Printf(0, 2, "%02x %02x%02x", DRV_REG_CTRL_2, pData2[0], pData2[1]);
-		LCD_Printf(0, 3, "%02x %02x%02x", DRV_REG_CTRL_3, pData3[0], pData3[1]);
+		HAL_Delay(10);
+		LCD_Printf(0, 1, "L: %02x%02x", pData1[0], pData1[1]);
+		LCD_Printf(0, 2, "L: %02x%02x", pData2[0], pData2[1]);
+		LCD_Printf(0, 3, "L: %02x%02x", pData3[0], pData3[1]);
+		HAL_Delay(10);
+		SPI1_Config_For_DRV8316();
+		HAL_Delay(10);
+		DRV8316C_ReadRegister(&DRV8316C_R, DRV_REG_IC_STATUS, pData1);
+		DRV8316C_ReadRegister(&DRV8316C_R, DRV_REG_STATUS_1, pData2);
+		DRV8316C_ReadRegister(&DRV8316C_R, DRV_REG_STATUS_2, pData3);
+		HAL_Delay(10);
+		SPI1_Config_For_ST7735();
+		HAL_Delay(10);
+		LCD_Printf(9, 1, "R: %02x%02x", pData1[0], pData1[1]);
+		LCD_Printf(9, 2, "R: %02x%02x", pData2[0], pData2[1]);
+		LCD_Printf(9, 3, "R: %02x%02x", pData3[0], pData3[1]);
 
 		HAL_Delay(100);
-
+		TRIG_TOGGLE;
 		/* USER CODE BEGIN 3 */
-
 
 	}
 	/* USER CODE END 3 */

@@ -236,7 +236,11 @@ DRV8316C_REG_Typedef DRV8316C_VerifyConfig(DRV8316C_Handle_t *hdrv) {
 }
 
 void MX_DRV8316C_Init() {
+	HAL_GPIO_WritePin(MTR_nSLEEP_GPIO_Port, MTR_nSLEEP_Pin, GPIO_PIN_SET);
+	HAL_Delay(10);
+
 	SPI1_Config_For_DRV8316();
+	HAL_Delay(10);
 
 	DRV8316C_Init(&DRV8316C_L, &hspi1, MTR_L_CS_GPIO_Port, MTR_L_CS_Pin);
 	DRV8316C_Init(&DRV8316C_R, &hspi1, MTR_R_CS_GPIO_Port, MTR_R_CS_Pin);
