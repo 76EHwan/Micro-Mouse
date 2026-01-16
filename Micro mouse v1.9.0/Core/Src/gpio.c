@@ -63,10 +63,8 @@ void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, XSHUT1_Pin|XSHUT0_Pin|ENC_R_CS_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : LD2_Pin LCD_CS_Pin LCD_DC_Pin XSHUT3_Pin
-                           XSHUT2_Pin MTR_INLx_Pin */
-  GPIO_InitStruct.Pin = LD2_Pin|LCD_CS_Pin|LCD_DC_Pin|XSHUT3_Pin
-                          |XSHUT2_Pin|MTR_INLx_Pin;
+  /*Configure GPIO pins : LD2_Pin LCD_CS_Pin LCD_DC_Pin MTR_INLx_Pin */
+  GPIO_InitStruct.Pin = LD2_Pin|LCD_CS_Pin|LCD_DC_Pin|MTR_INLx_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -87,12 +85,26 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : XSHUT1_Pin XSHUT0_Pin ENC_R_CS_Pin */
-  GPIO_InitStruct.Pin = XSHUT1_Pin|XSHUT0_Pin|ENC_R_CS_Pin;
+  /*Configure GPIO pins : XSHUT3_Pin XSHUT2_Pin */
+  GPIO_InitStruct.Pin = XSHUT3_Pin|XSHUT2_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : XSHUT1_Pin XSHUT0_Pin */
+  GPIO_InitStruct.Pin = XSHUT1_Pin|XSHUT0_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : ENC_R_CS_Pin */
+  GPIO_InitStruct.Pin = ENC_R_CS_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  HAL_GPIO_Init(ENC_R_CS_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : TOF_INT0_Pin TOF_INT1_Pin TOF_INT2_Pin */
   GPIO_InitStruct.Pin = TOF_INT0_Pin|TOF_INT1_Pin|TOF_INT2_Pin;

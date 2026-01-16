@@ -8,6 +8,6 @@
 #ifndef INC_VL53L4CX_H_
 #define INC_VL53L4CX_H_
 
-
+void VL53L4CX_Init();
 
 #endif /* INC_VL53L4CX_H_ */

@@ -33,6 +33,7 @@
 #include "lcd.h"
 #include "drv8316crq1.h"
 #include "lsm6ds3tr-c.h"
+#include "vl53l4cx.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -126,21 +127,22 @@ int main(void)
 	LCD_Test();
 	LCD_Printf(0, 0, "Hello World");
 
-	if (LSM6DS3_Init() != HAL_OK) {
-		sprintf(error_log, "IMU Init Fail");
-		Error_Handler();
-	}
+//	if (LSM6DS3_Init() != HAL_OK) {
+//		sprintf(error_log, "IMU Init Fail");
+//		Error_Handler();
+//	}
+//
+//	Gyro_Calibrate_Z_Only();
+//	HAL_TIM_Base_Start(&htim2);
+//	HAL_TIM_Base_Start_IT(&htim6);
 
-	Gyro_Calibrate_Z_Only();
-	HAL_TIM_Base_Start(&htim2);
-	HAL_TIM_Base_Start_IT(&htim6);
+	VL53L4CX_Init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	while (1) {
-		LCD_Printf(0, 1, "%.6f   ", imu_data.Yaw_Angle);
-		LCD_Printf(0, 2, "%d", imu_data.Gyro_Z);
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
