@@ -18,6 +18,7 @@
 #define REG_CTRL1_XL        0x10 // Accelerometer Control
 #define REG_CTRL2_G         0x11 // Gyroscope Control
 #define REG_OUTX_L_G        0x22 // Gyro Output Start
+#define REG_OUTZ_L_G		0x26 // Gyro Z-axis Output Start
 #define REG_OUTX_L_XL       0x28 // Accel Output Start
 
 // Configuration Values
@@ -42,12 +43,19 @@ typedef struct {
     float Gyro_X;  // Unit: dps
     float Gyro_Y;
     float Gyro_Z;
+
+    float Gyro_X_Offset;
+    float Gyro_Y_Offset;
+    float Gyro_Z_Offset;
+
+    float Yaw_Angle;
 } LSM6DS3_Data_t;
 
-// Function Prototypes
-uint8_t LSM6DS3_Init(I2C_HandleTypeDef *hi2c);
-void LSM6DS3_ReadAccel(I2C_HandleTypeDef *hi2c, LSM6DS3_Data_t *data);
-void LSM6DS3_ReadGyro(I2C_HandleTypeDef *hi2c, LSM6DS3_Data_t *data);
-void LSM6DS3_ReadAll(I2C_HandleTypeDef *hi2c, LSM6DS3_Data_t *data);
+extern LSM6DS3_Data_t imu_data;
 
+// Function Prototypes
+HAL_StatusTypeDef LSM6DS3_Init();
+void LSM6DS3_ReadAll(LSM6DS3_Data_t *data);
+void LSM6DS3_ReadGyro_Z_Only(LSM6DS3_Data_t *data);
+void Gyro_Calibrate_Z_Only(void);
 #endif /* INC_LSM6DS3TR_H_ */
