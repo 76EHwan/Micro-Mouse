@@ -7,7 +7,6 @@
 #include "main.h"
 #include "i2c.h"
 #include "vl53l4cx.h"
-#include "VL53Lx_api.h"
 #include "lcd.h"
 
 int status;
@@ -46,3 +45,10 @@ void VL53L4CX_Init() {
 	status = VL53LX_StartMeasurement(Dev);
 
 }
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+	if(GPIO_Pin == TOF_INT0_Pin){
+		IntCount++;
+	}
+}
+

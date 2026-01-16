@@ -136,13 +136,15 @@ int main(void)
 //	HAL_TIM_Base_Start(&htim2);
 //	HAL_TIM_Base_Start_IT(&htim6);
 
+	HAL_TIM_Base_Start_IT(&htim3);
 	VL53L4CX_Init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	while (1) {
-
+		LCD_Printf(0, 1, "D: %5d    ",
+				pMultiRangingData->RangeData[0].RangeMilliMeter);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
