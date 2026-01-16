@@ -308,10 +308,6 @@ void MX_TIM6_Init(void)
   {
     Error_Handler();
   }
-  if (HAL_TIM_OnePulse_Init(&htim6, TIM_OPMODE_SINGLE) != HAL_OK)
-  {
-    Error_Handler();
-  }
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
   if (HAL_TIMEx_MasterConfigSynchronization(&htim6, &sMasterConfig) != HAL_OK)
@@ -846,7 +842,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
 		// 적분
 		imu_data.Yaw_Angle += gyro_z_corrected * dt; // dt = 1ms
-		TRIG_TOGGLE;
 		imu_data.Yaw_Angle += 1;
 		if(imu_data.Yaw_Angle > 360.f) imu_data.Yaw_Angle -= 360.f;
 	}
