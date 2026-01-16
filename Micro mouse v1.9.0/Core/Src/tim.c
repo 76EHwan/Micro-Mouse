@@ -124,7 +124,7 @@ void MX_TIM2_Init(void) {
 
 	/* USER CODE END TIM2_Init 1 */
 	htim2.Instance = TIM2;
-	htim2.Init.Prescaler = 0;
+	htim2.Init.Prescaler = 249;
 	htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
 	htim2.Init.Period = 4294967295;
 	htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -756,7 +756,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 		// 1. 자이로 Z축 데이터 읽기
 		static uint32_t prev_tick = 0;
 		uint32_t cur_tick = TIM2->CNT;
-		float dt = (cur_tick - prev_tick) * 0.0000001;
+		float dt = (cur_tick - prev_tick) * 0.000001f;
 		prev_tick = cur_tick;
 
 		LSM6DS3_ReadGyro_Z_Only(&imu_data);
