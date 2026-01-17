@@ -131,12 +131,16 @@ void Error_Handler(void);
 #define ENC_L_CS_GPIO_Port GPIOA
 #define TOF_INT3_Pin GPIO_PIN_10
 #define TOF_INT3_GPIO_Port GPIOC
+#define TOF_INT3_EXTI_IRQn EXTI10_IRQn
 #define TOF_INT2_Pin GPIO_PIN_11
 #define TOF_INT2_GPIO_Port GPIOC
+#define TOF_INT2_EXTI_IRQn EXTI11_IRQn
 #define TOF_INT1_Pin GPIO_PIN_12
 #define TOF_INT1_GPIO_Port GPIOC
+#define TOF_INT1_EXTI_IRQn EXTI12_IRQn
 #define TOF_INT0_Pin GPIO_PIN_2
 #define TOF_INT0_GPIO_Port GPIOD
+#define TOF_INT0_EXTI_IRQn EXTI2_IRQn
 #define IMU_SCL_Pin GPIO_PIN_6
 #define IMU_SCL_GPIO_Port GPIOB
 #define IMU_SDA_Pin GPIO_PIN_7
