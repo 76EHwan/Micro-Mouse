@@ -16,7 +16,7 @@
  *
  ******************************************************************************
  */
-
+#include "vl53l4cx.h"
 #include "lsm6ds3tr-c.h"
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
@@ -169,7 +169,7 @@ void MX_TIM3_Init(void)
   htim3.Instance = TIM3;
   htim3.Init.Prescaler = 249;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 9999;
+  htim3.Init.Period = 999;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
@@ -832,11 +832,13 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if (htim->Instance == TIM3) {
-		IntCount = 0;
-		int status = VL53LX_GetMultiRangingData(Dev, pMultiRangingData);
-		no_of_object_found = pMultiRangingData->NumberOfObjectsFound;
-		if (status == 0) {
-			status = VL53LX_ClearInterruptAndStartMeasurement(Dev);
+		if(IntCount > 0) {
+			IntCount = 0;
+			int status = VL53LX_GetMultiRangingData(Dev, pMultiRangingData);
+			no_of_object_found = pMultiRangingData->NumberOfObjectsFound;
+			if (status == 0) {
+				status = VL53LX_ClearInterruptAndStartMeasurement(Dev);
+			}
 		}
 	}
 

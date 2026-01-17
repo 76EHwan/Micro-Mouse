@@ -16,6 +16,7 @@
   *
   ******************************************************************************
   */
+#include "vl53l4cx.h"
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
@@ -106,20 +107,25 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(ENC_R_CS_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : TOF_INT0_Pin TOF_INT1_Pin TOF_INT2_Pin */
-  GPIO_InitStruct.Pin = TOF_INT0_Pin|TOF_INT1_Pin|TOF_INT2_Pin;
+  /*Configure GPIO pins : TOF_INT3_Pin TOF_INT2_Pin TOF_INT1_Pin */
+  GPIO_InitStruct.Pin = TOF_INT3_Pin|TOF_INT2_Pin|TOF_INT1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : TOF_INT3_Pin */
-  GPIO_InitStruct.Pin = TOF_INT3_Pin;
+  /*Configure GPIO pin : TOF_INT0_Pin */
+  GPIO_InitStruct.Pin = TOF_INT0_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(TOF_INT3_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(TOF_INT0_GPIO_Port, &GPIO_InitStruct);
 
 }
 
 /* USER CODE BEGIN 2 */
 
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+	if(GPIO_Pin == TOF_INT0_Pin){
+		IntCount++;
+	}
+}
 /* USER CODE END 2 */
