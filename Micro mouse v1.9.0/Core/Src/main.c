@@ -122,7 +122,7 @@ int main(void)
   MX_TIM15_Init();
   MX_TIM12_Init();
   /* USER CODE BEGIN 2 */
-//	TRIG_ON;
+	TRIG_ON;
 //	MX_DRV8316C_Init();
 	LCD_Test();
 	LCD_Printf(0, 0, "Hello World");
@@ -136,15 +136,23 @@ int main(void)
 //	HAL_TIM_Base_Start(&htim2);
 //	HAL_TIM_Base_Start_IT(&htim6);
 
-	HAL_TIM_Base_Start_IT(&htim3);
 	VL53L4CX_Init();
+	HAL_TIM_Base_Start_IT(&htim3);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	while (1) {
-		LCD_Printf(0, 1, "D: %5d    ",
-				pMultiRangingData->RangeData[0].RangeMilliMeter);
+//		int status = VL53LX_GetMeasurementDataReady(Dev, &NewDataReady);
+//		HAL_Delay(5);
+//		if ((!status) && (NewDataReady != 0)) {
+//			status = VL53LX_GetMultiRangingData(Dev, pMultiRangingData);
+//			no_of_object_found = pMultiRangingData->NumberOfObjectsFound;
+			LCD_Printf(0, 4, "D=%5dmm", pMultiRangingData->RangeData[0].RangeMilliMeter);
+//			if (status == 0) {
+//				status = VL53LX_ClearInterruptAndStartMeasurement(Dev);
+//			}
+//		}
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
