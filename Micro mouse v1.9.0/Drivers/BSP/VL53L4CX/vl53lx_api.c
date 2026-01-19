@@ -215,7 +215,7 @@ VL53LX_Error VL53LX_DataInit(VL53LX_DEV Dev)
 
 	if (Status == VL53LX_ERROR_NONE)
 		Status = VL53LX_SetMeasurementTimingBudgetMicroSeconds(Dev,
-				33333);
+				3333);
 
 	if (Status == VL53LX_ERROR_NONE) {
 		pdev = VL53LXDevStructGetLLDriverHandle(Dev);

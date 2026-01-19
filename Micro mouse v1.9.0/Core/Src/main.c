@@ -55,6 +55,7 @@
 
 /* USER CODE BEGIN PV */
 char error_log[20];
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -135,9 +136,8 @@ int main(void)
 //	Gyro_Calibrate_Z_Only();
 //	HAL_TIM_Base_Start(&htim2);
 //	HAL_TIM_Base_Start_IT(&htim6);
-
-	VL53L4CX_Init();
-	HAL_TIM_Base_Start_IT(&htim3);
+	MX_VL53L4CX_Init();
+	VL53L4CX_Start();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -148,7 +148,11 @@ int main(void)
 //		if ((!status) && (NewDataReady != 0)) {
 //			status = VL53LX_GetMultiRangingData(Dev, pMultiRangingData);
 //			no_of_object_found = pMultiRangingData->NumberOfObjectsFound;
-			LCD_Printf(0, 4, "D=%5dmm", pMultiRangingData->RangeData[0].RangeMilliMeter);
+			LCD_Printf(0, 1, "D=%5dmm", pMultiRangingData->RangeData[0].RangeMilliMeter);
+			LCD_Printf(0, 2, "D=%5dmm", pMultiRangingData->RangeData[1].RangeMilliMeter);
+			LCD_Printf(0, 3, "D=%5dmm", pMultiRangingData->RangeData[2].RangeMilliMeter);
+			LCD_Printf(0, 4, "D=%5dmm", pMultiRangingData->RangeData[3].RangeMilliMeter);
+
 //			if (status == 0) {
 //				status = VL53LX_ClearInterruptAndStartMeasurement(Dev);
 //			}
