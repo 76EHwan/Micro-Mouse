@@ -148,10 +148,10 @@ int main(void)
 //		if ((!status) && (NewDataReady != 0)) {
 //			status = VL53LX_GetMultiRangingData(Dev, pMultiRangingData);
 //			no_of_object_found = pMultiRangingData->NumberOfObjectsFound;
-			LCD_Printf(0, 1, "D=%5dmm", pMultiRangingData->RangeData[0].RangeMilliMeter);
-			LCD_Printf(0, 2, "D=%5dmm", pMultiRangingData->RangeData[1].RangeMilliMeter);
-			LCD_Printf(0, 3, "D=%5dmm", pMultiRangingData->RangeData[2].RangeMilliMeter);
-			LCD_Printf(0, 4, "D=%5dmm", pMultiRangingData->RangeData[3].RangeMilliMeter);
+			LCD_Printf(0, 1, "D=%5dmm", (pMultiRangingData + 0)->RangeData[0].RangeMilliMeter);
+			LCD_Printf(0, 1, "D=%5dmm", (pMultiRangingData + 1)->RangeData[0].RangeMilliMeter);
+			LCD_Printf(0, 1, "D=%5dmm", (pMultiRangingData + 2)->RangeData[0].RangeMilliMeter);
+			LCD_Printf(0, 1, "D=%5dmm", (pMultiRangingData + 3)->RangeData[0].RangeMilliMeter);
 
 //			if (status == 0) {
 //				status = VL53LX_ClearInterruptAndStartMeasurement(Dev);

@@ -12,7 +12,8 @@
 
 #define VL53L4CX_I2C &hi2c2
 
-VL53LX_DEV vl53lx[VL53L4CX_NUM];
+VL53LX_Dev_t dev;
+VL53LX_DEV vl53lx = &dev;
 int status;
 
 volatile uint8_t is_vl53lx_ready[VL53L4CX_NUM];
@@ -39,21 +40,21 @@ void VL53L4CX_Init(VL53LX_DEV Dev, GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin,
 }
 
 void MX_VL53L4CX_Init() {
-	VL53L4CX_Init(vl53lx[0], XSHUT0_GPIO_Port, XSHUT0_Pin,
+	VL53L4CX_Init(vl53lx + 0, XSHUT0_GPIO_Port, XSHUT0_Pin,
 			VL53LX_SLAVE_ADDRESS_DEFAULT + 0x06);
-	VL53L4CX_Init(vl53lx[1], XSHUT1_GPIO_Port, XSHUT1_Pin,
+	VL53L4CX_Init(vl53lx + 1, XSHUT1_GPIO_Port, XSHUT1_Pin,
 			VL53LX_SLAVE_ADDRESS_DEFAULT + 0x04);
-	VL53L4CX_Init(vl53lx[2], XSHUT2_GPIO_Port, XSHUT2_Pin,
+	VL53L4CX_Init(vl53lx + 2, XSHUT2_GPIO_Port, XSHUT2_Pin,
 			VL53LX_SLAVE_ADDRESS_DEFAULT + 0x02);
-	VL53L4CX_Init(vl53lx[3], XSHUT3_GPIO_Port, XSHUT3_Pin,
+	VL53L4CX_Init(vl53lx + 3, XSHUT3_GPIO_Port, XSHUT3_Pin,
 			VL53LX_SLAVE_ADDRESS_DEFAULT);
 }
 
 void VL53L4CX_Start() {
 	for (uint8_t i = 0; i < VL53L4CX_NUM; i++) {
-		status = VL53LX_WaitDeviceBooted(vl53lx[i]);
-		status = VL53LX_DataInit(vl53lx[i]);
-		status = VL53LX_StartMeasurement(vl53lx[i]);
+		status = VL53LX_WaitDeviceBooted(vl53lx + i);
+		status = VL53LX_DataInit(vl53lx + i);
+		status = VL53LX_StartMeasurement(vl53lx + i);
 	}
 	HAL_TIM_Base_Start_IT(&htim3);
 }

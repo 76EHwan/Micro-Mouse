@@ -763,12 +763,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 		for (uint8_t i = 0; i < VL53L4CX_NUM; i++) {
 			if (is_vl53lx_ready[i] > 0) {
 				is_vl53lx_ready[i] = 0;
-				int status = VL53LX_GetMultiRangingData(vl53lx[i],
-						pMultiRangingData);
-				no_of_object_found = pMultiRangingData->NumberOfObjectsFound;
+				int status = VL53LX_GetMultiRangingData(vl53lx + i,
+						pMultiRangingData + i);
+				no_of_object_found = (pMultiRangingData + i)->NumberOfObjectsFound;
 				if (status == 0) {
 					status = VL53LX_ClearInterruptAndStartMeasurement(
-							vl53lx[i]);
+							vl53lx + i);
 				}
 			}
 		}

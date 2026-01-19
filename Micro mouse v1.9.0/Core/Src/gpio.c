@@ -142,13 +142,13 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
 	if (GPIO_Pin == TOF_INT0_Pin) {
 		is_vl53lx_ready[0] = 1;
 	}
-	if (GPIO_Pin == TOF_INT1_Pin) {
+	else if (GPIO_Pin == TOF_INT1_Pin) {
 		is_vl53lx_ready[1] = 1;
 	}
-	if (GPIO_Pin == TOF_INT2_Pin) {
+	else if (GPIO_Pin == TOF_INT2_Pin) {
 		is_vl53lx_ready[2] = 1;
 	}
-	if (GPIO_Pin == TOF_INT3_Pin) {
+	else if (GPIO_Pin == TOF_INT3_Pin) {
 		is_vl53lx_ready[3] = 1;
 	}
 }
