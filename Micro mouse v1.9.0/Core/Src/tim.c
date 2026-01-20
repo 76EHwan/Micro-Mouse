@@ -760,7 +760,7 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef *tim_baseHandle) {
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if (htim->Instance == TIM3) {
-		for (uint8_t i = 0; i < 1; i++) {
+		for (uint8_t i = 0; i < VL53L4CX_NUM; i++) {
 			if (is_vl53lx_ready[i] > 0) {
 				is_vl53lx_ready[i] = 0;
 				int status = VL53LX_GetMultiRangingData(vl53lx + i,

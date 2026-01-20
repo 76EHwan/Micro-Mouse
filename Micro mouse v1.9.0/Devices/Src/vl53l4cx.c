@@ -35,7 +35,15 @@ void VL53L4CX_Init(VL53LX_DEV Dev, GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin,
 	HAL_GPIO_WritePin(GPIOx, GPIO_Pin, GPIO_PIN_SET);
 	HAL_Delay(2);
 	status = VL53LX_WaitDeviceBooted(Dev);
+	if (status != 0) {
+		LCD_Printf(0, 5, "Boot Fail Addr:0x%x", new_address); // 부팅 실패 시 에러 출력
+		return;
+	}
 	status = VL53LX_DataInit(Dev);
+	if (status != 0) {
+		LCD_Printf(0, 5, "Init Fail Addr:0x%x", new_address); // 초기화 실패 시 에러 출력
+		return;
+	}
 
 	VL53LX_SetDeviceAddress(Dev, new_address); // 예: 0x52 -> 0x56
 	Dev->I2cDevAddr = new_address;
