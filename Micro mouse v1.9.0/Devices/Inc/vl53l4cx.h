@@ -19,7 +19,7 @@ extern volatile uint8_t is_vl53lx_ready[VL53L4CX_NUM];
 
 extern uint8_t byteData;
 extern uint16_t wordData;
-extern VL53LX_MultiRangingData_t MultiRangingData;
+extern VL53LX_MultiRangingData_t MultiRangingData[VL53L4CX_NUM];
 extern VL53LX_MultiRangingData_t *pMultiRangingData;
 extern uint8_t NewDataReady;
 extern int no_of_object_found;

@@ -12,16 +12,16 @@
 
 #define VL53L4CX_I2C &hi2c2
 
-VL53LX_Dev_t dev;
-VL53LX_DEV vl53lx = &dev;
+VL53LX_Dev_t dev[VL53L4CX_NUM];
+VL53LX_DEV vl53lx = dev;
 int status;
 
 volatile uint8_t is_vl53lx_ready[VL53L4CX_NUM];
 
 uint8_t byteData;
 uint16_t wordData;
-VL53LX_MultiRangingData_t MultiRangingData;
-VL53LX_MultiRangingData_t *pMultiRangingData = &MultiRangingData;
+VL53LX_MultiRangingData_t MultiRangingData[VL53L4CX_NUM];
+VL53LX_MultiRangingData_t *pMultiRangingData = MultiRangingData;
 uint8_t NewDataReady = 0;
 int no_of_object_found = 0, j;
 
