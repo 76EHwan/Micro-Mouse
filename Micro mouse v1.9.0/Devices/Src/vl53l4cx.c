@@ -56,19 +56,19 @@ void MX_VL53L4CX_Init() {
 	HAL_GPIO_WritePin(XSHUT3_GPIO_Port, XSHUT3_Pin, GPIO_PIN_RESET);
 
 	VL53L4CX_Init(vl53lx + 0, XSHUT0_GPIO_Port, XSHUT0_Pin,
-	VL53LX_SLAVE_ADDRESS_DEFAULT + 0x08);
-	VL53L4CX_Init(vl53lx + 1, XSHUT1_GPIO_Port, XSHUT1_Pin,
-	VL53LX_SLAVE_ADDRESS_DEFAULT + 0x06);
-	VL53L4CX_Init(vl53lx + 2, XSHUT2_GPIO_Port, XSHUT2_Pin,
-	VL53LX_SLAVE_ADDRESS_DEFAULT + 0x04);
-	VL53L4CX_Init(vl53lx + 3, XSHUT3_GPIO_Port, XSHUT3_Pin,
 	VL53LX_SLAVE_ADDRESS_DEFAULT + 0x02);
+//	VL53L4CX_Init(vl53lx + 1, XSHUT1_GPIO_Port, XSHUT1_Pin,
+//	VL53LX_SLAVE_ADDRESS_DEFAULT + 0x04);
+//	VL53L4CX_Init(vl53lx + 2, XSHUT2_GPIO_Port, XSHUT2_Pin,
+//	VL53LX_SLAVE_ADDRESS_DEFAULT + 0x06);
+//	VL53L4CX_Init(vl53lx + 3, XSHUT3_GPIO_Port, XSHUT3_Pin,
+//	VL53LX_SLAVE_ADDRESS_DEFAULT + 0x08);
 }
 
 void VL53L4CX_Start() {
-	for (uint8_t i = 0; i < VL53L4CX_NUM; i++) {
+	for (uint8_t i = 0; i < 1; i++) {
 		status = VL53LX_StartMeasurement(vl53lx + i);
 	}
-	HAL_TIM_Base_Start_IT(&htim3);
+//	HAL_TIM_Base_Start_IT(&htim3);
 }
 

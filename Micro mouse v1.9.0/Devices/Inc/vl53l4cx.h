@@ -11,7 +11,7 @@
 #include "VL53Lx_api.h"
 #include "vl53lx_register_settings.h"
 
-#define VL53L4CX_NUM 4
+#define VL53L4CX_NUM 3
 #define VL53LX_SLAVE_ADDRESS_DEFAULT (VL53LX_EWOK_I2C_DEV_ADDR_DEFAULT << 1)
 
 extern VL53LX_DEV vl53lx;

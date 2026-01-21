@@ -355,7 +355,7 @@ void Set_Color(uint16_t font_color, uint16_t back_color) {
 }
 
 void LCD_Printf(int x, int y, const char *text, ...) {
-	char txt[512] = { 0 };
+	char txt[64] = { 0 };
 	va_list args;
 	va_start(args, text);
 	vsprintf(txt, text, args);

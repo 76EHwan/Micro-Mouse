@@ -137,27 +137,34 @@ int main(void) {
 //	HAL_TIM_Base_Start_IT(&htim6);
 	MX_VL53L4CX_Init();
 	VL53L4CX_Start();
+//
+//	HAL_NVIC_DisableIRQ(EXTI10_IRQn);
+//	HAL_NVIC_DisableIRQ(EXTI11_IRQn);
+//	HAL_NVIC_DisableIRQ(EXTI12_IRQn);
+//	HAL_NVIC_DisableIRQ(EXTI2_IRQn);
+
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 	while (1) {
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < 1; i++) {
 			// 1. 인터럽트 플래그 확인
-			if (is_vl53lx_ready[i]) {
-				is_vl53lx_ready[i] = 0; // 플래그 클리어
+			uint8_t NewDataReady = 0;
+			int status = VL53LX_GetMeasurementDataReady((vl53lx + i),
+					&NewDataReady);
+			if ((!status) && (NewDataReady != 0)) {
 
 				// 2. 데이터 읽기 시도
-				int status = VL53LX_GetMultiRangingData(vl53lx + i,
-						pMultiRangingData + i);
+				VL53LX_GetMultiRangingData(vl53lx + i, pMultiRangingData + i);
 
 				// 3. 읽기 성공 여부와 관계없이 인터럽트 클리어 (중요!)
 				//    이게 없으면 한 번 에러난 센서는 영원히 멈춥니다.
-				VL53LX_ClearInterruptAndStartMeasurement(vl53lx + i);
 			}
+			VL53LX_ClearInterruptAndStartMeasurement(vl53lx + i);
 		}
 
-		// LCD 출력 (255가 뜨더라도 멈추지는 않게 됨)
+//		// LCD 출력 (255가 뜨더라도 멈추지는 않게 됨)
 		LCD_Printf(0, 1, "0 D:%4d S:%d",
 				(pMultiRangingData + 0)->RangeData[0].RangeMilliMeter,
 				(pMultiRangingData + 0)->RangeData[0].RangeStatus);
@@ -171,7 +178,8 @@ int main(void) {
 				(pMultiRangingData + 3)->RangeData[0].RangeMilliMeter,
 				(pMultiRangingData + 3)->RangeData[0].RangeStatus);
 
-		HAL_Delay(50);
+//		HAL_Delay(50);
+		TRIG_TOGGLE;
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
