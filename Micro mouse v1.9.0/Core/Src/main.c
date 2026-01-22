@@ -143,12 +143,13 @@ int main(void) {
 //	HAL_NVIC_DisableIRQ(EXTI12_IRQn);
 //	HAL_NVIC_DisableIRQ(EXTI2_IRQn);
 
+	TRIG_OFF;
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 	while (1) {
-		for (int i = 0; i < 1; i++) {
+		for (int i = 3; i < VL53L4CX_NUM; i++) {
 			// 1. 인터럽트 플래그 확인
 			uint8_t NewDataReady = 0;
 			int status = VL53LX_GetMeasurementDataReady((vl53lx + i),
@@ -178,8 +179,8 @@ int main(void) {
 				(pMultiRangingData + 3)->RangeData[0].RangeMilliMeter,
 				(pMultiRangingData + 3)->RangeData[0].RangeStatus);
 
-//		HAL_Delay(50);
-		TRIG_TOGGLE;
+		HAL_Delay(50);
+//		TRIG_TOGGLE;
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
