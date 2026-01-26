@@ -125,25 +125,9 @@ int main(void)
   MX_TIM12_Init();
   /* USER CODE BEGIN 2 */
 	TRIG_ON;
-//	MX_DRV8316C_Init();
+
 	LCD_Test();
 	LCD_Printf(0, 0, "Hello World");
-
-//	if (LSM6DS3_Init() != HAL_OK) {
-//		sprintf(error_log, "IMU Init Fail");
-//		Error_Handler();
-//	}
-//
-//	Gyro_Calibrate_Z_Only();
-//	HAL_TIM_Base_Start(&htim2);
-//	HAL_TIM_Base_Start_IT(&htim6);
-//	MX_VL53L4CX_Init();
-//	VL53L4CX_Start();
-//
-//	HAL_NVIC_DisableIRQ(EXTI10_IRQn);
-//	HAL_NVIC_DisableIRQ(EXTI11_IRQn);
-//	HAL_NVIC_DisableIRQ(EXTI12_IRQn);
-//	HAL_NVIC_DisableIRQ(EXTI2_IRQn);
 
 	TRIG_OFF;
   /* USER CODE END 2 */
@@ -151,10 +135,9 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	while (1) {
-		MT6701_ReadSSI();
-		LCD_Printf(0, 1, "%6d", encData.raw_angle);
-		HAL_Delay(100);
-//		TRIG_TOGGLE;
+		MT6701_ReadSSI(&encDataR);
+		LCD_Printf(0, 1, "%8d", encDataR.raw_angle);
+		LCD_Printf(0, 2, "%.3f   ", encDataR.angle_deg);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
