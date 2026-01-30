@@ -238,8 +238,8 @@ void Error_Handler(void)
   /* USER CODE BEGIN Error_Handler_Debug */
 	/* User can add his own implementation to report the HAL error return state */
 //	__disable_irq();
-//	LCD_Clear();
-//	LCD_Printf(0, 0, error_log);
+	ST7789_FillScreen(ST7789_RED);
+	LCD_Printf(0, 0, ST7789_BLACK, ST7789_RED, error_log);
 	while (1) {
 		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 		HAL_Delay(100);
