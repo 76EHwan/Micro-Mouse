@@ -349,19 +349,19 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 
 /* USER CODE BEGIN 1 */
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
-    if (hadc->Instance == ADC1) {
-        // DMA 버퍼에서 최신 값 복사
-        focR.adc_raw_u = adc_buffer[0]; // PC0 (SOA_R)
-        focR.adc_raw_v = adc_buffer[1]; // PC1 (SOB_R)
-        focR.adc_raw_w = adc_buffer[2]; // PC2 (SOC_R)
-
-        focL.adc_raw_u = adc_buffer[3]; // PA0 (SOA_L)
-        focL.adc_raw_v = adc_buffer[4]; // PA1 (SOB_L)
-        focL.adc_raw_w = adc_buffer[5]; // PA2 (SOC_L)
-
-        // FOC 계산 실행
-        FOC_Update(&focL);
-        FOC_Update(&focR);
-    }
+//    if (hadc->Instance == ADC1) {
+//        // DMA 버퍼에서 최신 값 복사
+//        focR.adc_raw_u = adc_buffer[0]; // PC0 (SOA_R)
+//        focR.adc_raw_v = adc_buffer[1]; // PC1 (SOB_R)
+//        focR.adc_raw_w = adc_buffer[2]; // PC2 (SOC_R)
+//
+//        focL.adc_raw_u = adc_buffer[3]; // PA0 (SOA_L)
+//        focL.adc_raw_v = adc_buffer[4]; // PA1 (SOB_L)
+//        focL.adc_raw_w = adc_buffer[5]; // PA2 (SOC_L)
+//
+//        // FOC 계산 실행
+//        FOC_Update(&focL);
+//        FOC_Update(&focR);
+//    }
 }
 /* USER CODE END 1 */
