@@ -38,7 +38,8 @@ extern ADC_HandleTypeDef hadc2;
 
 /* USER CODE BEGIN Private defines */
 extern uint16_t adc_buffer[6];
-
+extern uint16_t raw_vbattery;
+extern float vbattery;
 /* USER CODE END Private defines */
 
 void MX_ADC1_Init(void);
