@@ -30,7 +30,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "lcd.h"
+#include "st7789.h"
 #include "drv8316crq1.h"
 #include "lsm6ds3tr-c.h"
 #include "vl53l4cx.h"
@@ -126,8 +126,10 @@ int main(void)
   /* USER CODE BEGIN 2 */
 	TRIG_ON;
 
-	LCD_Test();
-	LCD_Printf(0, 0, "Hello World");
+	ST7789_Init();
+	ST7789_FillScreen(ST7789_BLACK);
+	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
+	__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3, 200);
 
 	TRIG_OFF;
   /* USER CODE END 2 */
@@ -136,8 +138,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 	while (1) {
 		MT6701_ReadSSI(&encDataR);
-		LCD_Printf(0, 1, "%8d", encDataR.raw_angle);
-		LCD_Printf(0, 2, "%.3f   ", encDataR.angle_deg);
+		LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "%5d", encDataR.last_raw_angle);
+		LCD_Printf(0, 2, ST7789_WHITE, ST7789_BLACK, "%.3f   ", encDataR.motor_elec_angle);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -236,8 +238,8 @@ void Error_Handler(void)
   /* USER CODE BEGIN Error_Handler_Debug */
 	/* User can add his own implementation to report the HAL error return state */
 //	__disable_irq();
-	LCD_Clear();
-	LCD_Printf(0, 0, error_log);
+//	LCD_Clear();
+//	LCD_Printf(0, 0, error_log);
 	while (1) {
 		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 		HAL_Delay(100);

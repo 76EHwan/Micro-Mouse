@@ -11,12 +11,9 @@
 	* **PT:** PT26-21B/CT
 	* **Encoder:** MT6701QT-STD (Magnetic)
 	* **ToF:** VL53L4CX (Optional)
-* **DISPLAY:** ST7735 0.96 LCD
+* **DISPLAY:** ST7789 1.14 LCD
 
 ## Dev Environment
 * **IDE:** STM32CubeIDE 1.18.0
 * **F/W Library:** STM32Cube FW_H5 V1.5.1
 * **Debugger:** ST-Link V2
-
-
-

@@ -52,6 +52,7 @@
 									<listOptionValue builtIn="false" value="../Motion/Inc"/>
 									<listOptionValue builtIn="false" value="../Drivers/BSP/ST7735"/>
 									<listOptionValue builtIn="false" value="../Drivers/BSP/VL53L4CX"/>
+									<listOptionValue builtIn="false" value="../Drivers/BSP/ST7789"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.9106577" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>

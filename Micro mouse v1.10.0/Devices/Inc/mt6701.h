@@ -11,10 +11,12 @@
 #include "main.h"
 
 typedef struct {
-    uint16_t raw_angle; // 14-bit raw value
-    float angle_deg;    // 변환된 각도 (0~360도)
-    uint8_t status;     // 상태 비트
-    uint8_t crc;        // CRC 값
+    uint16_t raw_angle;
+    float wheel_angle_deg;
+    uint16_t last_raw_angle;
+    float motor_elec_angle;
+    uint8_t status;
+    uint8_t crc;
     GPIO_TypeDef *cs_port;
 	uint16_t cs_pin;
 } MT6701_Data_t;

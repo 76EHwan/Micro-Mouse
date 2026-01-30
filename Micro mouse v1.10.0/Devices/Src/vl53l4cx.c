@@ -7,7 +7,6 @@
 #include "main.h"
 #include "i2c.h"
 #include "vl53l4cx.h"
-#include "lcd.h"
 #include "tim.h"
 
 #define VL53L4CX_I2C &hi2c2
@@ -36,12 +35,10 @@ void VL53L4CX_Init(VL53LX_DEV Dev, GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin,
 	HAL_Delay(2);
 	status = VL53LX_WaitDeviceBooted(Dev);
 	if (status != 0) {
-		LCD_Printf(0, 5, "Boot Fail Addr:0x%x", new_address); // 부팅 실패 시 에러 출력
 		return;
 	}
 	status = VL53LX_DataInit(Dev);
 	if (status != 0) {
-		LCD_Printf(0, 5, "Init Fail Addr:0x%x", new_address); // 초기화 실패 시 에러 출력
 		return;
 	}
 
