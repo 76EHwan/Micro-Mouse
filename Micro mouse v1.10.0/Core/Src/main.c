@@ -166,7 +166,6 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	uint32_t adc_data;
-//	HAL_ADC_Start(&hadc2);
 	HAL_ADC_Start_DMA(&hadc2, &adc_data, 1);
 	TRIG_OFF;
 	while (1) {
