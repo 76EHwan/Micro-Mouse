@@ -35,6 +35,7 @@
 #include "lsm6ds3tr-c.h"
 #include "vl53l4cx.h"
 #include "mt6701.h"
+#include "foc.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -131,19 +132,69 @@ int main(void)
 	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
 	__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3, 200);
 
-	TRIG_OFF;
+
+	HAL_GPIO_WritePin(MTR_nSLEEP_GPIO_Port, MTR_nSLEEP_Pin, GPIO_PIN_SET);
+
+//	DRV8316C_Init(&DRV8316C_L, &hspi1, MTR_L_CS_GPIO_Port, MTR_L_CS_Pin);
+	DRV8316C_Init(&DRV8316C_R, &hspi1, MTR_R_CS_GPIO_Port, MTR_R_CS_Pin);
+
+//	DRV8316C_UnlockRegister(&DRV8316C_L);
+	DRV8316C_UnlockRegister(&DRV8316C_R);
+
+//	DRV8316C_ApplyDefaultConfig(&DRV8316C_L);
+	DRV8316C_ApplyDefaultConfig(&DRV8316C_R);
+
+//	DRV8316C_LockRegister(&DRV8316C_L);
+	DRV8316C_LockRegister(&DRV8316C_R);
+
+//	// 1. ADC DMA 시작 (버퍼에 데이터 자동 저장)
+//	// adc_buffer 순서가 Rank 설정에 따름 (예: R_U, R_V, R_W, L_U, L_V, L_W)
+//	HAL_ADC_Start_DMA(&hadc1, (uint32_t*) adc_buffer, 6);
+//
+//	// 2. FOC 구조체 초기화
+//	// TIM1 = Left Motor, TIM8 = Right Motor
+////	FOC_Init(&focL, &htim1, &encDataL);
+//	FOC_Init(&focR, &htim8, &encDataR);
+//
+//	// 3. ADC Offset 캘리브레이션 (모터 구동 전)
+//	// 주의: DMA가 동작 중이어야 함
+////	FOC_Calibrate_ADC_Offset(&focL);
+//	FOC_Calibrate_ADC_Offset(&focR);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+	uint32_t adc_data;
+//	HAL_ADC_Start(&hadc2);
+	HAL_ADC_Start_DMA(&hadc2, &adc_data, sizeof(uint32_t));
+	TRIG_OFF;
 	while (1) {
-		MT6701_ReadSSI(&encDataR);
-		LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "%5d", encDataR.last_raw_angle);
-		LCD_Printf(0, 2, ST7789_WHITE, ST7789_BLACK, "%.3f   ", encDataR.motor_elec_angle);
+//		MT6701_ReadSSI(&encDataL);
+//		MT6701_ReadSSI(&encDataR);
+
+//		HAL_ADC_Start(&hadc2);
+//		adc_data = HAL_ADC_GetValue(&hadc2);
+//		HAL_ADC_Stop(&hadc2);
+		LCD_Printf(0, 0, ST7789_WHITE, ST7789_BLACK, "%d", adc_data);
+
+
+		// 예시: 0.2A 토크 지령
+//		FOC_Set_Torque(&focL, 0.2f);
+//		FOC_Set_Torque(&focR, 0.2f);
+
+//		LCD_Printf(0, 0, ST7789_WHITE, ST7789_BLACK, "%5d", adc_buffer[0]);
+//		LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "%5d", adc_buffer[1]);
+//		LCD_Printf(0, 2, ST7789_WHITE, ST7789_BLACK, "%5d", adc_buffer[2]);
+//		LCD_Printf(0, 3, ST7789_WHITE, ST7789_BLACK, "%5d", adc_buffer[3]);
+//		LCD_Printf(0, 4, ST7789_WHITE, ST7789_BLACK, "%5d", adc_buffer[4]);
+//		LCD_Printf(0, 5, ST7789_WHITE, ST7789_BLACK, "%5d", adc_buffer[5]);
+
+		HAL_Delay(100);
+		TRIG_TOGGLE;
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
 	}
   /* USER CODE END 3 */
 }
@@ -217,8 +268,19 @@ void PeriphCommonClock_Config(void)
 
   /** Initializes the peripherals clock
   */
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_CKPER;
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_CKPER|RCC_PERIPHCLK_ADCDAC;
+  PeriphClkInitStruct.PLL2.PLL2Source = RCC_PLL2_SOURCE_HSE;
+  PeriphClkInitStruct.PLL2.PLL2M = 5;
+  PeriphClkInitStruct.PLL2.PLL2N = 64;
+  PeriphClkInitStruct.PLL2.PLL2P = 2;
+  PeriphClkInitStruct.PLL2.PLL2Q = 2;
+  PeriphClkInitStruct.PLL2.PLL2R = 5;
+  PeriphClkInitStruct.PLL2.PLL2RGE = RCC_PLL2_VCIRANGE_2;
+  PeriphClkInitStruct.PLL2.PLL2VCOSEL = RCC_PLL2_VCORANGE_WIDE;
+  PeriphClkInitStruct.PLL2.PLL2FRACN = 0;
+  PeriphClkInitStruct.PLL2.PLL2ClockOut = RCC_PLL2_DIVR;
   PeriphClkInitStruct.CkperClockSelection = RCC_CLKPSOURCE_HSI;
+  PeriphClkInitStruct.AdcDacClockSelection = RCC_ADCDACCLKSOURCE_PLL2R;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {
     Error_Handler();

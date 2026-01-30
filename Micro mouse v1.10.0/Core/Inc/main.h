@@ -109,10 +109,10 @@ void Error_Handler(void);
 #define ENC_MISO_GPIO_Port GPIOB
 #define ENC_R_CS_Pin GPIO_PIN_15
 #define ENC_R_CS_GPIO_Port GPIOB
-#define MTR_R_INH2_Pin GPIO_PIN_6
+#define MTR_R_INH1_Pin GPIO_PIN_6
+#define MTR_R_INH1_GPIO_Port GPIOC
+#define MTR_R_INH2_Pin GPIO_PIN_7
 #define MTR_R_INH2_GPIO_Port GPIOC
-#define MTR_R_INH2C7_Pin GPIO_PIN_7
-#define MTR_R_INH2C7_GPIO_Port GPIOC
 #define MTR_R_INH3_Pin GPIO_PIN_8
 #define MTR_R_INH3_GPIO_Port GPIOC
 #define MTR_INLx_Pin GPIO_PIN_9

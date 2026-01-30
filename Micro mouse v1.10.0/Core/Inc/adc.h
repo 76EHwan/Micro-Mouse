@@ -37,6 +37,7 @@ extern ADC_HandleTypeDef hadc1;
 extern ADC_HandleTypeDef hadc2;
 
 /* USER CODE BEGIN Private defines */
+extern uint16_t adc_buffer[6];
 
 /* USER CODE END Private defines */
 
