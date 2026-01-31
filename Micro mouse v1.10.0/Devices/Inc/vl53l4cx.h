@@ -24,8 +24,8 @@ extern VL53LX_MultiRangingData_t *pMultiRangingData;
 extern uint8_t NewDataReady;
 extern int no_of_object_found;
 
-void VL53L4CX_Init(VL53LX_DEV Dev, GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin, uint16_t new_address);
-void MX_VL53L4CX_Init();
+HAL_StatusTypeDef VL53L4CX_Init(VL53LX_DEV Dev, GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin, uint16_t new_address);
+HAL_StatusTypeDef MX_VL53L4CX_Init();
 void VL53L4CX_Start();
 
 #endif /* INC_VL53L4CX_H_ */
