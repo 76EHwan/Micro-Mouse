@@ -831,22 +831,6 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
 /* USER CODE BEGIN 1 */
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
-	if (htim->Instance == TIM3) {
-		for (uint8_t i = 0; i < VL53L4CX_NUM; i++) {
-			// EXTI 인터럽트에 의해 데이터 준비 플래그가 세워졌는지 확인
-			if (is_vl53lx_ready[i]) {
-				// 1. 센서로부터 데이터 읽기
-				VL53LX_GetMultiRangingData(&vl53lx[i], &MultiRangingData[i]);
-
-				// 2. 인터럽트 클리어 및 다음 측정 시작
-				VL53LX_ClearInterruptAndStartMeasurement(&vl53lx[i]);
-
-				// 3. 플래그 초기화
-				is_vl53lx_ready[i] = 0;
-			}
-		}
-	}
-
 	if (htim->Instance == TIM6) {
 		// 1. 자이로 Z축 데이터 읽기
 		static uint32_t prev_tick = 0;
