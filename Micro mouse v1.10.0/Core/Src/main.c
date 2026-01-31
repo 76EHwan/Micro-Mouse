@@ -30,12 +30,12 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "st7789.h"
-#include "drv8316crq1.h"
-#include "lsm6ds3tr-c.h"
-#include "vl53l4cx.h"
-#include "mt6701.h"
+#include "init.h"
+#include "error.h"
+#include "sensor.h"
 #include "foc.h"
+
+#include "st7789.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -56,7 +56,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-char error_log[20];
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -126,35 +126,23 @@ int main(void)
   /* USER CODE BEGIN 2 */
 	TRIG_ON;
 
-	ST7789_Init();
-	ST7789_FillScreen(ST7789_BLACK);
-	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
-	__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3, 200);
-
-
-	HAL_GPIO_WritePin(MTR_nSLEEP_GPIO_Port, MTR_nSLEEP_Pin, GPIO_PIN_SET);
-
-//	DRV8316C_Init(&DRV8316C_L, &hspi1, MTR_L_CS_GPIO_Port, MTR_L_CS_Pin);
-	DRV8316C_Init(&DRV8316C_R, &hspi1, MTR_R_CS_GPIO_Port, MTR_R_CS_Pin);
-
-//	DRV8316C_UnlockRegister(&DRV8316C_L);
-	DRV8316C_UnlockRegister(&DRV8316C_R);
-
-//	DRV8316C_ApplyDefaultConfig(&DRV8316C_L);
-	DRV8316C_ApplyDefaultConfig(&DRV8316C_R);
-
-//	DRV8316C_LockRegister(&DRV8316C_L);
-	DRV8316C_LockRegister(&DRV8316C_R);
+	MX_User_Init();
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	HAL_ADC_Start_DMA(&hadc2, &raw_vbattery, 1);
+	VL53L4CX_Start();
+	ADC_Battery_Start();
 
 	TRIG_OFF;
 	while (1) {
-		LCD_Printf(0, 0, ST7789_WHITE, ST7789_BLACK, "%f", vbattery);
+		LCD_Printf(0, 0, ST7789_WHITE, ST7789_BLACK, "%d", (pMultiRangingData + 0)->RangeData[0].RangeMilliMeter);
+		LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "%d", (pMultiRangingData + 1)->RangeData[0].RangeMilliMeter);
+		LCD_Printf(0, 2, ST7789_WHITE, ST7789_BLACK, "%d", (pMultiRangingData + 2)->RangeData[0].RangeMilliMeter);
+		LCD_Printf(0, 3, ST7789_WHITE, ST7789_BLACK, "%d", (pMultiRangingData + 3)->RangeData[0].RangeMilliMeter);
+		LCD_Printf(0, 4, ST7789_WHITE, ST7789_BLACK, "%f", vbattery);
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

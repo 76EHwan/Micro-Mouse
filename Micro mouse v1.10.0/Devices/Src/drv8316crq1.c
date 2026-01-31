@@ -6,14 +6,9 @@
  */
 
 #include "drv8316crq1.h"
-#include "spi.h"
 
 DRV8316C_Handle_t DRV8316C_L;
 DRV8316C_Handle_t DRV8316C_R;
-
-/* Macros for manual nCS pin control */
-#define DRV8316C_CS_LOW(hdrv)     HAL_GPIO_WritePin((hdrv)->nCS_Port, (hdrv)->nCS_Pin, GPIO_PIN_RESET)
-#define DRV8316C_CS_HIGH(hdrv)    HAL_GPIO_WritePin((hdrv)->nCS_Port, (hdrv)->nCS_Pin, GPIO_PIN_SET)
 
 /*=======================================================================*/
 /* Internal Helper Functions                                             */

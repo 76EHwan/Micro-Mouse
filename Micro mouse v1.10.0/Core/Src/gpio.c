@@ -139,6 +139,7 @@ void MX_GPIO_Init(void)
 void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
 	if (GPIO_Pin == TOF_INT0_Pin) {
 		is_vl53lx_ready[0] = 1;
+		TRIG_TOGGLE;
 	}
 	else if (GPIO_Pin == TOF_INT1_Pin) {
 		is_vl53lx_ready[1] = 1;

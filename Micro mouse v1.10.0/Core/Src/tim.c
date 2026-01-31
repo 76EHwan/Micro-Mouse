@@ -839,8 +839,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 						pMultiRangingData + i);
 				no_of_object_found = (pMultiRangingData + i)->NumberOfObjectsFound;
 				if (status == 0) {
-					status = VL53LX_ClearInterruptAndStartMeasurement(
-							vl53lx + i);
+					status = VL53LX_ClearInterruptAndStartMeasurement(vl53lx + i);
 				}
 			}
 		}

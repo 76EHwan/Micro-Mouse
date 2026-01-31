@@ -20,15 +20,18 @@ MT6701_Data_t encDataL = { .cs_port = ENC_L_CS_GPIO_Port, .cs_pin = ENC_L_CS_Pin
 MT6701_Data_t encDataR = { .cs_port = ENC_R_CS_GPIO_Port, .cs_pin = ENC_R_CS_Pin };
 
 // 초기화 함수 (첫 실행 시 튀는 것 방지용)
-void MT6701_Init(MT6701_Data_t *encData) {
+HAL_StatusTypeDef MT6701_Init(MT6701_Data_t *encData) {
     uint8_t rxBuffer[3] = {0,0,0};
     HAL_GPIO_WritePin(encData->cs_port, encData->cs_pin, GPIO_PIN_RESET);
     HAL_SPI_Receive(ENC_SPI, rxBuffer, 3, 10);
     HAL_GPIO_WritePin(encData->cs_port, encData->cs_pin, GPIO_PIN_SET);
 
+    if((((rxBuffer[2] >> 6) | rxBuffer[1]) & 0x03)) return HAL_ERROR;
+
     uint32_t rawValue = ((uint32_t)rxBuffer[0] << 16) | ((uint32_t)rxBuffer[1] << 8) | rxBuffer[2];
     encData->last_raw_angle = (rawValue >> 10) & 0x3FFF;
     encData->motor_elec_angle = 0.0f;
+    return HAL_OK;
 }
 
 void MT6701_ReadSSI(MT6701_Data_t *encData) {

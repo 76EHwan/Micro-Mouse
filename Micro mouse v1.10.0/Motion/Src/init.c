@@ -1,0 +1,74 @@
+/*
+ * init.c
+ *
+ *  Created on: Jan 31, 2026
+ *      Author: kth59
+ */
+#include "main.h"
+#include "tim.h"
+
+#include "init.h"
+#include "error.h"
+
+#include "drv8316crq1.h"
+#include "lsm6ds3tr-c.h"
+#include "mt6701.h"
+#include "vl53l4cx.h"
+#include "st7789.h"
+
+void MX_User_Init() {
+	ST7789_Init();
+	ST7789_FillScreen(ST7789_BLACK);
+	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
+	__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3, 200);
+
+	HAL_Delay(10);
+
+	if (LSM6DS3_Init() != HAL_OK) {
+		sprintf(error_log, " IMU ERROR!");
+		Error_Handler();
+	}
+
+	DRV8316C_WAKEUP;
+
+	DRV8316C_Init(&DRV8316C_L, DRV8316C_SPI, MTR_L_CS_GPIO_Port, MTR_L_CS_Pin);
+	DRV8316C_Init(&DRV8316C_R, DRV8316C_SPI, MTR_R_CS_GPIO_Port, MTR_R_CS_Pin);
+
+	if (DRV8316C_UnlockRegister(&DRV8316C_L) != HAL_OK) {
+		sprintf(error_log, " DRV8316C LEFT UNLOCK ERROR!");
+		Error_Handler();
+	}
+	if (DRV8316C_ApplyDefaultConfig(&DRV8316C_L) != HAL_OK) {
+		sprintf(error_log, " DRV8316C LEFT CONFIG ERROR!");
+		Error_Handler();
+	}
+	if (DRV8316C_LockRegister(&DRV8316C_L) != HAL_OK) {
+		sprintf(error_log, " DRV8316C LEFT LOCK ERROR!");
+		Error_Handler();
+	}
+
+	if (DRV8316C_UnlockRegister(&DRV8316C_R) != HAL_OK) {
+		sprintf(error_log, " DRV8316C RIGHT UNLOCK ERROR!");
+		Error_Handler();
+	}
+	if (DRV8316C_ApplyDefaultConfig(&DRV8316C_R) != HAL_OK) {
+		sprintf(error_log, " DRV8316C RIGHT CONFIG ERROR!");
+		Error_Handler();
+	}
+	if (DRV8316C_LockRegister(&DRV8316C_R) != HAL_OK) {
+		sprintf(error_log, " DRV8316C RIGHT LOCK ERROR!");
+		Error_Handler();
+	}
+
+//	if (MT6701_Init(&encDataL) != HAL_OK) {
+//		sprintf(error_log, " Encoder LEFT ERROR!");
+//		Error_Handler();
+//	}
+	if (MT6701_Init(&encDataR) != HAL_OK) {
+		sprintf(error_log, " Encoder RIGHT ERROR!");
+		Error_Handler();
+	}
+
+	MX_VL53L4CX_Init();
+
+}

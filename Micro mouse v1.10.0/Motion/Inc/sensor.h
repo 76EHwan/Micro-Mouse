@@ -8,4 +8,6 @@
 #ifndef SENSOR_H_
 #define SENSOR_H_
 
+void ADC_Battery_Start();
+
 #endif /* SENSOR_H_ */

@@ -15,6 +15,16 @@ extern "C" {
 #include "main.h"
 #include "spi.h"
 
+#define DRV8316C_SPI &hspi2
+
+/* Macros for manual nCS pin control */
+#define DRV8316C_CS_LOW(hdrv)     HAL_GPIO_WritePin((hdrv)->nCS_Port, (hdrv)->nCS_Pin, GPIO_PIN_RESET)
+#define DRV8316C_CS_HIGH(hdrv)    HAL_GPIO_WritePin((hdrv)->nCS_Port, (hdrv)->nCS_Pin, GPIO_PIN_SET)
+
+/* Macros for manual nSLEEP pin control */
+#define DRV8316C_WAKEUP			  HAL_GPIO_WritePin(MTR_nSLEEP_GPIO_Port, MTR_nSLEEP_Pin, GPIO_PIN_SET)
+#define DRV8316C_SLEEP			  HAL_GPIO_WritePin(MTR_nSLEEP_GPIO_Port, MTR_nSLEEP_Pin, GPIO_PIN_RESET)
+
 /*=======================================================================*/
 /* SPI Frame Definition */
 /*=======================================================================*/

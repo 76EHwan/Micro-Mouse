@@ -24,7 +24,7 @@
 #include "foc.h"
 
 uint16_t adc_buffer[6];
-uint16_t raw_vbattery;
+uint32_t raw_vbattery;
 float vbattery;
 
 /* USER CODE END 0 */
@@ -174,7 +174,7 @@ void MX_ADC2_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_13;
   sConfig.Rank = ADC_REGULAR_RANK_1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_24CYCLES_5;
+  sConfig.SamplingTime = ADC_SAMPLETIME_92CYCLES_5;
   sConfig.SingleDiff = ADC_SINGLE_ENDED;
   sConfig.OffsetNumber = ADC_OFFSET_NONE;
   sConfig.Offset = 0;
