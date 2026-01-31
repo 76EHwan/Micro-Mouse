@@ -138,9 +138,9 @@ int main(void)
 	TRIG_OFF;
 	while (1) {
 		LCD_Printf(0, 0, ST7789_WHITE, ST7789_BLACK, "%d", (pMultiRangingData + 0)->RangeData[0].RangeMilliMeter);
-		LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "%d", (pMultiRangingData + 1)->RangeData[0].RangeMilliMeter);
-		LCD_Printf(0, 2, ST7789_WHITE, ST7789_BLACK, "%d", (pMultiRangingData + 2)->RangeData[0].RangeMilliMeter);
-		LCD_Printf(0, 3, ST7789_WHITE, ST7789_BLACK, "%d", (pMultiRangingData + 3)->RangeData[0].RangeMilliMeter);
+//		LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "%d", (pMultiRangingData + 1)->RangeData[0].RangeMilliMeter);
+//		LCD_Printf(0, 2, ST7789_WHITE, ST7789_BLACK, "%d", (pMultiRangingData + 2)->RangeData[0].RangeMilliMeter);
+//		LCD_Printf(0, 3, ST7789_WHITE, ST7789_BLACK, "%d", (pMultiRangingData + 3)->RangeData[0].RangeMilliMeter);
 		LCD_Printf(0, 4, ST7789_WHITE, ST7789_BLACK, "%f", vbattery);
 
     /* USER CODE END WHILE */

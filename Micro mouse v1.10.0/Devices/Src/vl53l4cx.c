@@ -31,9 +31,9 @@ HAL_StatusTypeDef VL53L4CX_Init(VL53LX_DEV Dev, GPIO_TypeDef *GPIOx, uint16_t GP
 	Dev->I2cDevAddr = VL53LX_SLAVE_ADDRESS_DEFAULT;
 
 	HAL_GPIO_WritePin(GPIOx, GPIO_Pin, GPIO_PIN_RESET);
-	HAL_Delay(5);
+	HAL_Delay(10);
 	HAL_GPIO_WritePin(GPIOx, GPIO_Pin, GPIO_PIN_SET);
-	HAL_Delay(2);
+	HAL_Delay(10);
 	status = VL53LX_WaitDeviceBooted(Dev);
 	if (status != 0) {
 		sprintf(error_log, " ToF Device boot fail");
@@ -60,12 +60,12 @@ HAL_StatusTypeDef MX_VL53L4CX_Init() {
 
 	VL53L4CX_Init(vl53lx + 0, XSHUT0_GPIO_Port, XSHUT0_Pin,
 	VL53LX_SLAVE_ADDRESS_DEFAULT + 0x02);
-	VL53L4CX_Init(vl53lx + 1, XSHUT1_GPIO_Port, XSHUT1_Pin,
-	VL53LX_SLAVE_ADDRESS_DEFAULT + 0x04);
-	VL53L4CX_Init(vl53lx + 2, XSHUT2_GPIO_Port, XSHUT2_Pin,
-	VL53LX_SLAVE_ADDRESS_DEFAULT + 0x06);
-	VL53L4CX_Init(vl53lx + 3, XSHUT3_GPIO_Port, XSHUT3_Pin,
-	VL53LX_SLAVE_ADDRESS_DEFAULT + 0x08);
+//	VL53L4CX_Init(vl53lx + 1, XSHUT1_GPIO_Port, XSHUT1_Pin,
+//	VL53LX_SLAVE_ADDRESS_DEFAULT + 0x04);
+//	VL53L4CX_Init(vl53lx + 2, XSHUT2_GPIO_Port, XSHUT2_Pin,
+//	VL53LX_SLAVE_ADDRESS_DEFAULT + 0x06);
+//	VL53L4CX_Init(vl53lx + 3, XSHUT3_GPIO_Port, XSHUT3_Pin,
+//	VL53LX_SLAVE_ADDRESS_DEFAULT + 0x08);
 	return HAL_OK;
 }
 
