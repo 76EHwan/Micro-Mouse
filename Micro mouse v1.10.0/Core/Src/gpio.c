@@ -136,32 +136,24 @@ void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 2 */
 
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{
-    uint8_t i = 0xFF; // 어떤 센서인지 식별하기 위한 인덱스
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+	uint8_t i = 0xFF; // 어떤 센서인지 식별하기 위한 인덱스
 
-    // 인터럽트가 발생한 핀이 어떤 센서인지 확인 (main.h의 핀 정의에 따라 매핑 필요)
-    if (GPIO_Pin == TOF_INT0_Pin) {
-        i = 0;
-        TRIG_TOGGLE;
-    } else if (GPIO_Pin == TOF_INT1_Pin) {
-        i = 1;
-    } else if (GPIO_Pin == TOF_INT2_Pin) {
-        i = 2;
-    } else if (GPIO_Pin == TOF_INT3_Pin) {
-        i = 3;
-    }
+	// 인터럽트가 발생한 핀이 어떤 센서인지 확인 (main.h의 핀 정의에 따라 매핑 필요)
+	if (GPIO_Pin == TOF_INT0_Pin) {
+		i = 0;
+		TRIG_TOGGLE;
+	} else if (GPIO_Pin == TOF_INT1_Pin) {
+		i = 1;
+	} else if (GPIO_Pin == TOF_INT2_Pin) {
+		i = 2;
+	} else if (GPIO_Pin == TOF_INT3_Pin) {
+		i = 3;
+	}
 
-    // 유효한 센서 인덱스라면 데이터 읽기 수행
-    if (i < VL53L4CX_NUM) {
-        // 1. 데이터 읽어오기 (전역 변수 MultiRangingData 갱신)
-        VL53LX_GetMultiRangingData(vl53lx + i, &MultiRangingData[i]);
-
-        // 2. 중요: 인터럽트를 클리어하고 다음 측정 시작! (이게 없으면 멈춤)
-        VL53LX_ClearInterruptAndStartMeasurement(vl53lx + i);
-
-        // (선택) 데이터 갱신 플래그 설정 (main loop에서 확인용)
-        // NewDataReady = 1;
-    }
+	if (i < VL53L4CX_NUM) {
+		// 여기서는 I2C 함수를 호출하지 않고 플래그만 세웁니다.
+		is_vl53lx_ready[i] = 1;
+	}
 }
 /* USER CODE END 2 */

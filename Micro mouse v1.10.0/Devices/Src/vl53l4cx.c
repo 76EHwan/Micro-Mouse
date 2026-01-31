@@ -73,5 +73,6 @@ void VL53L4CX_Start() {
 	for (uint8_t i = 0; i < VL53L4CX_NUM; i++) {
 		status = VL53LX_StartMeasurement(vl53lx + i);
 	}
+	HAL_TIM_Base_Start_IT(&htim3);
 }
 

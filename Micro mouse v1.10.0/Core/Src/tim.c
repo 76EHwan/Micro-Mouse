@@ -831,6 +831,19 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
 /* USER CODE BEGIN 1 */
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+	if (htim->Instance == TIM3) {
+		// 1. 데이터 준비 여부 확인
+		for (uint8_t i = 0; i < VL53L4CX_NUM; i++) {
+			if (is_vl53lx_ready[i] > 0) {
+				is_vl53lx_ready[i] = 0;
+				// 2. 데이터 읽기 (여기서 status_read 값을 확인해야 함)
+				VL53LX_GetMultiRangingData(&vl53lx[i], &MultiRangingData[i]);
+
+				// 3. 인터럽트 클리어 및 재시작
+				VL53LX_ClearInterruptAndStartMeasurement(&vl53lx[i]);
+			}
+		}
+	}
 	if (htim->Instance == TIM6) {
 		// 1. 자이로 Z축 데이터 읽기
 		static uint32_t prev_tick = 0;
