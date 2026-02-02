@@ -68,7 +68,10 @@ void MX_User_Init() {
 		sprintf(error_log, " Encoder RIGHT ERROR!");
 		Error_Handler();
 	}
-
-	MX_VL53L4CX_Init();
-
+#ifdef SENSOR_IS_TOF
+	if (MX_VL53L4CX_Init() != HAL_OK) {
+		sprintf(error_log, " ToF Init ERROR!");
+		Error_Handler();
+	}
+#endif
 }

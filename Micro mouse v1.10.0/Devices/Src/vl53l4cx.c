@@ -16,7 +16,7 @@ VL53LX_Dev_t dev[VL53L4CX_NUM];
 VL53LX_DEV vl53lx = dev;
 int status;
 
-volatile uint8_t is_vl53lx_ready[VL53L4CX_NUM];
+uint8_t is_vl53lx_ready[VL53L4CX_NUM];
 
 uint8_t byteData;
 uint16_t wordData;
@@ -59,7 +59,7 @@ HAL_StatusTypeDef MX_VL53L4CX_Init() {
 	HAL_GPIO_WritePin(XSHUT3_GPIO_Port, XSHUT3_Pin, GPIO_PIN_RESET);
 
 	VL53L4CX_Init(vl53lx + 0, XSHUT0_GPIO_Port, XSHUT0_Pin,
-	VL53LX_SLAVE_ADDRESS_DEFAULT + 0x02);
+	VL53LX_SLAVE_ADDRESS_DEFAULT + 0x04);
 //	VL53L4CX_Init(vl53lx + 1, XSHUT1_GPIO_Port, XSHUT1_Pin,
 //	VL53LX_SLAVE_ADDRESS_DEFAULT + 0x04);
 //	VL53L4CX_Init(vl53lx + 2, XSHUT2_GPIO_Port, XSHUT2_Pin,

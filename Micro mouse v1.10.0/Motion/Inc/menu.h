@@ -11,10 +11,16 @@ extern "C" {
 #endif
 
 #include "main.h"
+#include "adc.h"
+#include "st7789.h"
 
-/* --- Public Functions --- */
+extern uint8_t battery_percent;
+
 void Menu_Init(void);
 void Menu_Loop(void);
+
+
+void Show_Battery(void);
 
 #ifdef __cplusplus
 }

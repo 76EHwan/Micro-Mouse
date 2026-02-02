@@ -15,7 +15,7 @@
 #define VL53LX_SLAVE_ADDRESS_DEFAULT (VL53LX_EWOK_I2C_DEV_ADDR_DEFAULT << 1)
 
 extern VL53LX_DEV vl53lx;
-extern volatile uint8_t is_vl53lx_ready[VL53L4CX_NUM];
+extern uint8_t is_vl53lx_ready[VL53L4CX_NUM];
 
 extern uint8_t byteData;
 extern uint16_t wordData;

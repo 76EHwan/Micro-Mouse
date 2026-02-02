@@ -136,7 +136,7 @@ void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 2 */
 
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
 	uint8_t i = 0xFF; // 어떤 센서인지 식별하기 위한 인덱스
 
 	// 인터럽트가 발생한 핀이 어떤 센서인지 확인 (main.h의 핀 정의에 따라 매핑 필요)

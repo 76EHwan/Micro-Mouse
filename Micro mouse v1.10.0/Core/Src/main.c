@@ -31,11 +31,9 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "init.h"
+#include "menu.h"
 #include "error.h"
 #include "sensor.h"
-#include "foc.h"
-
-#include "st7789.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -132,15 +130,13 @@ int main(void) {
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 	ADC_Battery_Start();
-	VL53L4CX_Start();
+	TRIG_OFF;
 
 	while (1) {
 		/* USER CODE END WHILE */
-		LCD_Printf(0, 0, ST7789_WHITE, ST7789_BLACK, "%5d, %3d",
-				MultiRangingData[0].RangeData[0].RangeMilliMeter,
-				MultiRangingData[0].RangeData[0].RangeStatus);
-		LCD_Printf(0, 4, ST7789_WHITE, ST7789_BLACK, "%f", vbattery);
+		LCD_Printf(0, 0, ST7789_WHITE, ST7789_BLACK, "Hello world!");
 		/* USER CODE BEGIN 3 */
+		Show_Battery();
 	}
 	/* USER CODE END 3 */
 }
