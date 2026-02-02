@@ -132,49 +132,41 @@ void ST7789_DrawPixel(uint16_t x, uint16_t y, uint16_t color) {
 // 데이터 구조: [Col 0 Top] [Col 0 Bot] [Col 1 Top] [Col 1 Bot] ...
 void ST7789_DrawUser8x16(uint16_t x, uint16_t y, char *str, uint16_t color, uint16_t bgcolor) {
     uint8_t i, j;
-    uint8_t top_byte, bot_byte;
     char ch;
+    // 글자 하나(8x16)를 담을 버퍼 (128 픽셀 * 2바이트)
+    uint16_t char_buf[8 * 16];
+
+    // 색상 데이터 엔디언 변환 (ST7789는 Big-Endian 사용 가능성이 높음)
+    uint16_t color_le = (color >> 8) | (color << 8);
+    uint16_t bgcolor_le = (bgcolor >> 8) | (bgcolor << 8);
 
     while (*str) {
         ch = *str;
-        if (ch < 32 || ch > 126) {
-            str++;
-            continue;
-        }
+        if (ch < 32 || ch > 126) { str++; continue; }
 
         const uint8_t *pData = asc2_1608[ch - 32];
 
-        if (x + 8 >= ST7789_WIDTH) {
-            x = 0;
-            y += 16;
-            if (y + 16 >= ST7789_HEIGHT) break;
-        }
-
-        // 왼쪽에서 오른쪽으로 8개 기둥(Column)을 그립니다.
+        // 1. 버퍼에 픽셀 데이터 채우기 (세로 방향 MSB First 대응)
         for (i = 0; i < 8; i++) {
-            top_byte = pData[i * 2];     // 윗부분 데이터
-            bot_byte = pData[i * 2 + 1]; // 아랫부분 데이터
+            uint8_t top = pData[i * 2];
+            uint8_t bot = pData[i * 2 + 1];
 
-            // [핵심 수정] 비트 7(MSB)이 가장 위쪽 픽셀입니다. (0x80부터 검사)
-
-            // 1. 윗부분 8픽셀 그리기 (y ~ y+7)
             for (j = 0; j < 8; j++) {
-                if ((top_byte << j) & 0x80) { // 비트를 왼쪽으로 밀면서 최상위 비트 확인
-                    ST7789_DrawPixel(x + i, y + j, color);
-                } else {
-                    ST7789_DrawPixel(x + i, y + j, bgcolor);
-                }
-            }
-
-            // 2. 아랫부분 8픽셀 그리기 (y+8 ~ y+15)
-            for (j = 0; j < 8; j++) {
-                if ((bot_byte << j) & 0x80) {
-                    ST7789_DrawPixel(x + i, y + j + 8, color);
-                } else {
-                    ST7789_DrawPixel(x + i, y + j + 8, bgcolor);
-                }
+                // 상단 8비트
+                char_buf[i + (j * 8)] = (top & (0x80 >> j)) ? color_le : bgcolor_le;
+                // 하단 8비트
+                char_buf[i + ((j + 8) * 8)] = (bot & (0x80 >> j)) ? color_le : bgcolor_le;
             }
         }
+
+        // 2. 글자 영역 윈도우 설정 (한 번만 수행)
+        ST7789_SetAddressWindow(x, y, x + 8 - 1, y + 16 - 1);
+
+        // 3. 통째로 전송
+        ST7789_Select();
+        HAL_GPIO_WritePin(ST7789_DC_PORT, ST7789_DC_PIN, GPIO_PIN_SET);
+        HAL_SPI_Transmit(&ST7789_SPI_PORT, (uint8_t*)char_buf, sizeof(char_buf), HAL_MAX_DELAY);
+        ST7789_UnSelect();
 
         x += 8;
         str++;
