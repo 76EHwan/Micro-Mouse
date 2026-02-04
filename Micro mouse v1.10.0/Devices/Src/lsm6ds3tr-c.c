@@ -13,7 +13,7 @@
 #include <string.h> // for memset
 #include "st7789.h"
 
-#define IMU_I2C	&hi2c1
+#define IMU_I2C	&hi2c2
 
 LSM6DS3_Data_t imu_data;
 
@@ -138,7 +138,7 @@ void Gyro_Calibrate_Z_Only(void) {
     float sum = 0.0f;
     const int sample_count = 1000; // 샘플링 횟수 (1초 정도 소요)
 
-    LCD_Printf(0, 0, ST7789_WHITE, ST7789_BLACK, "Calibrating...");
+    LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "Calibrating...");
 
     for (int i = 0; i < sample_count; i++) {
         // Z축 데이터만 읽기
@@ -150,6 +150,6 @@ void Gyro_Calibrate_Z_Only(void) {
     // 평균값(Offset) 계산
     imu_data.Gyro_Z_Offset = sum / (float)sample_count;
 
-    LCD_Printf(0, 1,  ST7789_WHITE, ST7789_BLACK, "Offset: %.2f", imu_data.Gyro_Z_Offset);
+    LCD_Printf(0, 2,  ST7789_WHITE, ST7789_BLACK, "Offset: %.2f", imu_data.Gyro_Z_Offset);
     HAL_Delay(1000); // 값 확인용 대기
 }

@@ -52,108 +52,66 @@ void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, LD2_Pin|XSHUT3_Pin|XSHUT2_Pin|MTR_INLx_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, LD2_Pin|MTR_R_DRVOFF_Pin|MTR_L_DRVOFF_Pin|MTR_INLx_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, LCD_CS_Pin|LCD_DC_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOA, MTR_nSLEEP_Pin|MTR_R_CS_Pin|MTR_L_CS_Pin|ENC_L_CS_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, MTR_R_DRVOFF_Pin|MTR_L_DRVOFF_Pin|MTR_nSLEEP_Pin|MTR_R_CS_Pin
-                          |MTR_L_CS_Pin|ENC_L_CS_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, ENC_R_CS_Pin|LCD_DC_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, XSHUT1_Pin|XSHUT0_Pin|ENC_R_CS_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(LCD_CS_GPIO_Port, LCD_CS_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : LD2_Pin LCD_CS_Pin LCD_DC_Pin MTR_INLx_Pin */
-  GPIO_InitStruct.Pin = LD2_Pin|LCD_CS_Pin|LCD_DC_Pin|MTR_INLx_Pin;
+  /*Configure GPIO pins : LD2_Pin MTR_INLx_Pin */
+  GPIO_InitStruct.Pin = LD2_Pin|MTR_INLx_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : MTR_R_DRVOFF_Pin MTR_L_DRVOFF_Pin MTR_nSLEEP_Pin MTR_R_CS_Pin
-                           MTR_L_CS_Pin ENC_L_CS_Pin */
-  GPIO_InitStruct.Pin = MTR_R_DRVOFF_Pin|MTR_L_DRVOFF_Pin|MTR_nSLEEP_Pin|MTR_R_CS_Pin
-                          |MTR_L_CS_Pin|ENC_L_CS_Pin;
+  /*Configure GPIO pins : SWL_Pin SWR_Pin */
+  GPIO_InitStruct.Pin = SWL_Pin|SWR_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : MTR_nSLEEP_Pin MTR_R_CS_Pin MTR_L_CS_Pin ENC_L_CS_Pin */
+  GPIO_InitStruct.Pin = MTR_nSLEEP_Pin|MTR_R_CS_Pin|MTR_L_CS_Pin|ENC_L_CS_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : MTR_R_DRVOFF_Pin MTR_L_DRVOFF_Pin */
+  GPIO_InitStruct.Pin = MTR_R_DRVOFF_Pin|MTR_L_DRVOFF_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pins : MTR_R_nFAULT_Pin MTR_L_nFAULT_Pin */
   GPIO_InitStruct.Pin = MTR_R_nFAULT_Pin|MTR_L_nFAULT_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : XSHUT3_Pin XSHUT2_Pin */
-  GPIO_InitStruct.Pin = XSHUT3_Pin|XSHUT2_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : XSHUT1_Pin XSHUT0_Pin */
-  GPIO_InitStruct.Pin = XSHUT1_Pin|XSHUT0_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : ENC_R_CS_Pin */
-  GPIO_InitStruct.Pin = ENC_R_CS_Pin;
+  /*Configure GPIO pins : ENC_R_CS_Pin LCD_DC_Pin */
+  GPIO_InitStruct.Pin = ENC_R_CS_Pin|LCD_DC_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(ENC_R_CS_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : TOF_INT3_Pin TOF_INT2_Pin TOF_INT1_Pin */
-  GPIO_InitStruct.Pin = TOF_INT3_Pin|TOF_INT2_Pin|TOF_INT1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : TOF_INT0_Pin */
-  GPIO_InitStruct.Pin = TOF_INT0_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(TOF_INT0_GPIO_Port, &GPIO_InitStruct);
-
-  /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI2_IRQn, 5, 0);
-  HAL_NVIC_EnableIRQ(EXTI2_IRQn);
-
-  HAL_NVIC_SetPriority(EXTI10_IRQn, 5, 0);
-  HAL_NVIC_EnableIRQ(EXTI10_IRQn);
-
-  HAL_NVIC_SetPriority(EXTI11_IRQn, 5, 0);
-  HAL_NVIC_EnableIRQ(EXTI11_IRQn);
-
-  HAL_NVIC_SetPriority(EXTI12_IRQn, 5, 0);
-  HAL_NVIC_EnableIRQ(EXTI12_IRQn);
+  /*Configure GPIO pin : LCD_CS_Pin */
+  GPIO_InitStruct.Pin = LCD_CS_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(LCD_CS_GPIO_Port, &GPIO_InitStruct);
 
 }
 
 /* USER CODE BEGIN 2 */
 
-void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
-	uint8_t i = 0xFF; // 어떤 센서인지 식별하기 위한 인덱스
-
-	// 인터럽트가 발생한 핀이 어떤 센서인지 확인 (main.h의 핀 정의에 따라 매핑 필요)
-	if (GPIO_Pin == TOF_INT0_Pin) {
-		i = 0;
-		TRIG_TOGGLE;
-	} else if (GPIO_Pin == TOF_INT1_Pin) {
-		i = 1;
-	} else if (GPIO_Pin == TOF_INT2_Pin) {
-		i = 2;
-	} else if (GPIO_Pin == TOF_INT3_Pin) {
-		i = 3;
-	}
-
-	if (i < VL53L4CX_NUM) {
-		// 여기서는 I2C 함수를 호출하지 않고 플래그만 세웁니다.
-		is_vl53lx_ready[i] = 1;
-	}
-}
 /* USER CODE END 2 */

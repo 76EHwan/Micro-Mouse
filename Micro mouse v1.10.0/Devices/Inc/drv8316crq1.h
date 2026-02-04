@@ -15,7 +15,7 @@ extern "C" {
 #include "main.h"
 #include "spi.h"
 
-#define DRV8316C_SPI &hspi2
+#define DRV8316C_SPI &hspi3
 
 /* Macros for manual nCS pin control */
 #define DRV8316C_CS_LOW(hdrv)     HAL_GPIO_WritePin((hdrv)->nCS_Port, (hdrv)->nCS_Pin, GPIO_PIN_RESET)
@@ -204,6 +204,8 @@ DRV8316C_REG_Typedef DRV8316C_VerifyConfig(DRV8316C_Handle_t *hdrv);
  * @brief  Initializes global DRV8316 instances and SPI configuration.
  */
 void MX_DRV8316C_Init(void);
+
+void Test_DRV8316C_Read_Status(void);
 
 #ifdef __cplusplus
 }

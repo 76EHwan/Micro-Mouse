@@ -16,5 +16,5 @@
 #endif
 
 void MX_User_Init();
-
+void IMU_Start();
 #endif /* INC_INIT_H_ */

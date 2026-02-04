@@ -82,7 +82,7 @@ void MX_I2C2_Init(void)
 
   /* USER CODE END I2C2_Init 1 */
   hi2c2.Instance = I2C2;
-  hi2c2.Init.Timing = 0x10C043E5;
+  hi2c2.Init.Timing = 0x603060FF;
   hi2c2.Init.OwnAddress1 = 0;
   hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
@@ -139,7 +139,7 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef* i2cHandle)
     PB6     ------> I2C1_SCL
     PB7     ------> I2C1_SDA
     */
-    GPIO_InitStruct.Pin = IMU_SCL_Pin|IMU_SDA_Pin;
+    GPIO_InitStruct.Pin = TOF_SCL_Pin|TOF_SDA_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -172,7 +172,7 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef* i2cHandle)
     PB10     ------> I2C2_SCL
     PB12     ------> I2C2_SDA
     */
-    GPIO_InitStruct.Pin = TOF_SCL_Pin|TOF_SDA_Pin;
+    GPIO_InitStruct.Pin = IMU_SCL_Pin|IMU_SDA_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
@@ -202,9 +202,9 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef* i2cHandle)
     PB6     ------> I2C1_SCL
     PB7     ------> I2C1_SDA
     */
-    HAL_GPIO_DeInit(IMU_SCL_GPIO_Port, IMU_SCL_Pin);
+    HAL_GPIO_DeInit(TOF_SCL_GPIO_Port, TOF_SCL_Pin);
 
-    HAL_GPIO_DeInit(IMU_SDA_GPIO_Port, IMU_SDA_Pin);
+    HAL_GPIO_DeInit(TOF_SDA_GPIO_Port, TOF_SDA_Pin);
 
   /* USER CODE BEGIN I2C1_MspDeInit 1 */
 
@@ -222,9 +222,9 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef* i2cHandle)
     PB10     ------> I2C2_SCL
     PB12     ------> I2C2_SDA
     */
-    HAL_GPIO_DeInit(TOF_SCL_GPIO_Port, TOF_SCL_Pin);
+    HAL_GPIO_DeInit(IMU_SCL_GPIO_Port, IMU_SCL_Pin);
 
-    HAL_GPIO_DeInit(TOF_SDA_GPIO_Port, TOF_SDA_Pin);
+    HAL_GPIO_DeInit(IMU_SDA_GPIO_Port, IMU_SDA_Pin);
 
   /* USER CODE BEGIN I2C2_MspDeInit 1 */
 

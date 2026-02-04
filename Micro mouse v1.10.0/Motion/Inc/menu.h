@@ -22,6 +22,8 @@ void Menu_Loop(void);
 
 void Show_Battery(void);
 
+void Show_IMU(void);
+
 #ifdef __cplusplus
 }
 #endif

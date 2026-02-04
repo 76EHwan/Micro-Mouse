@@ -16,6 +16,17 @@
 #include "vl53l4cx.h"
 #include "st7789.h"
 
+#define IMU_EN
+#define DRV8316C_L_EN
+//#define DRV8316C_L_STATUS_EN
+#define DRV8316C_R_EN
+//#define DRV8316C_R_STATUS_EN
+//#define ENCODER_L_EN
+//#define ENCODER_R_EN
+//#define SENSOR_TOF_EN
+
+
+
 void MX_User_Init() {
 	ST7789_Init();
 	ST7789_FillScreen(ST7789_BLACK);
@@ -24,16 +35,19 @@ void MX_User_Init() {
 
 	HAL_Delay(10);
 
+#ifdef IMU_EN
 	if (LSM6DS3_Init() != HAL_OK) {
 		sprintf(error_log, " IMU ERROR!");
 		Error_Handler();
 	}
+#endif
 
+#if defined(DRV8316C_L_EN) || defined(DRV8316C_R_EN)
 	DRV8316C_WAKEUP;
+#endif
 
+#ifdef DRV8316C_L_EN
 	DRV8316C_Init(&DRV8316C_L, DRV8316C_SPI, MTR_L_CS_GPIO_Port, MTR_L_CS_Pin);
-	DRV8316C_Init(&DRV8316C_R, DRV8316C_SPI, MTR_R_CS_GPIO_Port, MTR_R_CS_Pin);
-
 	if (DRV8316C_UnlockRegister(&DRV8316C_L) != HAL_OK) {
 		sprintf(error_log, " DRV8316C LEFT UNLOCK ERROR!");
 		Error_Handler();
@@ -46,7 +60,16 @@ void MX_User_Init() {
 		sprintf(error_log, " DRV8316C LEFT LOCK ERROR!");
 		Error_Handler();
 	}
+#endif
+#if defined(DRV8316C_L_EN) && defined(DRV8316C_L_STATUS_EN)
+	if (DRV8316C_VerifyConfig(&DRV8316C_L) != REG_OK) {
+		sprintf(error_log, " DRV8316C LEFT NOT CONFIG!");
+		Error_Handler();
+	}
+#endif
 
+#ifdef DRV8316C_R_EN
+	DRV8316C_Init(&DRV8316C_R, DRV8316C_SPI, MTR_R_CS_GPIO_Port, MTR_R_CS_Pin);
 	if (DRV8316C_UnlockRegister(&DRV8316C_R) != HAL_OK) {
 		sprintf(error_log, " DRV8316C RIGHT UNLOCK ERROR!");
 		Error_Handler();
@@ -59,19 +82,37 @@ void MX_User_Init() {
 		sprintf(error_log, " DRV8316C RIGHT LOCK ERROR!");
 		Error_Handler();
 	}
-
-//	if (MT6701_Init(&encDataL) != HAL_OK) {
-//		sprintf(error_log, " Encoder LEFT ERROR!");
-//		Error_Handler();
-//	}
+#endif
+#if defined(DRV8316C_R_EN) && defined(DRV8316C_R_STATUS_EN)
+	if (DRV8316C_VerifyConfig(&DRV8316C_R) != REG_OK) {
+		sprintf(error_log, " DRV8316C RIGHT NOT CONFIG!");
+		Error_Handler();
+	}
+#endif
+#ifdef ENCODER_L_EN
+	if (MT6701_Init(&encDataL) != HAL_OK) {
+		sprintf(error_log, " Encoder LEFT ERROR!");
+		Error_Handler();
+	}
+#endif
+#ifdef ENCODER_R_EN
 	if (MT6701_Init(&encDataR) != HAL_OK) {
 		sprintf(error_log, " Encoder RIGHT ERROR!");
 		Error_Handler();
 	}
-#ifdef SENSOR_IS_TOF
+#endif
+
+#ifdef SENSOR_TOF_EN
 	if (MX_VL53L4CX_Init() != HAL_OK) {
 		sprintf(error_log, " ToF Init ERROR!");
 		Error_Handler();
 	}
 #endif
+}
+
+void IMU_Start() {
+	Gyro_Calibrate_Z_Only();
+	ST7789_FillScreen(ST7789_BLACK);
+	HAL_TIM_Base_Start_IT(&htim6);
+	HAL_TIM_Base_Start(&htim2);
 }

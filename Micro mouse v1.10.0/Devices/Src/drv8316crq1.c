@@ -6,6 +6,7 @@
  */
 
 #include "drv8316crq1.h"
+#include "st7789.h"
 
 DRV8316C_Handle_t DRV8316C_L;
 DRV8316C_Handle_t DRV8316C_R;
@@ -175,7 +176,7 @@ HAL_StatusTypeDef DRV8316C_ApplyDefaultConfig(DRV8316C_Handle_t *hdrv) {
 	if (status != HAL_OK)
 		return status;
 
-	reg_val = 1;
+	reg_val = 0x13;
 	status = DRV8316C_WriteRegister(hdrv, DRV_REG_CTRL_6, reg_val);
 
 	return status;
@@ -234,11 +235,8 @@ void MX_DRV8316C_Init() {
 	HAL_GPIO_WritePin(MTR_nSLEEP_GPIO_Port, MTR_nSLEEP_Pin, GPIO_PIN_SET);
 	HAL_Delay(10);
 
-	SPI1_Config_For_DRV8316();
-	HAL_Delay(10);
-
-	DRV8316C_Init(&DRV8316C_L, &hspi1, MTR_L_CS_GPIO_Port, MTR_L_CS_Pin);
-	DRV8316C_Init(&DRV8316C_R, &hspi1, MTR_R_CS_GPIO_Port, MTR_R_CS_Pin);
+	DRV8316C_Init(&DRV8316C_L, DRV8316C_SPI, MTR_L_CS_GPIO_Port, MTR_L_CS_Pin);
+	DRV8316C_Init(&DRV8316C_R, DRV8316C_SPI, MTR_R_CS_GPIO_Port, MTR_R_CS_Pin);
 
 	DRV8316C_UnlockRegister(&DRV8316C_L);
 	DRV8316C_UnlockRegister(&DRV8316C_R);
@@ -255,7 +253,26 @@ void MX_DRV8316C_Init() {
 	if (DRV8316C_VerifyConfig(&DRV8316C_R) != REG_OK) {
 		TRIG_OFF;
 	}
+}
 
-	SPI1_Config_For_ST7735();
+void Test_DRV8316C_Read_Status() {
+	uint8_t ic_status;
+	uint8_t status1;
+	uint8_t status2;
+
+	DRV8316C_ReadRegister(&DRV8316C_L, DRV_REG_IC_STATUS, &ic_status);
+	LCD_Printf(0, 2, ST7789_WHITE, ST7789_BLACK, "L IC: %02X (80)", ic_status);
+	DRV8316C_ReadRegister(&DRV8316C_L, DRV_REG_STATUS_1, &status1);
+	LCD_Printf(0, 3, ST7789_WHITE, ST7789_BLACK, "L S1: %02X (00)", status1);
+	DRV8316C_ReadRegister(&DRV8316C_L, DRV_REG_STATUS_2, &status2);
+	LCD_Printf(0, 4, ST7789_WHITE, ST7789_BLACK, "L S2: %02X (00)", status2);
+
+	DRV8316C_ReadRegister(&DRV8316C_R, DRV_REG_IC_STATUS, &ic_status);
+	LCD_Printf(0, 5, ST7789_WHITE, ST7789_BLACK, "R IC: %02X (80)", ic_status);
+	DRV8316C_ReadRegister(&DRV8316C_R, DRV_REG_STATUS_1, &status1);
+	LCD_Printf(0, 6, ST7789_WHITE, ST7789_BLACK, "R S1: %02X (00)", status1);
+	DRV8316C_ReadRegister(&DRV8316C_R, DRV_REG_STATUS_2, &status2);
+	LCD_Printf(0, 7, ST7789_WHITE, ST7789_BLACK, "R S2: %02X (00)", status2);
+
 }
 
