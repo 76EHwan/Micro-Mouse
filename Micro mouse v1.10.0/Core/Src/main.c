@@ -136,13 +136,13 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-//	ADC_Batte	ry_Start();
+	ADC_Battery_Start();
 	IMU_Start();
 	while (1) {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		Test_DRV8316C_Read_Status(&DRV8316C_R);
+//		Test_DRV8316C_Read_Status(&DRV8316C_R);
 		Show_Battery();
 		Show_IMU();
 	}

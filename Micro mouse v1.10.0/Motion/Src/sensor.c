@@ -9,5 +9,5 @@
 #include "adc.h"
 
 void ADC_Battery_Start(){
-	HAL_ADC_Start_DMA(&hadc2, &raw_vbattery, 1);
+	HAL_ADC_Start_DMA(&hadc1, adc1_buffer, 7);
 }

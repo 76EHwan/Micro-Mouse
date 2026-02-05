@@ -23,8 +23,7 @@
 /* USER CODE BEGIN 0 */
 #include "foc.h"
 
-uint16_t adc_buffer[6];
-uint32_t raw_vbattery;
+uint32_t adc1_buffer[7];
 float vbattery;
 
 /* USER CODE END 0 */
@@ -264,43 +263,16 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /* USER CODE BEGIN ADC1_MspInit 1 */
-
-  /* USER CODE END ADC1_MspInit 1 */
-  }
-  else if(adcHandle->Instance==ADC2)
-  {
-  /* USER CODE BEGIN ADC2_MspInit 0 */
-
-  /* USER CODE END ADC2_MspInit 0 */
-    /* ADC2 clock enable */
-    HAL_RCC_ADC_CLK_ENABLED++;
-    if(HAL_RCC_ADC_CLK_ENABLED==1){
-      __HAL_RCC_ADC_CLK_ENABLE();
-    }
-
-    __HAL_RCC_GPIOA_CLK_ENABLE();
-    /**ADC2 GPIO Configuration
-    PA3     ------> ADC2_INP15
-    PA4     ------> ADC2_INP18
-    PA5     ------> ADC2_INP19
-    PA6     ------> ADC2_INP3
-    */
-    GPIO_InitStruct.Pin = SENSOR_IN3_Pin|SENSOR_IN2_Pin|SENSOR_IN1_Pin|SENSOR_IN0_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-    /* ADC2 DMA Init */
-    /* GPDMA1_REQUEST_ADC2 Init */
+    /* ADC1 DMA Init */
+    /* GPDMA1_REQUEST_ADC1 Init */
     NodeConfig.NodeType = DMA_GPDMA_LINEAR_NODE;
-    NodeConfig.Init.Request = GPDMA1_REQUEST_ADC2;
+    NodeConfig.Init.Request = GPDMA1_REQUEST_ADC1;
     NodeConfig.Init.BlkHWRequest = DMA_BREQ_SINGLE_BURST;
     NodeConfig.Init.Direction = DMA_PERIPH_TO_MEMORY;
-    NodeConfig.Init.SrcInc = DMA_SINC_FIXED;
-    NodeConfig.Init.DestInc = DMA_DINC_INCREMENTED;
-    NodeConfig.Init.SrcDataWidth = DMA_SRC_DATAWIDTH_HALFWORD;
-    NodeConfig.Init.DestDataWidth = DMA_DEST_DATAWIDTH_HALFWORD;
+    NodeConfig.Init.SrcInc = DMA_SINC_INCREMENTED;
+    NodeConfig.Init.DestInc = DMA_DINC_FIXED;
+    NodeConfig.Init.SrcDataWidth = DMA_SRC_DATAWIDTH_WORD;
+    NodeConfig.Init.DestDataWidth = DMA_DEST_DATAWIDTH_WORD;
     NodeConfig.Init.SrcBurstLength = 1;
     NodeConfig.Init.DestBurstLength = 1;
     NodeConfig.Init.TransferAllocatedPort = DMA_SRC_ALLOCATED_PORT0|DMA_DEST_ALLOCATED_PORT0;
@@ -347,6 +319,33 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
       Error_Handler();
     }
 
+  /* USER CODE BEGIN ADC1_MspInit 1 */
+
+  /* USER CODE END ADC1_MspInit 1 */
+  }
+  else if(adcHandle->Instance==ADC2)
+  {
+  /* USER CODE BEGIN ADC2_MspInit 0 */
+
+  /* USER CODE END ADC2_MspInit 0 */
+    /* ADC2 clock enable */
+    HAL_RCC_ADC_CLK_ENABLED++;
+    if(HAL_RCC_ADC_CLK_ENABLED==1){
+      __HAL_RCC_ADC_CLK_ENABLE();
+    }
+
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+    /**ADC2 GPIO Configuration
+    PA3     ------> ADC2_INP15
+    PA4     ------> ADC2_INP18
+    PA5     ------> ADC2_INP19
+    PA6     ------> ADC2_INP3
+    */
+    GPIO_InitStruct.Pin = SENSOR_IN3_Pin|SENSOR_IN2_Pin|SENSOR_IN1_Pin|SENSOR_IN0_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
   /* USER CODE BEGIN ADC2_MspInit 1 */
 
   /* USER CODE END ADC2_MspInit 1 */
@@ -380,6 +379,8 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 
     HAL_GPIO_DeInit(GPIOA, SOA_RA0_Pin|SOB_RA1_Pin|SOC_RA2_Pin);
 
+    /* ADC1 DMA DeInit */
+    HAL_DMA_DeInit(adcHandle->DMA_Handle);
   /* USER CODE BEGIN ADC1_MspDeInit 1 */
 
   /* USER CODE END ADC1_MspDeInit 1 */
@@ -403,8 +404,6 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
     */
     HAL_GPIO_DeInit(GPIOA, SENSOR_IN3_Pin|SENSOR_IN2_Pin|SENSOR_IN1_Pin|SENSOR_IN0_Pin);
 
-    /* ADC2 DMA DeInit */
-    HAL_DMA_DeInit(adcHandle->DMA_Handle);
   /* USER CODE BEGIN ADC2_MspDeInit 1 */
 
   /* USER CODE END ADC2_MspDeInit 1 */
@@ -427,8 +426,8 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
 //        FOC_Update(&focL);
 //        FOC_Update(&focR);
 //    }
-	if(hadc->Instance == ADC2) {
-		vbattery = raw_vbattery * 4.f * 3.3f / 1.f / (1 << 12);
+	if(hadc->Instance == ADC1) {
+		vbattery = adc1_buffer[0] * 4.f * 3.3f / 1.f / (1 << 12);
 	}
 }
 /* USER CODE END 1 */
