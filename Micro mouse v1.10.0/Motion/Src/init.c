@@ -18,14 +18,10 @@
 
 #define IMU_EN
 #define DRV8316C_L_EN
-//#define DRV8316C_L_STATUS_EN
 #define DRV8316C_R_EN
-//#define DRV8316C_R_STATUS_EN
 //#define ENCODER_L_EN
 //#define ENCODER_R_EN
 //#define SENSOR_TOF_EN
-
-
 
 void MX_User_Init() {
 	ST7789_Init();
@@ -42,53 +38,61 @@ void MX_User_Init() {
 	}
 #endif
 
-#if defined(DRV8316C_L_EN) || defined(DRV8316C_R_EN)
-	DRV8316C_WAKEUP;
-#endif
-
+	DRV8316C_REG_Typedef reg_status;
 #ifdef DRV8316C_L_EN
-	DRV8316C_Init(&DRV8316C_L, DRV8316C_SPI, MTR_L_CS_GPIO_Port, MTR_L_CS_Pin);
+	HAL_GPIO_WritePin(MTR_nSLEEP_GPIO_Port, MTR_nSLEEP_Pin, GPIO_PIN_SET);
+	DRV8316C_Init(&DRV8316C_L, DRV8316C_SPI, MTR_L_CS_GPIO_Port, MTR_L_CS_Pin,
+	MTR_L_nFAULT_GPIO_Port, MTR_L_nFAULT_Pin, MTR_L_DRVOFF_GPIO_Port,
+	MTR_L_DRVOFF_Pin, DRV8316C_L_TIM, TIM_CHANNEL_1, TIM_CHANNEL_2,
+	TIM_CHANNEL_3);
+	HAL_Delay(10);
 	if (DRV8316C_UnlockRegister(&DRV8316C_L) != HAL_OK) {
 		sprintf(error_log, " DRV8316C LEFT UNLOCK ERROR!");
 		Error_Handler();
 	}
+	HAL_Delay(10);
 	if (DRV8316C_ApplyDefaultConfig(&DRV8316C_L) != HAL_OK) {
 		sprintf(error_log, " DRV8316C LEFT CONFIG ERROR!");
 		Error_Handler();
 	}
+	HAL_Delay(10);
 	if (DRV8316C_LockRegister(&DRV8316C_L) != HAL_OK) {
 		sprintf(error_log, " DRV8316C LEFT LOCK ERROR!");
 		Error_Handler();
 	}
-#endif
-#if defined(DRV8316C_L_EN) && defined(DRV8316C_L_STATUS_EN)
-	if (DRV8316C_VerifyConfig(&DRV8316C_L) != REG_OK) {
-		sprintf(error_log, " DRV8316C LEFT NOT CONFIG!");
-		Error_Handler();
+	HAL_Delay(10);
+	if ((reg_status = DRV8316C_VerifyConfig(&DRV8316C_L)) != REG_OK) {
+		sprintf(error_log, "DRV8316C LEFT CONFIG %d ERROR!", reg_status);
 	}
 #endif
 
 #ifdef DRV8316C_R_EN
-	DRV8316C_Init(&DRV8316C_R, DRV8316C_SPI, MTR_R_CS_GPIO_Port, MTR_R_CS_Pin);
+	HAL_GPIO_WritePin(MTR_nSLEEP_GPIO_Port, MTR_nSLEEP_Pin, GPIO_PIN_SET);
+	DRV8316C_Init(&DRV8316C_R, DRV8316C_SPI, MTR_R_CS_GPIO_Port, MTR_R_CS_Pin,
+	MTR_R_nFAULT_GPIO_Port, MTR_R_nFAULT_Pin, MTR_R_DRVOFF_GPIO_Port,
+	MTR_R_DRVOFF_Pin, DRV8316C_R_TIM, TIM_CHANNEL_1, TIM_CHANNEL_2,
+	TIM_CHANNEL_3);
+	HAL_Delay(10);
 	if (DRV8316C_UnlockRegister(&DRV8316C_R) != HAL_OK) {
 		sprintf(error_log, " DRV8316C RIGHT UNLOCK ERROR!");
 		Error_Handler();
 	}
+	HAL_Delay(10);
 	if (DRV8316C_ApplyDefaultConfig(&DRV8316C_R) != HAL_OK) {
 		sprintf(error_log, " DRV8316C RIGHT CONFIG ERROR!");
 		Error_Handler();
 	}
+	HAL_Delay(10);
 	if (DRV8316C_LockRegister(&DRV8316C_R) != HAL_OK) {
 		sprintf(error_log, " DRV8316C RIGHT LOCK ERROR!");
 		Error_Handler();
 	}
-#endif
-#if defined(DRV8316C_R_EN) && defined(DRV8316C_R_STATUS_EN)
-	if (DRV8316C_VerifyConfig(&DRV8316C_R) != REG_OK) {
-		sprintf(error_log, " DRV8316C RIGHT NOT CONFIG!");
-		Error_Handler();
+	HAL_Delay(10);
+	if ((reg_status = DRV8316C_VerifyConfig(&DRV8316C_R)) != REG_OK) {
+		sprintf(error_log, "DRV8316C RIGHT CONFIG %d ERROR!", reg_status);
 	}
 #endif
+
 #ifdef ENCODER_L_EN
 	if (MT6701_Init(&encDataL) != HAL_OK) {
 		sprintf(error_log, " Encoder LEFT ERROR!");

@@ -14,8 +14,11 @@ extern "C" {
 
 #include "main.h"
 #include "spi.h"
+#include "tim.h"
 
 #define DRV8316C_SPI &hspi3
+#define DRV8316C_L_TIM &htim1
+#define DRV8316C_R_TIM &htim8
 
 /* Macros for manual nCS pin control */
 #define DRV8316C_CS_LOW(hdrv)     HAL_GPIO_WritePin((hdrv)->nCS_Port, (hdrv)->nCS_Pin, GPIO_PIN_RESET)
@@ -103,8 +106,12 @@ extern "C" {
 #define DRV_CTRL2_CLR_FLT_BIT   (1 << 0) // Write 1 to clear faults
 
 /* Control Register 3 (Offset = 5h) */
+#define DRV_CTRL3_PWM_100_DUTY_40KHZ  (1 << 4) // Overtemperature Warning Reporting
+#define DRV_CTRL3_OVP_SEL_22V   (1 << 3) // Overtemperature Warning Reporting
 #define DRV_CTRL3_OVP_EN        (1 << 2) // OVP Enable
+#define DRV_CTRL3_SPI_FLT_REP   (1 << 1) // Overtemperature Warning Reporting
 #define DRV_CTRL3_OTW_REP       (1 << 0) // Overtemperature Warning Reporting
+
 
 /* Control Register 4 (Offset = 6h) */
 #define DRV_CTRL4_OCP_RETRY_5ms (0 << 3) // 5 ms OCP retry
@@ -126,7 +133,14 @@ extern "C" {
 #define DRV_CTRL5_CSA_GAIN_1_2  (3 << 0) // 1.2 V/A
 
 /* Control Register 6 (Offset = 8h) */
+#define DRV_CTRL6_BUCK_PS_DIS   (1 << 4) // Buck Regulator Disable
+#define DRV_CTRL6_BUCK_CL       (1 << 3) // Buck Regulator Disable
+#define DRV_CTRL6_BUCK_SEL_3V3  (0 << 1) // Buck Regulator Disable
+#define DRV_CTRL6_BUCK_SEL_5V   (1 << 1) // Buck Regulator Disable
+#define DRV_CTRL6_BUCK_SEL_4V   (2 << 1) // Buck Regulator Disable
+#define DRV_CTRL6_BUCK_SEL_5V7  (3 << 1) // Buck Regulator Disable
 #define DRV_CTRL6_BUCK_DIS      (1 << 0) // Buck Regulator Disable
+
 
 /*=======================================================================*/
 /* Driver Handle Structure                                               */
@@ -150,6 +164,17 @@ typedef struct
     GPIO_TypeDef* nSLEEP_Port; // GPIO Port for nSLEEP pin
     uint16_t           nSLEEP_Pin;   // nSLEEP pin number
 
+    GPIO_TypeDef* DRVOFF_Port;
+    uint16_t DRVOFF_Pin;
+
+    GPIO_TypeDef* nFAULT_Port;
+    uint16_t nFAULT_Pin;
+
+    TIM_HandleTypeDef* htim;
+    uint32_t U_CHANNEL;
+    uint32_t V_CHANNEL;
+    uint32_t W_CHANNEL;
+
 } DRV8316C_Handle_t;
 
 extern DRV8316C_Handle_t DRV8316C_L;
@@ -162,8 +187,10 @@ extern DRV8316C_Handle_t DRV8316C_R;
 /**
  * @brief  Initializes the DRV8316C handle.
  */
-void DRV8316C_Init(DRV8316C_Handle_t* hdrv, SPI_HandleTypeDef* hspi,
-                   GPIO_TypeDef* nCS_Port, uint16_t nCS_Pin);
+
+void DRV8316C_Init(DRV8316C_Handle_t *hdrv, SPI_HandleTypeDef *hspi, GPIO_TypeDef *nCS_Port, uint16_t nCS_Pin,
+		 GPIO_TypeDef *nFAULT_Port, uint16_t nFAULT_Pin,  GPIO_TypeDef *DRVOFF_Port, uint16_t DRVOFF_Pin,
+		 TIM_HandleTypeDef *htim, uint32_t u_channel, uint32_t v_channel, uint32_t w_channel);
 
 /**
  * @brief  Writes 8 bits of data to a specific DRV8316C register.
@@ -205,7 +232,7 @@ DRV8316C_REG_Typedef DRV8316C_VerifyConfig(DRV8316C_Handle_t *hdrv);
  */
 void MX_DRV8316C_Init(void);
 
-void Test_DRV8316C_Read_Status(void);
+void Test_DRV8316C_Read_Status(DRV8316C_Handle_t *hdrv);
 
 #ifdef __cplusplus
 }

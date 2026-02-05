@@ -128,6 +128,7 @@ int main(void)
 	TRIG_ON;
 
 	MX_User_Init();
+	TRIG_OFF;
 	LCD_Printf(0, 0, ST7789_WHITE, ST7789_BLACK, "Hello world!");
 	HAL_Delay(1000);
 
@@ -135,14 +136,13 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	ADC_Battery_Start();
+//	ADC_Batte	ry_Start();
 	IMU_Start();
-	TRIG_OFF;
 	while (1) {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		Test_DRV8316C_Read_Status();
+		Test_DRV8316C_Read_Status(&DRV8316C_R);
 		Show_Battery();
 		Show_IMU();
 	}

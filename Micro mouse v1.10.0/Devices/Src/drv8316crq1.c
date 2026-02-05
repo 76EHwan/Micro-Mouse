@@ -4,9 +4,28 @@
  * Created on: Nov 10, 2025
  * Author: kth59
  */
+/*
+ * DRV8316C.c
+ *
+ * Modified for 16-bit SPI Mode
+ */
+
+/*
+ * DRV8316C.c
+ *
+ * Modified for 16-bit SPI Mode with CORRECT Bit Packing
+ * [중요] 칩 스펙에 맞춰 비트 위치를 강제로 재정의했습니다.
+ */
 
 #include "drv8316crq1.h"
 #include "st7789.h"
+
+// --- [CRITICAL] DRV8316C SPI Bit Definitions ---
+// 헤더 파일의 정의가 틀렸을 수 있으므로 여기서 직접 정의합니다.
+#define DRV_RW_READ_BIT     (1 << 15)
+#define DRV_ADDR_SHIFT      9           // 주소는 9비트 밀어야 함 (Bit 14-9)
+#define DRV_PARITY_BIT      (1 << 8)    // 패리티는 Bit 8에 위치
+#define DRV_DATA_MASK       0xFF        // 데이터는 하위 8비트
 
 DRV8316C_Handle_t DRV8316C_L;
 DRV8316C_Handle_t DRV8316C_R;
@@ -16,42 +35,36 @@ DRV8316C_Handle_t DRV8316C_R;
 /*=======================================================================*/
 
 /**
- * @brief  Calculates the even parity bit by counting the number of '1's.
- * @note   Datasheet 8.5.1.1: "Parity bit is set such that the SDI input data word has even number of 1s"
- * @param  data: 16-bit SPI frame with parity bit (B8) cleared to 0.
- * @return 1 (if 1s count is odd), 0 (if 1s count is even)
+ * @brief  Calculates the even parity bit.
  */
 static uint8_t DRV8316C_CalculateEvenParity(uint16_t data) {
 	uint8_t one_count = 0;
-	// Clear the parity bit (B8) just in case, to count the other 15 bits
-	data &= ~DRV_SPI_PARITY_BIT;
+	// 패리티 비트 위치(Bit 8)를 제외하고 1의 개수 카운트
+	data &= ~DRV_PARITY_BIT;
 
 	for (int i = 0; i < 16; i++) {
 		if ((data >> i) & 0x01) {
 			one_count++;
 		}
 	}
-
-	// If the count of 1s is odd, return 1 to make the total count even.
+	// 홀수 개면 1을 반환 (전체를 짝수로 맞춤)
 	return (one_count % 2);
 }
 
 /**
- * @brief  Internal helper function to perform SPI transmit/receive (8-bit x 2)
- * @note   Modified to send 2 bytes (8-bit mode) instead of 1 half-word (16-bit mode)
+ * @brief  Internal helper for SPI Tx/Rx (Native 16-bit)
  */
 static HAL_StatusTypeDef DRV8316C_SPI_TxRx(DRV8316C_Handle_t *hdrv,
-		uint8_t *pTxData, uint8_t *pRxData) {
+		uint16_t *pTxData, uint16_t *pRxData) {
 	HAL_StatusTypeDef status;
 
-	DRV8316C_CS_LOW(hdrv); // Activate Chip Select (LOW)
+	DRV8316C_CS_LOW(hdrv);
 
-	// Transmit 2 bytes (Size = 2).
-	// HAL_SPI_TransmitReceive handles sending pTxData[0] then pTxData[1].
-	status = HAL_SPI_TransmitReceive(hdrv->hspi, pTxData, pRxData, 2,
-			100);
+	// 16-bit 모드: Size = 1 (16비트 한 덩어리 전송)
+	status = HAL_SPI_TransmitReceive(hdrv->hspi, (uint8_t*) pTxData,
+			(uint8_t*) pRxData, 1, 100);
 
-	DRV8316C_CS_HIGH(hdrv); // Deactivate Chip Select (HIGH)
+	DRV8316C_CS_HIGH(hdrv);
 
 	return status;
 }
@@ -60,87 +73,81 @@ static HAL_StatusTypeDef DRV8316C_SPI_TxRx(DRV8316C_Handle_t *hdrv,
 /* Public Function Implementations                                       */
 /*=======================================================================*/
 
-/**
- * @brief  Initializes the DRV8316C handle.
- */
 void DRV8316C_Init(DRV8316C_Handle_t *hdrv, SPI_HandleTypeDef *hspi,
-		GPIO_TypeDef *nCS_Port, uint16_t nCS_Pin) {
+		GPIO_TypeDef *nCS_Port, uint16_t nCS_Pin, GPIO_TypeDef *nFAULT_Port,
+		uint16_t nFAULT_Pin, GPIO_TypeDef *DRVOFF_Port, uint16_t DRVOFF_Pin,
+		TIM_HandleTypeDef *htim, uint32_t u_channel, uint32_t v_channel,
+		uint32_t w_channel) {
 	hdrv->hspi = hspi;
 	hdrv->nCS_Port = nCS_Port;
 	hdrv->nCS_Pin = nCS_Pin;
 
-	// Set initial pin states
-	DRV8316C_CS_HIGH(hdrv);  // nCS starts inactive (HIGH)
+	hdrv->nFAULT_Port = nFAULT_Port;
+	hdrv->nFAULT_Pin = nFAULT_Pin;
+
+	hdrv->DRVOFF_Port = DRVOFF_Port;
+	hdrv->DRVOFF_Pin = DRVOFF_Pin;
+
+	hdrv->htim = htim;
+	hdrv->U_CHANNEL = u_channel;
+	hdrv->V_CHANNEL = v_channel;
+	hdrv->W_CHANNEL = w_channel;
+
+	DRV8316C_CS_HIGH(hdrv);
 }
 
 /**
- * @brief  Writes 8 bits of data to a specific DRV8316C register.
+ * @brief  Writes 16-bit frame with CORRECT Bit Packing
  */
 HAL_StatusTypeDef DRV8316C_WriteRegister(DRV8316C_Handle_t *hdrv,
 		uint8_t regAddr, uint8_t data) {
-	uint16_t frame_16bit = 0;
-	uint8_t tx_buff[2] = { 0 };
-	uint8_t rx_buff[2] = { 0 };
+	uint16_t tx_frame = 0;
+	uint16_t rx_frame = 0;
 
-	// 1. Construct the 16-bit frame first (R/W=0, Addr, Data)
-	frame_16bit = DRV_SPI_WRITE_MASK
-			| ((regAddr << DRV_SPI_ADDR_SHIFT) & DRV_SPI_ADDR_MASK)
-			| (data & DRV_SPI_DATA_MASK);
+	// 1. 프레임 생성 (Write=0, Address Shift=9, Data)
+	// [중요] 기존 코드의 shift 8이나 mask 문제를 해결
+	tx_frame = ((uint16_t) (regAddr & 0x3F) << DRV_ADDR_SHIFT)
+			| (data & DRV_DATA_MASK);
 
-	// 2. Calculate and set the even parity bit
-	if (DRV8316C_CalculateEvenParity(frame_16bit)) {
-		frame_16bit |= DRV_SPI_PARITY_BIT;
+	// 2. 패리티 계산 및 삽입 (Bit 8)
+	if (DRV8316C_CalculateEvenParity(tx_frame)) {
+		tx_frame |= DRV_PARITY_BIT;
 	}
 
-	// 3. Split 16-bit frame into two 8-bit bytes (MSB First)
-	tx_buff[0] = (uint8_t) ((frame_16bit >> 8) & 0xFF); // Upper byte
-	tx_buff[1] = (uint8_t) (frame_16bit & 0xFF);        // Lower byte
-
-	// 4. Transmit 2 bytes
-	return DRV8316C_SPI_TxRx(hdrv, tx_buff, rx_buff);
+	// 3. 전송
+	return DRV8316C_SPI_TxRx(hdrv, &tx_frame, &rx_frame);
 }
 
 /**
- * @brief  Reads 8 bits of data from a specific DRV8316C register.
+ * @brief  Reads 16-bit frame with CORRECT Bit Packing
  */
 HAL_StatusTypeDef DRV8316C_ReadRegister(DRV8316C_Handle_t *hdrv,
 		uint8_t regAddr, uint8_t *pData) {
-	uint16_t frame_16bit = 0;
-	uint8_t tx_buff[2] = { 0 };
-	uint8_t rx_buff[2] = { 0 };
+	uint16_t tx_frame = 0;
+	uint16_t rx_frame = 0;
 	HAL_StatusTypeDef status;
 
-	// 1. Construct the read frame with R/W=1 and address
-	frame_16bit = DRV_SPI_READ_MASK
-			| ((regAddr << DRV_SPI_ADDR_SHIFT) & DRV_SPI_ADDR_MASK);
+	// 1. Read 프레임 생성 (Read=1, Address Shift=9)
+	tx_frame = DRV_RW_READ_BIT
+			| ((uint16_t) (regAddr & 0x3F) << DRV_ADDR_SHIFT);
 
-	// 2. Calculate and set the even parity bit
-	if (DRV8316C_CalculateEvenParity(frame_16bit)) {
-		frame_16bit |= DRV_SPI_PARITY_BIT;
+	// 2. 패리티 계산 및 삽입
+	if (DRV8316C_CalculateEvenParity(tx_frame)) {
+		tx_frame |= DRV_PARITY_BIT;
 	}
 
-	// 3. Split into bytes (MSB First)
-	tx_buff[0] = (uint8_t) ((frame_16bit >> 8) & 0xFF);
-	tx_buff[1] = (uint8_t) (frame_16bit & 0xFF);
-
-	// 4. Transmit/Receive 2 bytes
-	status = DRV8316C_SPI_TxRx(hdrv, tx_buff, rx_buff);
+	// 3. 전송 및 수신
+	status = DRV8316C_SPI_TxRx(hdrv, &tx_frame, &rx_frame);
 
 	if (status == HAL_OK) {
-		// 5. Reconstruct 16-bit received frame from 2 bytes
-		uint16_t rx_frame = ((uint16_t) rx_buff[0] << 8) | rx_buff[1];
-
-		// The lower 8 bits of the received frame contain the data
-		*pData = (rx_frame & DRV_SPI_DATA_MASK);
+		// 4. 데이터 추출 (하위 8비트)
+		*pData = (uint8_t) (rx_frame & DRV_DATA_MASK);
 	}
 
 	return status;
 }
 
-// ... (나머지 Unlock, Lock, ApplyDefault, Verify 함수는 그대로 유지) ...
-// ... (Helper 함수인 DRV8316C_SPI_TxRx가 바뀌었으므로 이 함수들을 호출하는 상위 로직은 수정 불필요) ...
-// ... (아래는 참고용으로 변경된 부분이 없는 함수들입니다. 파일에 그대로 두시면 됩니다.) ...
-
+// ... (Unlock, Lock, ApplyDefault 등 나머지 함수는 변경 없음) ...
 HAL_StatusTypeDef DRV8316C_UnlockRegister(DRV8316C_Handle_t *hdrv) {
 	return DRV8316C_WriteRegister(hdrv, 0x3, 0x3);
 }
@@ -148,24 +155,25 @@ HAL_StatusTypeDef DRV8316C_UnlockRegister(DRV8316C_Handle_t *hdrv) {
 HAL_StatusTypeDef DRV8316C_LockRegister(DRV8316C_Handle_t *hdrv) {
 	return DRV8316C_WriteRegister(hdrv, 0x3, 0x6);
 }
-
+// (나머지 함수들도 그대로 두시면 됩니다)
 HAL_StatusTypeDef DRV8316C_ApplyDefaultConfig(DRV8316C_Handle_t *hdrv) {
-	// (이전 코드와 동일, 내부에서 WriteRegister를 호출하므로 자동 적용됨)
 	HAL_StatusTypeDef status;
 	uint8_t reg_val;
 
 	reg_val = DRV_CTRL2_SDO_MODE_PP | DRV_CTRL2_SLEW_125V_us
-			| DRV_CTRL2_PWM_MODE_3X;
+			| DRV_CTRL2_PWM_MODE_3X | DRV_CTRL2_CLR_FLT_BIT;
 	status = DRV8316C_WriteRegister(hdrv, DRV_REG_CTRL_2, reg_val);
 	if (status != HAL_OK)
 		return status;
 
-	reg_val = (1 << 2) | (1 << 0);
+	reg_val = DRV_CTRL3_PWM_100_DUTY_40KHZ | DRV_CTRL3_OVP_SEL_22V
+			| DRV_CTRL3_OVP_EN | DRV_CTRL3_SPI_FLT_REP | DRV_CTRL3_OTW_REP;
 	status = DRV8316C_WriteRegister(hdrv, DRV_REG_CTRL_3, reg_val);
 	if (status != HAL_OK)
 		return status;
 
-	reg_val = DRV_CTRL4_OCP_MODE_RETRY | DRV_CTRL4_OCP_LVL_16A | (1 << 4);
+	reg_val = DRV_CTRL4_OCP_MODE_RETRY | DRV_CTRL4_OCP_LVL_16A
+			| DRV_CTRL4_OCP_DEG_0_6us;
 	status = DRV8316C_WriteRegister(hdrv, DRV_REG_CTRL_4, reg_val);
 	if (status != HAL_OK)
 		return status;
@@ -176,23 +184,22 @@ HAL_StatusTypeDef DRV8316C_ApplyDefaultConfig(DRV8316C_Handle_t *hdrv) {
 	if (status != HAL_OK)
 		return status;
 
-	reg_val = 0x13;
+	reg_val =
+	DRV_CTRL6_BUCK_PS_DIS | DRV_CTRL6_BUCK_SEL_5V | DRV_CTRL6_BUCK_DIS;
 	status = DRV8316C_WriteRegister(hdrv, DRV_REG_CTRL_6, reg_val);
 
 	return status;
 }
 
 HAL_StatusTypeDef DRV8316C_ClearFaults(DRV8316C_Handle_t *hdrv) {
-	// (이전 코드와 동일)
-	HAL_StatusTypeDef status;
-	uint8_t unlock_val = 0x03;
-	status = DRV8316C_WriteRegister(hdrv, DRV_REG_CTRL_1, unlock_val);
-	if (status != HAL_OK)
-		return status;
-
-	uint8_t reg_val = DRV_CTRL2_SDO_MODE_PP | DRV_CTRL2_SLEW_125V_us
-			| DRV_CTRL2_PWM_MODE_3X | DRV_CTRL2_CLR_FLT_BIT;
-	return DRV8316C_WriteRegister(hdrv, DRV_REG_CTRL_2, reg_val);
+//	// (이전 코드와 동일)
+//	DRV8316C_UnlockRegister(hdrv);
+//	uint8_t reg_val = DRV_CTRL2_SDO_MODE_PP | DRV_CTRL2_SLEW_125V_us
+//			| DRV_CTRL2_PWM_MODE_3X | DRV_CTRL2_CLR_FLT_BIT;
+//	return DRV8316C_WriteRegister(hdrv, DRV_REG_CTRL_2, reg_val);
+//	DRV8316C_LockRegister(hdrv);
+	UNUSED(hdrv);
+	return HAL_OK;
 }
 
 DRV8316C_REG_Typedef DRV8316C_VerifyConfig(DRV8316C_Handle_t *hdrv) {
@@ -207,12 +214,14 @@ DRV8316C_REG_Typedef DRV8316C_VerifyConfig(DRV8316C_Handle_t *hdrv) {
 	if (status != REG_OK || read_val != expected_val)
 		return REG_FAULT_CTRL2;
 
-	expected_val = (1 << 2) | (1 << 0);
+	expected_val = DRV_CTRL3_PWM_100_DUTY_40KHZ | DRV_CTRL3_OVP_SEL_22V
+			| DRV_CTRL3_OVP_EN | DRV_CTRL3_SPI_FLT_REP | DRV_CTRL3_OTW_REP;
 	status = DRV8316C_ReadRegister(hdrv, DRV_REG_CTRL_3, &read_val);
 	if (status != REG_OK || read_val != expected_val)
 		return REG_FAULT_CTRL3;
 
-	expected_val = DRV_CTRL4_OCP_MODE_RETRY | DRV_CTRL4_OCP_LVL_16A | (1 << 4);
+	expected_val = DRV_CTRL4_OCP_MODE_RETRY | DRV_CTRL4_OCP_LVL_16A
+			| DRV_CTRL4_OCP_DEG_0_6us;
 	status = DRV8316C_ReadRegister(hdrv, DRV_REG_CTRL_4, &read_val);
 	if (status != REG_OK || read_val != expected_val)
 		return REG_FAULT_CTRL4;
@@ -223,7 +232,8 @@ DRV8316C_REG_Typedef DRV8316C_VerifyConfig(DRV8316C_Handle_t *hdrv) {
 	if (status != REG_OK || read_val != expected_val)
 		return REG_FAULT_CTRL5;
 
-	expected_val = 1;
+	expected_val = DRV_CTRL6_BUCK_PS_DIS | DRV_CTRL6_BUCK_SEL_5V
+			| DRV_CTRL6_BUCK_DIS;
 	status = DRV8316C_ReadRegister(hdrv, DRV_REG_CTRL_6, &read_val);
 	if (status != REG_OK || read_val != expected_val)
 		return REG_FAULT_CTRL6;
@@ -231,48 +241,51 @@ DRV8316C_REG_Typedef DRV8316C_VerifyConfig(DRV8316C_Handle_t *hdrv) {
 	return REG_OK;
 }
 
-void MX_DRV8316C_Init() {
-	HAL_GPIO_WritePin(MTR_nSLEEP_GPIO_Port, MTR_nSLEEP_Pin, GPIO_PIN_SET);
-	HAL_Delay(10);
-
-	DRV8316C_Init(&DRV8316C_L, DRV8316C_SPI, MTR_L_CS_GPIO_Port, MTR_L_CS_Pin);
-	DRV8316C_Init(&DRV8316C_R, DRV8316C_SPI, MTR_R_CS_GPIO_Port, MTR_R_CS_Pin);
-
-	DRV8316C_UnlockRegister(&DRV8316C_L);
-	DRV8316C_UnlockRegister(&DRV8316C_R);
-
-	DRV8316C_ApplyDefaultConfig(&DRV8316C_L);
-	DRV8316C_ApplyDefaultConfig(&DRV8316C_R);
-
-	DRV8316C_LockRegister(&DRV8316C_L);
-	DRV8316C_LockRegister(&DRV8316C_R);
-
-	if (DRV8316C_VerifyConfig(&DRV8316C_L) != REG_OK) {
-		TRIG_OFF;
+void Test_DRV8316C_Read_Status(DRV8316C_Handle_t *hdrv) {
+	uint8_t status;
+	LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, " nFAULT: %d",
+			HAL_GPIO_ReadPin(hdrv->nFAULT_Port, hdrv->nFAULT_Pin));
+	DRV8316C_ReadRegister(hdrv, DRV_REG_IC_STATUS, &status);
+	LCD_Printf(0, 2, ST7789_WHITE, ST7789_BLACK, "IC STATUS: %02X (%02X)",
+			status, 0x00);
+	DRV8316C_ReadRegister(hdrv, DRV_REG_STATUS_1, &status);
+	LCD_Printf(0, 3, ST7789_WHITE, ST7789_BLACK, "STATUS 1: %02X (%02X)",
+			status, 0x00);
+	DRV8316C_ReadRegister(hdrv, DRV_REG_STATUS_2, &status);
+	LCD_Printf(0, 4, ST7789_WHITE, ST7789_BLACK, "STATUS 2: %02X (%02X)",
+			status, 0x80);
+	while (1) {
+		DRV8316C_ReadRegister(hdrv, DRV_REG_CTRL_1, &status);
+		LCD_Printf(0, 5, ST7789_WHITE, ST7789_BLACK, "CTRL 1: %02X (06)",
+				status);
+		DRV8316C_ReadRegister(hdrv, DRV_REG_CTRL_2, &status);
+		LCD_Printf(0, 6, ST7789_WHITE, ST7789_BLACK, "CTRL 2: %02X (%02X)",
+				status,
+				DRV_CTRL2_SDO_MODE_PP | DRV_CTRL2_SLEW_125V_us
+						| DRV_CTRL2_PWM_MODE_3X);
+		DRV8316C_ReadRegister(hdrv, DRV_REG_CTRL_3, &status);
+		LCD_Printf(0, 7, ST7789_WHITE, ST7789_BLACK, "CTRL 3: %02X (%02X)",
+				status,
+				DRV_CTRL3_PWM_100_DUTY_40KHZ | DRV_CTRL3_OVP_SEL_22V
+						| DRV_CTRL3_OVP_EN | DRV_CTRL3_SPI_FLT_REP
+						| DRV_CTRL3_OTW_REP);
+		HAL_Delay(2000);
+		DRV8316C_ReadRegister(hdrv, DRV_REG_CTRL_4, &status);
+		LCD_Printf(0, 5, ST7789_WHITE, ST7789_BLACK, "CTRL 4: %02X (%02X)",
+				status,
+				DRV_CTRL4_OCP_MODE_RETRY | DRV_CTRL4_OCP_LVL_16A
+						| DRV_CTRL4_OCP_DEG_0_6us);
+		DRV8316C_ReadRegister(hdrv, DRV_REG_CTRL_5, &status);
+		LCD_Printf(0, 6, ST7789_WHITE, ST7789_BLACK, "CTRL 5: %02X (%02X)",
+				status,
+				DRV_CTRL5_CSA_GAIN_0_6 | DRV_CTRL5_EN_ASR_BIT
+						| DRV_CTRL5_EN_AAR_BIT);
+		DRV8316C_ReadRegister(hdrv, DRV_REG_CTRL_6, &status);
+		LCD_Printf(0, 7, ST7789_WHITE, ST7789_BLACK, "CTRL 6: %02X (%02X)",
+				status,
+				DRV_CTRL6_BUCK_PS_DIS | DRV_CTRL6_BUCK_SEL_5V
+						| DRV_CTRL6_BUCK_DIS);
+		HAL_Delay(2000);
 	}
-	if (DRV8316C_VerifyConfig(&DRV8316C_R) != REG_OK) {
-		TRIG_OFF;
-	}
-}
-
-void Test_DRV8316C_Read_Status() {
-	uint8_t ic_status;
-	uint8_t status1;
-	uint8_t status2;
-
-	DRV8316C_ReadRegister(&DRV8316C_L, DRV_REG_IC_STATUS, &ic_status);
-	LCD_Printf(0, 2, ST7789_WHITE, ST7789_BLACK, "L IC: %02X (80)", ic_status);
-	DRV8316C_ReadRegister(&DRV8316C_L, DRV_REG_STATUS_1, &status1);
-	LCD_Printf(0, 3, ST7789_WHITE, ST7789_BLACK, "L S1: %02X (00)", status1);
-	DRV8316C_ReadRegister(&DRV8316C_L, DRV_REG_STATUS_2, &status2);
-	LCD_Printf(0, 4, ST7789_WHITE, ST7789_BLACK, "L S2: %02X (00)", status2);
-
-	DRV8316C_ReadRegister(&DRV8316C_R, DRV_REG_IC_STATUS, &ic_status);
-	LCD_Printf(0, 5, ST7789_WHITE, ST7789_BLACK, "R IC: %02X (80)", ic_status);
-	DRV8316C_ReadRegister(&DRV8316C_R, DRV_REG_STATUS_1, &status1);
-	LCD_Printf(0, 6, ST7789_WHITE, ST7789_BLACK, "R S1: %02X (00)", status1);
-	DRV8316C_ReadRegister(&DRV8316C_R, DRV_REG_STATUS_2, &status2);
-	LCD_Printf(0, 7, ST7789_WHITE, ST7789_BLACK, "R S2: %02X (00)", status2);
-
 }
 
