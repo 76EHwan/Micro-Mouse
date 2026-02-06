@@ -62,7 +62,7 @@ void MX_User_Init() {
 	}
 	HAL_Delay(10);
 	if ((reg_status = DRV8316C_VerifyConfig(&DRV8316C_L)) != REG_OK) {
-		sprintf(error_log, "DRV8316C LEFT CONFIG %d ERROR!", reg_status);
+		sprintf(error_log, "DRV8316C LEFT CONFIG %d!", reg_status);
 	}
 #endif
 
@@ -89,7 +89,7 @@ void MX_User_Init() {
 	}
 	HAL_Delay(10);
 	if ((reg_status = DRV8316C_VerifyConfig(&DRV8316C_R)) != REG_OK) {
-		sprintf(error_log, "DRV8316C RIGHT CONFIG %d ERROR!", reg_status);
+		sprintf(error_log, "DRV8316C RIGHT CONFIG %d!", reg_status);
 	}
 #endif
 

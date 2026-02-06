@@ -8,6 +8,8 @@
 #ifndef SENSOR_H_
 #define SENSOR_H_
 
-void ADC_Battery_Start();
+void ADC1_Start();
+
+void Calc_DRV8316C_Current();
 
 #endif /* SENSOR_H_ */

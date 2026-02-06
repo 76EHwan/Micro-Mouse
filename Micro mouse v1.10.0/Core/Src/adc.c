@@ -22,6 +22,7 @@
 
 /* USER CODE BEGIN 0 */
 #include "foc.h"
+#include "drv8316crq1.h"
 
 uint32_t adc1_buffer[7];
 float vbattery;
@@ -86,7 +87,7 @@ void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_0;
+  sConfig.Channel = ADC_CHANNEL_10;
   sConfig.Rank = ADC_REGULAR_RANK_2;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -95,7 +96,7 @@ void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_1;
+  sConfig.Channel = ADC_CHANNEL_11;
   sConfig.Rank = ADC_REGULAR_RANK_3;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -104,7 +105,7 @@ void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_14;
+  sConfig.Channel = ADC_CHANNEL_12;
   sConfig.Rank = ADC_REGULAR_RANK_4;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -113,7 +114,7 @@ void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_10;
+  sConfig.Channel = ADC_CHANNEL_0;
   sConfig.Rank = ADC_REGULAR_RANK_5;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -122,7 +123,7 @@ void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_11;
+  sConfig.Channel = ADC_CHANNEL_1;
   sConfig.Rank = ADC_REGULAR_RANK_6;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -131,7 +132,7 @@ void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_12;
+  sConfig.Channel = ADC_CHANNEL_14;
   sConfig.Rank = ADC_REGULAR_RANK_7;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -253,12 +254,12 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
     PA1     ------> ADC1_INP1
     PA2     ------> ADC1_INP14
     */
-    GPIO_InitStruct.Pin = SOA_R_Pin|SOB_R_Pin|SOC_R_Pin|ADC_BAT_Pin;
+    GPIO_InitStruct.Pin = SOA_L_Pin|SOB_L_Pin|SOC_L_Pin|ADC_BAT_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-    GPIO_InitStruct.Pin = SOA_RA0_Pin|SOB_RA1_Pin|SOC_RA2_Pin;
+    GPIO_InitStruct.Pin = SOA_R_Pin|SOB_R_Pin|SOC_R_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -281,7 +282,6 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
     NodeConfig.TriggerConfig.TriggerPolarity = DMA_TRIG_POLARITY_MASKED;
     NodeConfig.DataHandlingConfig.DataExchange = DMA_EXCHANGE_NONE;
     NodeConfig.DataHandlingConfig.DataAlignment = DMA_DATA_RIGHTALIGN_ZEROPADDED;
-    NodeConfig.DataSize = 28;
     if (HAL_DMAEx_List_BuildNode(&NodeConfig, &Node_GPDMA1_Channel0) != HAL_OK)
     {
       Error_Handler();
@@ -376,9 +376,9 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
     PA1     ------> ADC1_INP1
     PA2     ------> ADC1_INP14
     */
-    HAL_GPIO_DeInit(GPIOC, SOA_R_Pin|SOB_R_Pin|SOC_R_Pin|ADC_BAT_Pin);
+    HAL_GPIO_DeInit(GPIOC, SOA_L_Pin|SOB_L_Pin|SOC_L_Pin|ADC_BAT_Pin);
 
-    HAL_GPIO_DeInit(GPIOA, SOA_RA0_Pin|SOB_RA1_Pin|SOC_RA2_Pin);
+    HAL_GPIO_DeInit(GPIOA, SOA_R_Pin|SOB_R_Pin|SOC_R_Pin);
 
     /* ADC1 DMA DeInit */
     HAL_DMA_DeInit(adcHandle->DMA_Handle);
@@ -412,23 +412,10 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 }
 
 /* USER CODE BEGIN 1 */
+
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
-//    if (hadc->Instance == ADC1) {
-//        // DMA 버퍼에서 최신 값 복사
-//        focR.adc_raw_u = adc_buffer[0]; // PC0 (SOA_R)
-//        focR.adc_raw_v = adc_buffer[1]; // PC1 (SOB_R)
-//        focR.adc_raw_w = adc_buffer[2]; // PC2 (SOC_R)
-//
-//        focL.adc_raw_u = adc_buffer[3]; // PA0 (SOA_L)
-//        focL.adc_raw_v = adc_buffer[4]; // PA1 (SOB_L)
-//        focL.adc_raw_w = adc_buffer[5]; // PA2 (SOC_L)
-//
-//        // FOC 계산 실행
-//        FOC_Update(&focL);
-//        FOC_Update(&focR);
-//    }
 	if(hadc->Instance == ADC1) {
-		vbattery = adc1_buffer[0] * 4.f * 3.3f / 1.f / (1 << 12);
+		vbattery = adc1_buffer[0] * 4.f * 3.3f / (1<<12);
 	}
 }
 /* USER CODE END 1 */

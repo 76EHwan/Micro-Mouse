@@ -175,6 +175,9 @@ typedef struct
     uint32_t V_CHANNEL;
     uint32_t W_CHANNEL;
 
+    float u_current;
+    float v_current;
+    float w_current;
 } DRV8316C_Handle_t;
 
 extern DRV8316C_Handle_t DRV8316C_L;

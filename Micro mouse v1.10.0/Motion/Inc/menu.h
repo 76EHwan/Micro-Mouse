@@ -24,6 +24,9 @@ void Show_Battery(void);
 
 void Show_IMU(void);
 
+void Show_Current(void);
+
+
 #ifdef __cplusplus
 }
 #endif
