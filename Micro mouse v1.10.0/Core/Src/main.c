@@ -137,6 +137,7 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	ADC1_Start();
+	ADC2_Start();
 	IMU_Start();
 	while (1) {
     /* USER CODE END WHILE */
@@ -146,6 +147,7 @@ int main(void)
 		Show_Battery();
 		Show_IMU();
 		Show_Current();
+		Show_IR();
 	}
   /* USER CODE END 3 */
 }

@@ -38,6 +38,7 @@ extern ADC_HandleTypeDef hadc2;
 
 /* USER CODE BEGIN Private defines */
 extern uint32_t adc1_buffer[7];
+extern uint32_t adc2_buffer[4];
 extern float vbattery;
 /* USER CODE END Private defines */
 

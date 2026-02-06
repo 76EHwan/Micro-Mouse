@@ -18,6 +18,11 @@ void ADC1_Start() {
 	HAL_ADC_Start_DMA(&hadc1, adc1_buffer, 7);
 }
 
+void ADC2_Start() {
+	HAL_ADCEx_Calibration_Start(&hadc2, ADC_SINGLE_ENDED);
+	HAL_ADC_Start_DMA(&hadc2, adc2_buffer, 4);
+}
+
 __STATIC_INLINE float Convert_DRV8316C_ADC_To_Current(uint32_t adc_data) {
 	int32_t voltage_measured = adc_data - CURRENT_OFFSET_RAW;
 	return voltage_measured * CURRENT_CONV_FACTOR;

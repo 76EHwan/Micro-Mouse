@@ -26,6 +26,7 @@ void Show_IMU(void);
 
 void Show_Current(void);
 
+void Show_IR(void);
 
 #ifdef __cplusplus
 }

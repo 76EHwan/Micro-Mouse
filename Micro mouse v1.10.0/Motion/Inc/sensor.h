@@ -9,6 +9,7 @@
 #define SENSOR_H_
 
 void ADC1_Start();
+void ADC2_Start();
 
 void Calc_DRV8316C_Current();
 
