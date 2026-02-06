@@ -269,8 +269,8 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
     NodeConfig.Init.Request = GPDMA1_REQUEST_ADC1;
     NodeConfig.Init.BlkHWRequest = DMA_BREQ_SINGLE_BURST;
     NodeConfig.Init.Direction = DMA_PERIPH_TO_MEMORY;
-    NodeConfig.Init.SrcInc = DMA_SINC_INCREMENTED;
-    NodeConfig.Init.DestInc = DMA_DINC_FIXED;
+    NodeConfig.Init.SrcInc = DMA_SINC_FIXED;
+    NodeConfig.Init.DestInc = DMA_DINC_INCREMENTED;
     NodeConfig.Init.SrcDataWidth = DMA_SRC_DATAWIDTH_WORD;
     NodeConfig.Init.DestDataWidth = DMA_DEST_DATAWIDTH_WORD;
     NodeConfig.Init.SrcBurstLength = 1;
@@ -281,6 +281,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
     NodeConfig.TriggerConfig.TriggerPolarity = DMA_TRIG_POLARITY_MASKED;
     NodeConfig.DataHandlingConfig.DataExchange = DMA_EXCHANGE_NONE;
     NodeConfig.DataHandlingConfig.DataAlignment = DMA_DATA_RIGHTALIGN_ZEROPADDED;
+    NodeConfig.DataSize = 28;
     if (HAL_DMAEx_List_BuildNode(&NodeConfig, &Node_GPDMA1_Channel0) != HAL_OK)
     {
       Error_Handler();

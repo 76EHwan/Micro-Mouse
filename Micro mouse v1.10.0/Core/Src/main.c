@@ -145,6 +145,12 @@ int main(void)
 //		Test_DRV8316C_Read_Status(&DRV8316C_R);
 		Show_Battery();
 		Show_IMU();
+		LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "%3.f", adc1_buffer[1]);
+		LCD_Printf(0, 2, ST7789_WHITE, ST7789_BLACK, "%3.f", adc1_buffer[2]);
+		LCD_Printf(0, 3, ST7789_WHITE, ST7789_BLACK, "%3.f", adc1_buffer[3]);
+		LCD_Printf(0, 4, ST7789_WHITE, ST7789_BLACK, "%3.f", adc1_buffer[4]);
+		LCD_Printf(0, 5, ST7789_WHITE, ST7789_BLACK, "%3.f", adc1_buffer[5]);
+		LCD_Printf(0, 6, ST7789_WHITE, ST7789_BLACK, "%3.f", adc1_buffer[6]);
 	}
   /* USER CODE END 3 */
 }
