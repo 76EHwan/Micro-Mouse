@@ -54,3 +54,10 @@ void Drive_TIM7_IRQ() {
 void Drive_First(){
 
 }
+
+void Test_UVW(){
+
+	for(uint8_t i = 0; i < 3; i++){
+
+	}
+}

@@ -15,6 +15,7 @@
 #include "mt6701.h"
 #include "vl53l4cx.h"
 #include "st7789.h"
+#include "foc.h"
 
 #define IMU_EN
 #define DRV8316C_L_EN
@@ -22,6 +23,7 @@
 //#define ENCODER_L_EN
 //#define ENCODER_R_EN
 //#define SENSOR_TOF_EN
+#define FOC_EN
 
 void MX_User_Init() {
 	ST7789_Init();
@@ -109,6 +111,11 @@ void MX_User_Init() {
 		sprintf(error_log, " ToF Init ERROR!");
 		Error_Handler();
 	}
+#endif
+
+#ifdef FOC_EN
+	FOC_Init(&focL, &htim1, &encDataL, TIM_CHANNEL_1, TIM_CHANNEL_2, TIM_CHANNEL_3);
+	FOC_Init(&focR, &htim8, &encDataR, TIM_CHANNEL_1, TIM_CHANNEL_2, TIM_CHANNEL_3);
 #endif
 }
 

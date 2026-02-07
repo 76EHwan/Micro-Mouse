@@ -72,9 +72,9 @@ void SVPWM_Generate(FOC_Handle_t *hfoc, float Valpha, float Vbeta) {
     if(Tc < 0) Tc = 0; else if(Tc > PWM_PERIOD) Tc = PWM_PERIOD;
 
     // 6. Timer CCR 설정
-    __HAL_TIM_SET_COMPARE(hfoc->htim_pwm, hfoc->u_tim_chaennel, (uint32_t)Ta);
-    __HAL_TIM_SET_COMPARE(hfoc->htim_pwm, hfoc->v_tim_chaennel, (uint32_t)Tb);
-    __HAL_TIM_SET_COMPARE(hfoc->htim_pwm, hfoc->w_tim_chaennel, (uint32_t)Tc);
+    __HAL_TIM_SET_COMPARE(hfoc->htim_pwm, hfoc->u_tim_channel, (uint32_t)Ta);
+    __HAL_TIM_SET_COMPARE(hfoc->htim_pwm, hfoc->v_tim_channel, (uint32_t)Tb);
+    __HAL_TIM_SET_COMPARE(hfoc->htim_pwm, hfoc->w_tim_channel, (uint32_t)Tc);
 }
 // --- Public Functions ---
 
@@ -82,9 +82,9 @@ void FOC_Init(FOC_Handle_t *hfoc, TIM_HandleTypeDef *htim, MT6701_Data_t *enc,
 		uint16_t u_tim_channel, uint16_t v_tim_channel, uint16_t w_tim_channel) {
     // Hardware Linking
     hfoc->htim_pwm = htim;
-    hfoc->u_tim_chaennel = u_tim_channel;
-    hfoc->v_tim_chaennel = v_tim_channel;
-    hfoc->w_tim_chaennel = w_tim_channel;
+    hfoc->u_tim_channel = u_tim_channel;
+    hfoc->v_tim_channel = v_tim_channel;
+    hfoc->w_tim_channel = w_tim_channel;
 
     hfoc->encoder = enc;
     hfoc->pole_pairs = POLE_PAIRS;
@@ -100,11 +100,16 @@ void FOC_Init(FOC_Handle_t *hfoc, TIM_HandleTypeDef *htim, MT6701_Data_t *enc,
     hfoc->pid_q.Ki = 0.05f; // 튜닝 필요
     hfoc->pid_q.out_max = VBUS * 0.9f;
     hfoc->pid_q.out_min = -VBUS * 0.9f;
+}
 
-    // PWM Start
-    HAL_TIM_PWM_Start(htim, TIM_CHANNEL_1);
-    HAL_TIM_PWM_Start(htim, TIM_CHANNEL_2);
-    HAL_TIM_PWM_Start(htim, TIM_CHANNEL_3);
+void FOC_Start(FOC_Handle_t *hfoc){
+    HAL_TIM_PWM_Start(hfoc->htim_pwm, hfoc->u_tim_channel);
+    HAL_TIM_PWM_Start(hfoc->htim_pwm, hfoc->v_tim_channel);
+    HAL_TIM_PWM_Start(hfoc->htim_pwm, hfoc->w_tim_channel);
+
+    __HAL_TIM_SET_COMPARE(hfoc->htim_pwm, hfoc->u_tim_channel, 0);
+    __HAL_TIM_SET_COMPARE(hfoc->htim_pwm, hfoc->v_tim_channel, 0);
+    __HAL_TIM_SET_COMPARE(hfoc->htim_pwm, hfoc->w_tim_channel, 0);
 }
 
 // 모터가 정지해 있을 때(0A)의 ADC 값을 읽어 오프셋으로 저장

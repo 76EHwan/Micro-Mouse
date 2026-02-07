@@ -36,6 +36,7 @@
 #include "sensor.h"
 #include "vl53l4cx.h"
 #include "drv8316crq1.h"
+#include "foc.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -138,15 +139,18 @@ int main(void)
 	ADC1_Start();
 	ADC2_Start();
 	IMU_Start();
+	FOC_Start(&focR);
 	while (1) {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-//		Test_DRV8316C_Read_Status(&DRV8316C_R);
-		Show_Battery();
-		Show_IMU();
-		Show_Current();
-		Show_IR();
+		static uint8_t i = 0;
+		static uint16_t current = 100;
+		__HAL_TIM_SET_COMPARE(focR.htim_pwm, focR.u_tim_channel, (i % 3 == 0) ? current : 0);
+		__HAL_TIM_SET_COMPARE(focR.htim_pwm, focR.v_tim_channel, (i % 3 == 1) ? current : 0);
+		__HAL_TIM_SET_COMPARE(focR.htim_pwm, focR.w_tim_channel, (i % 3 == 2) ? current : 0);
+		i = (i + 1) % 3;
+		HAL_Delay(500);
 	}
   /* USER CODE END 3 */
 }
