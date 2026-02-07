@@ -39,16 +39,15 @@ DRV8316C_Handle_t DRV8316C_R;
  */
 static uint8_t DRV8316C_CalculateEvenParity(uint16_t data) {
 	uint8_t one_count = 0;
-	// 패리티 비트 위치(Bit 8)를 제외하고 1의 개수 카운트
-	data &= ~DRV_PARITY_BIT;
+	data &= ~DRV_PARITY_BIT; // 패리티 비트 위치 제외
 
 	for (int i = 0; i < 16; i++) {
 		if ((data >> i) & 0x01) {
 			one_count++;
 		}
 	}
-	// 홀수 개면 1을 반환 (전체를 짝수로 맞춤)
-	return (one_count % 2);
+	// 1의 개수가 짝수이면 1을 반환(총 개수를 홀수로 만듦), 홀수이면 0 반환
+	return !(one_count % 2);
 }
 
 /**
@@ -87,6 +86,7 @@ void DRV8316C_Init(DRV8316C_Handle_t *hdrv, SPI_HandleTypeDef *hspi,
 	hdrv->DRVOFF_Pin = DRVOFF_Pin;
 
 	DRV8316C_CS_HIGH(hdrv);
+	DRV8316C_DRVOFF_LOW(hdrv);
 }
 
 /**
