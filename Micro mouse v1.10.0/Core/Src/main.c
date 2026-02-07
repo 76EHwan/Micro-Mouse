@@ -131,7 +131,9 @@ int main(void)
 	TRIG_OFF;
 	LCD_Printf(0, 0, ST7789_WHITE, ST7789_BLACK, "Hello world!");
 	HAL_Delay(1000);
-
+	HAL_GPIO_WritePin(MTR_L_DRVOFF_GPIO_Port, MTR_L_DRVOFF_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(MTR_R_DRVOFF_GPIO_Port, MTR_R_DRVOFF_Pin, GPIO_PIN_RESET);
+	HAL_Delay(10);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -147,9 +149,10 @@ int main(void)
 		Show_Current();
 		static uint8_t i = 0;
 		static uint16_t current = 2500;
-		__HAL_TIM_SET_COMPARE(focR.htim_pwm, focR.u_tim_channel, (i % 3 == 0) ? current : 0);
-		__HAL_TIM_SET_COMPARE(focR.htim_pwm, focR.v_tim_channel, (i % 3 == 1) ? current : 0);
-		__HAL_TIM_SET_COMPARE(focR.htim_pwm, focR.w_tim_channel, (i % 3 == 2) ? current : 0);
+		focR.htim_pwm->Instance->CCR1 = (i % 3 == 0) ? current : 0;
+		focR.htim_pwm->Instance->CCR2 = (i % 3 == 1) ? current : 0;
+		focR.htim_pwm->Instance->CCR3 = (i % 3 == 2) ? current : 0;
+
 		i = (i + 1) % 3;
 		HAL_Delay(500);
 		TRIG_TOGGLE;

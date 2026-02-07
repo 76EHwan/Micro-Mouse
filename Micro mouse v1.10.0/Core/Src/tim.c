@@ -832,7 +832,7 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if(htim->Instance == TIM3) {
-		FOC_Update(&focL);
+		FOC_Update(&focR);
 	}
 	if (htim->Instance == TIM6) {
 		// 1. 자이로 Z축 데이터 읽기
