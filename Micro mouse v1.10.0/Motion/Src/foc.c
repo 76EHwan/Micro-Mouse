@@ -106,7 +106,8 @@ void FOC_Start(FOC_Handle_t *hfoc){
     HAL_TIM_PWM_Start(hfoc->htim_pwm, hfoc->u_tim_channel);
     HAL_TIM_PWM_Start(hfoc->htim_pwm, hfoc->v_tim_channel);
     HAL_TIM_PWM_Start(hfoc->htim_pwm, hfoc->w_tim_channel);
-
+    HAL_TIM_Base_Start_IT(&htim3);
+    __HAL_TIM_MOE_ENABLE(hfoc->htim_pwm);
     __HAL_TIM_SET_COMPARE(hfoc->htim_pwm, hfoc->u_tim_channel, 0);
     __HAL_TIM_SET_COMPARE(hfoc->htim_pwm, hfoc->v_tim_channel, 0);
     __HAL_TIM_SET_COMPARE(hfoc->htim_pwm, hfoc->w_tim_channel, 0);
@@ -181,5 +182,5 @@ void FOC_Update(FOC_Handle_t *hfoc) {
     float Vbeta  = Vd * s + Vq * c;
 
     // 7. SVPWM Output
-    SVPWM_Generate(hfoc, Valpha, Vbeta);
+//    SVPWM_Generate(hfoc, Valpha, Vbeta);
 }

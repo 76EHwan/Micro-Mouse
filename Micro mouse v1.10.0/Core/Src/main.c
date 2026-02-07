@@ -144,6 +144,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+		Show_Current();
 		static uint8_t i = 0;
 		static uint16_t current = 2500;
 		__HAL_TIM_SET_COMPARE(focR.htim_pwm, focR.u_tim_channel, (i % 3 == 0) ? current : 0);
