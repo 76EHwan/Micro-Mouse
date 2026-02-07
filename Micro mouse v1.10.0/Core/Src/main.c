@@ -107,7 +107,6 @@ int main(void)
   MX_ADC1_Init();
   MX_ADC2_Init();
   MX_FLASH_Init();
-  MX_I2C1_Init();
   MX_I2C2_Init();
   MX_ICACHE_Init();
   MX_LPTIM1_Init();

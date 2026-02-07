@@ -15,6 +15,7 @@
 uint8_t battery_percent;
 
 void Show_Battery() {
+	vbattery = adc1_buffer[0] * 4.f * 3.3f / (1<<12);
 	LCD_Printf(25, 0, ST7789_WHITE, ST7789_BLACK, "%.2f", vbattery);
 }
 

@@ -143,10 +143,10 @@ void Error_Handler(void);
 #define LCD_DC_GPIO_Port GPIOB
 #define LCD_MOSI_Pin GPIO_PIN_5
 #define LCD_MOSI_GPIO_Port GPIOB
-#define TOF_SCL_Pin GPIO_PIN_6
-#define TOF_SCL_GPIO_Port GPIOB
-#define TOF_SDA_Pin GPIO_PIN_7
-#define TOF_SDA_GPIO_Port GPIOB
+#define PT_EN_Pin GPIO_PIN_6
+#define PT_EN_GPIO_Port GPIOB
+#define IR_EN_Pin GPIO_PIN_7
+#define IR_EN_GPIO_Port GPIOB
 #define LCD_BK_Pin GPIO_PIN_8
 #define LCD_BK_GPIO_Port GPIOB
 
