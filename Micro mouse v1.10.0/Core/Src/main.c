@@ -138,23 +138,24 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	ADC1_Start();
-	ADC2_Start();
+//	ADC1_Start();
+//	ADC2_Start();
 	IMU_Start();
-	FOC_Start(&focR);
+//	FOC_Start(&focR);
 	while (1) {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		Show_Current();
-		static uint8_t i = 0;
-		static uint16_t current = 2500;
-		focR.htim_pwm->Instance->CCR1 = (i % 3 == 0) ? current : 0;
-		focR.htim_pwm->Instance->CCR2 = (i % 3 == 1) ? current : 0;
-		focR.htim_pwm->Instance->CCR3 = (i % 3 == 2) ? current : 0;
-
-		i = (i + 1) % 3;
-		HAL_Delay(500);
+//		Show_Current();
+		Test_DRV8316C_Read_Status(&DRV8316C_R);
+//		static uint8_t i = 0;
+//		static uint16_t current = 2500;
+//		focR.htim_pwm->Instance->CCR1 = (i % 3 == 0) ? current : 0;
+//		focR.htim_pwm->Instance->CCR2 = (i % 3 == 1) ? current : 0;
+//		focR.htim_pwm->Instance->CCR3 = (i % 3 == 2) ? current : 0;
+//
+//		i = (i + 1) % 3;
+//		HAL_Delay(500);
 		TRIG_TOGGLE;
 	}
   /* USER CODE END 3 */
