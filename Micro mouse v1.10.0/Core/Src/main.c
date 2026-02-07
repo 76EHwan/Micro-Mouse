@@ -145,7 +145,7 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 		static uint8_t i = 0;
-		static uint16_t current = 500;
+		static uint16_t current = 2500;
 		__HAL_TIM_SET_COMPARE(focR.htim_pwm, focR.u_tim_channel, (i % 3 == 0) ? current : 0);
 		__HAL_TIM_SET_COMPARE(focR.htim_pwm, focR.v_tim_channel, (i % 3 == 1) ? current : 0);
 		__HAL_TIM_SET_COMPARE(focR.htim_pwm, focR.w_tim_channel, (i % 3 == 2) ? current : 0);
