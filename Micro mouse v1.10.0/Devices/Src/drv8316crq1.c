@@ -75,9 +75,7 @@ static HAL_StatusTypeDef DRV8316C_SPI_TxRx(DRV8316C_Handle_t *hdrv,
 
 void DRV8316C_Init(DRV8316C_Handle_t *hdrv, SPI_HandleTypeDef *hspi,
 		GPIO_TypeDef *nCS_Port, uint16_t nCS_Pin, GPIO_TypeDef *nFAULT_Port,
-		uint16_t nFAULT_Pin, GPIO_TypeDef *DRVOFF_Port, uint16_t DRVOFF_Pin,
-		TIM_HandleTypeDef *htim, uint32_t u_channel, uint32_t v_channel,
-		uint32_t w_channel) {
+		uint16_t nFAULT_Pin, GPIO_TypeDef *DRVOFF_Port, uint16_t DRVOFF_Pin) {
 	hdrv->hspi = hspi;
 	hdrv->nCS_Port = nCS_Port;
 	hdrv->nCS_Pin = nCS_Pin;
@@ -87,11 +85,6 @@ void DRV8316C_Init(DRV8316C_Handle_t *hdrv, SPI_HandleTypeDef *hspi,
 
 	hdrv->DRVOFF_Port = DRVOFF_Port;
 	hdrv->DRVOFF_Pin = DRVOFF_Pin;
-
-	hdrv->htim = htim;
-	hdrv->U_CHANNEL = u_channel;
-	hdrv->V_CHANNEL = v_channel;
-	hdrv->W_CHANNEL = w_channel;
 
 	DRV8316C_CS_HIGH(hdrv);
 }

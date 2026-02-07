@@ -72,15 +72,20 @@ void SVPWM_Generate(FOC_Handle_t *hfoc, float Valpha, float Vbeta) {
     if(Tc < 0) Tc = 0; else if(Tc > PWM_PERIOD) Tc = PWM_PERIOD;
 
     // 6. Timer CCR 설정
-    __HAL_TIM_SET_COMPARE(hfoc->htim_pwm, TIM_CHANNEL_1, (uint32_t)Ta);
-    __HAL_TIM_SET_COMPARE(hfoc->htim_pwm, TIM_CHANNEL_2, (uint32_t)Tb);
-    __HAL_TIM_SET_COMPARE(hfoc->htim_pwm, TIM_CHANNEL_3, (uint32_t)Tc);
+    __HAL_TIM_SET_COMPARE(hfoc->htim_pwm, hfoc->u_tim_chaennel, (uint32_t)Ta);
+    __HAL_TIM_SET_COMPARE(hfoc->htim_pwm, hfoc->v_tim_chaennel, (uint32_t)Tb);
+    __HAL_TIM_SET_COMPARE(hfoc->htim_pwm, hfoc->w_tim_chaennel, (uint32_t)Tc);
 }
 // --- Public Functions ---
 
-void FOC_Init(FOC_Handle_t *hfoc, TIM_HandleTypeDef *htim, MT6701_Data_t *enc) {
+void FOC_Init(FOC_Handle_t *hfoc, TIM_HandleTypeDef *htim, MT6701_Data_t *enc,
+		uint16_t u_tim_channel, uint16_t v_tim_channel, uint16_t w_tim_channel) {
     // Hardware Linking
     hfoc->htim_pwm = htim;
+    hfoc->u_tim_chaennel = u_tim_channel;
+    hfoc->v_tim_chaennel = v_tim_channel;
+    hfoc->w_tim_chaennel = w_tim_channel;
+
     hfoc->encoder = enc;
     hfoc->pole_pairs = POLE_PAIRS;
     hfoc->dir = 1;
@@ -104,7 +109,7 @@ void FOC_Init(FOC_Handle_t *hfoc, TIM_HandleTypeDef *htim, MT6701_Data_t *enc) {
 
 // 모터가 정지해 있을 때(0A)의 ADC 값을 읽어 오프셋으로 저장
 void FOC_Calibrate_ADC_Offset(FOC_Handle_t *hfoc) {
-    uint32_t sum_u = 0, sum_v = 0, sum_w = 0;
+    float sum_u = 0, sum_v = 0, sum_w = 0;
     int samples = 100;
 
     for(int i=0; i<samples; i++) {
@@ -116,9 +121,9 @@ void FOC_Calibrate_ADC_Offset(FOC_Handle_t *hfoc) {
         HAL_Delay(1);
     }
 
-    hfoc->offset_iu_adc = (float)sum_u / samples;
-    hfoc->offset_iv_adc = (float)sum_v / samples;
-    hfoc->offset_iw_adc = (float)sum_w / samples;
+    hfoc->offset_iu_adc = sum_u / samples;
+    hfoc->offset_iv_adc = sum_v / samples;
+    hfoc->offset_iw_adc = sum_w / samples;
 }
 
 void FOC_Set_Torque(FOC_Handle_t *hfoc, float iq_target) {
@@ -143,16 +148,15 @@ void FOC_Update(FOC_Handle_t *hfoc) {
     float volts_per_count = ADC_REF_VOLT / ADC_RES;
     float V_adc_u = (hfoc->adc_raw_u - hfoc->offset_iu_adc) * volts_per_count;
     float V_adc_v = (hfoc->adc_raw_v - hfoc->offset_iv_adc) * volts_per_count;
-    // float V_adc_w = (hfoc->adc_raw_w - hfoc->offset_iw_adc) * volts_per_count; // 2션트 사용시 계산으로 대체 가능
+    float V_adc_w = (hfoc->adc_raw_w - hfoc->offset_iw_adc) * volts_per_count; // 2션트 사용시 계산으로 대체 가능
 
     hfoc->Iu = V_adc_u / CSA_GAIN;
     hfoc->Iv = V_adc_v / CSA_GAIN;
-    // Kirchhoff's law: Iu + Iv + Iw = 0 => Iw = -(Iu + Iv)
-    hfoc->Iw = -(hfoc->Iu + hfoc->Iv);
+    hfoc->Iw = V_adc_w / CSA_GAIN;
 
     // 3. Clarke Transform (abc -> alpha,beta)
     hfoc->I_alpha = hfoc->Iu;
-    hfoc->I_beta  = (hfoc->Iu + 2.0f * hfoc->Iv) * SQRT3_INV;
+    hfoc->I_beta  = (hfoc->Iv - hfoc->Iw) * SQRT3_INV;
 
     // 4. Park Transform (alpha,beta -> d,q)
     float s = sinf(hfoc->theta_e);

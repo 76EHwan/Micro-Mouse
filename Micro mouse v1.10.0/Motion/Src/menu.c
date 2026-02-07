@@ -10,7 +10,7 @@
 #include "sensor.h"
 #include "adc.h"
 #include "lsm6ds3tr-c.h"
-#include "drv8316crq1.h"
+#include "foc.h"
 
 uint8_t battery_percent;
 
@@ -27,18 +27,17 @@ void Show_IMU() {
 void Show_Current() {
 	Calc_DRV8316C_Current();
 	LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "L U: %.2f ",
-			DRV8316C_L.u_current);
+			focL.Iu);
 	LCD_Printf(11, 1, ST7789_WHITE, ST7789_BLACK, "V: %.2f ",
-			DRV8316C_L.v_current);
+			focL.Iv);
 	LCD_Printf(20, 1, ST7789_WHITE, ST7789_BLACK, "W: %.2f ",
-			DRV8316C_L.w_current);
+			focL.Iw);
 	LCD_Printf(0, 2, ST7789_WHITE, ST7789_BLACK, "R U: %.2f ",
-			DRV8316C_R.u_current);
+			focR.Iu);
 	LCD_Printf(11, 2, ST7789_WHITE, ST7789_BLACK, "V: %.2f ",
-			DRV8316C_R.v_current);
+			focR.Iv);
 	LCD_Printf(20, 2, ST7789_WHITE, ST7789_BLACK, "W: %.2f ",
-			DRV8316C_R.w_current);
-
+			focR.Iw);
 }
 
 void Show_IR() {

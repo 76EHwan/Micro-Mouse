@@ -170,14 +170,6 @@ typedef struct
     GPIO_TypeDef* nFAULT_Port;
     uint16_t nFAULT_Pin;
 
-    TIM_HandleTypeDef* htim;
-    uint32_t U_CHANNEL;
-    uint32_t V_CHANNEL;
-    uint32_t W_CHANNEL;
-
-    float u_current;
-    float v_current;
-    float w_current;
 } DRV8316C_Handle_t;
 
 extern DRV8316C_Handle_t DRV8316C_L;
@@ -192,8 +184,7 @@ extern DRV8316C_Handle_t DRV8316C_R;
  */
 
 void DRV8316C_Init(DRV8316C_Handle_t *hdrv, SPI_HandleTypeDef *hspi, GPIO_TypeDef *nCS_Port, uint16_t nCS_Pin,
-		 GPIO_TypeDef *nFAULT_Port, uint16_t nFAULT_Pin,  GPIO_TypeDef *DRVOFF_Port, uint16_t DRVOFF_Pin,
-		 TIM_HandleTypeDef *htim, uint32_t u_channel, uint32_t v_channel, uint32_t w_channel);
+		 GPIO_TypeDef *nFAULT_Port, uint16_t nFAULT_Pin,  GPIO_TypeDef *DRVOFF_Port, uint16_t DRVOFF_Pin);
 
 /**
  * @brief  Writes 8 bits of data to a specific DRV8316C register.

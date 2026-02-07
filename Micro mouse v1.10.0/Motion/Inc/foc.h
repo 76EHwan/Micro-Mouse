@@ -35,6 +35,10 @@ typedef struct {
 typedef struct {
     // --- Hardware Links ---
     TIM_HandleTypeDef *htim_pwm;  // PWM Timer Handle (TIM1 or TIM8)
+    uint16_t u_tim_chaennel;
+    uint16_t v_tim_chaennel;
+    uint16_t w_tim_chaennel;
+
     MT6701_Data_t *encoder;       // Encoder Handle
 
     // --- Configuration ---
@@ -73,7 +77,8 @@ extern FOC_Handle_t focL;
 extern FOC_Handle_t focR;
 
 // --- Functions ---
-void FOC_Init(FOC_Handle_t *hfoc, TIM_HandleTypeDef *htim, MT6701_Data_t *enc);
+void FOC_Init(FOC_Handle_t *hfoc, TIM_HandleTypeDef *htim, MT6701_Data_t *enc,
+		uint16_t u_tim_channel, uint16_t v_tim_channel, uint16_t w_tim_channel);
 void FOC_Calibrate_ADC_Offset(FOC_Handle_t *hfoc);
 void FOC_Set_Torque(FOC_Handle_t *hfoc, float iq_target);
 void FOC_Update(FOC_Handle_t *hfoc); // Call this in Timer Interrupt (10kHz+)
