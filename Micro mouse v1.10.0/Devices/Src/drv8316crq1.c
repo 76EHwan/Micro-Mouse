@@ -47,7 +47,7 @@ static uint8_t DRV8316C_CalculateEvenParity(uint16_t data) {
 		}
 	}
 	// 1의 개수가 짝수이면 1을 반환(총 개수를 홀수로 만듦), 홀수이면 0 반환
-	return !(one_count % 2);
+	return one_count % 2;
 }
 
 /**
