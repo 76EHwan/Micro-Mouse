@@ -114,6 +114,7 @@ void FOC_Start(FOC_Handle_t *hfoc){
     __HAL_TIM_SET_COMPARE(hfoc->htim_pwm, hfoc->u_tim_channel, 0);
     __HAL_TIM_SET_COMPARE(hfoc->htim_pwm, hfoc->v_tim_channel, 0);
     __HAL_TIM_SET_COMPARE(hfoc->htim_pwm, hfoc->w_tim_channel, 0);
+    HAL_GPIO_WritePin(MTR_INLx_GPIO_Port, MTR_INLx_Pin, GPIO_PIN_SET);
 }
 
 // 모터가 정지해 있을 때(0A)의 ADC 값을 읽어 오프셋으로 저장

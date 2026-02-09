@@ -140,7 +140,7 @@ int main(void) {
 	ADC1_Start();
 	ADC2_Start();
 	IMU_Start();
-	FOC_Start(&focR);
+	FOC_Start(&focL);
 	while (1) {
 		/* USER CODE END WHILE */
 
@@ -148,41 +148,78 @@ int main(void) {
 //		Test_DRV8316C_Read_Status(&DRV8316C_R);
 		uint8_t ctrl2_val = 0;
 		// 레지스터 읽기 (READ 함수가 정상 동작한다고 가정)
-		DRV8316C_ReadRegister(&DRV8316C_R, DRV_REG_CTRL_2, &ctrl2_val);
+		DRV8316C_ReadRegister(&DRV8316C_L, DRV_REG_CTRL_2, &ctrl2_val);
 
 		// 3x PWM 모드라면 비트 0:1이 '01' 또는 '10'이어야 함.
 		// 0x00(00b) = 6x PWM Mode (현재 증상의 원인)
-		LCD_Printf(0, 4, ST7789_WHITE, ST7789_BLACK, "CTRL2: 0x%02X",
+		LCD_Printf(0, 3, ST7789_WHITE, ST7789_BLACK, "CTRL2: 0x%02X",
 				ctrl2_val);
+		if (ctrl2_val != 0x34) {
+			HAL_GPIO_WritePin(MTR_INLx_GPIO_Port, MTR_INLx_Pin, GPIO_PIN_RESET);
+			DRV8316C_UnlockRegister(&DRV8316C_L);
+			DRV8316C_ApplyDefaultConfig(&DRV8316C_L);
+			DRV8316C_LockRegister(&DRV8316C_L);
+			HAL_GPIO_WritePin(MTR_INLx_GPIO_Port, MTR_INLx_Pin, GPIO_PIN_SET);
+		}
+		DRV8316C_ReadRegister(&DRV8316C_L, DRV_REG_IC_STATUS, &ctrl2_val);
+		LCD_Printf(0, 4, ST7789_WHITE, ST7789_BLACK, "IC: 0x%02X", ctrl2_val);
+		DRV8316C_ReadRegister(&DRV8316C_L, DRV_REG_STATUS_1, &ctrl2_val);
+		LCD_Printf(0, 5, ST7789_WHITE, ST7789_BLACK, "ST2: 0x%02X", ctrl2_val);
+		DRV8316C_ReadRegister(&DRV8316C_L, DRV_REG_STATUS_2, &ctrl2_val);
+		LCD_Printf(0, 6, ST7789_WHITE, ST7789_BLACK, "ST2: 0x%02X", ctrl2_val);
 		static uint8_t step = 0;
-		uint16_t pwm_val = htim8.Instance->ARR; // 힘을 좀 더 강하게 (약 64%)
+		uint16_t pwm_val = htim1.Instance->ARR / 20; // 힘을 좀 더 강하게 (약 64%)
 
 		// 1. 상태 모니터링
-		int fault = HAL_GPIO_ReadPin(MTR_R_nFAULT_GPIO_Port, MTR_R_nFAULT_Pin);
-		uint32_t moe = (TIM1->BDTR & TIM_BDTR_MOE); // MOE 비트 확인
+//		int fault = HAL_GPIO_ReadPin(MTR_L_nFAULT_GPIO_Port, MTR_L_nFAULT_Pin);
+//		uint32_t moe = (TIM8->BDTR & TIM_BDTR_MOE); // MOE 비트 확인
 
 		LCD_Printf(0, 0, ST7789_WHITE, ST7789_BLACK, "MTR Check");
-		LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "FAULT:%d MOE:%d", fault,
-				(moe > 0));
+//		LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "FAULT:%d MOE:%d", fault,
+//				(moe > 0));
 		LCD_Printf(0, 2, ST7789_WHITE, ST7789_BLACK, "Step:%d PWM:%d", step,
 				pwm_val);
 
 		// 2. 강제 3상 스텝 구동 (0.5초마다 이동)
-		if (step == 0) { // U상만 High
-			__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, pwm_val);
-			__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_2, 0);
-			__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_3, 0);
-		} else if (step == 1) { // V상만 High
-			__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 0);
-			__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_2, pwm_val);
-			__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_3, 0);
-		} else { // W상만 High
-			__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 0);
-			__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_2, 0);
-			__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_3, pwm_val);
+		switch (step) {
+		case 0: // [Step 1] U: High / V: Low / W: Low (1 High)
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, pwm_val);
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0);
+			break;
+
+		case 1: // [Step 2] U: High / V: High / W: Low (2 High)
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, pwm_val);
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, pwm_val);
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0);
+			break;
+
+		case 2: // [Step 3] V: High / U: Low / W: Low (1 High)
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, pwm_val);
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0);
+			break;
+
+		case 3: // [Step 4] V: High / W: High / U: Low (2 High)
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, pwm_val);
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, pwm_val);
+			break;
+
+		case 4: // [Step 5] W: High / U: Low / V: Low (1 High)
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, pwm_val);
+			break;
+
+		case 5: // [Step 6] W: High / U: High / V: Low (2 High)
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, pwm_val);
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, pwm_val);
+			break;
 		}
 
-		step = (step + 1) % 3;
+		step = (step + 1) % 6;
 		TRIG_TOGGLE;
 		HAL_Delay(500);
 	}
