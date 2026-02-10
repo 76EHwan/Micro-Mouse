@@ -69,7 +69,18 @@ void PeriphCommonClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void delay_us(uint32_t us) {
+	// 현재 사이클 카운트 저장
+	uint32_t startTick = DWT->CYCCNT;
 
+	// 필요한 사이클 수 계산 (us * (HCLK / 1,000,000))
+	// SystemCoreClock은 현재 MCU의 주파수(Hz)를 담고 있습니다.
+	uint32_t delayTicks = us * (SystemCoreClock / 1000000);
+
+	// 목표 사이클에 도달할 때까지 대기
+	while ((DWT->CYCCNT - startTick) < delayTicks)
+		;
+}
 /* USER CODE END 0 */
 
 /**
@@ -169,11 +180,9 @@ int main(void) {
 		LCD_Printf(0, 6, ST7789_WHITE, ST7789_BLACK, "ST2: 0x%02X", ctrl2_val);
 		static uint8_t step = 0;
 		uint16_t pwm_val = htim8.Instance->ARR / 20; // 힘을 좀 더 강하게 (약 64%)
-//		uint16_t mid = pwm_val / 2; // 전기적 중성점 역할
 
 		// 1. 상태 모니터링
 		int fault = HAL_GPIO_ReadPin(MTR_L_nFAULT_GPIO_Port, MTR_R_nFAULT_Pin);
-//		uint32_t moe = (TIM8->BDTR & TIM_BDTR_MOE); // MOE 비트 확인
 
 		LCD_Printf(0, 0, ST7789_WHITE, ST7789_BLACK, "MTR Check");
 		LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "FAULT:%d", fault);

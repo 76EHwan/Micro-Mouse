@@ -25,7 +25,19 @@
 //#define SENSOR_TOF_EN
 #define FOC_EN
 
+void DWT_Init(void) {
+    // 1. DWT 유닛 활성화 (CoreDebug->DEMCR)
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+
+    // 2. 사이클 카운터 값 초기화
+    DWT->CYCCNT = 0;
+
+    // 3. 사이클 카운터 시작 (DWT->CTRL)
+    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+}
+
 void MX_User_Init() {
+	DWT_Init();
 	ST7789_Init();
 	ST7789_FillScreen(ST7789_BLACK);
 	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);

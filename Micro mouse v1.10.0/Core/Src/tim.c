@@ -18,10 +18,11 @@
  */
 #include "vl53l4cx.h"
 #include "lsm6ds3tr-c.h"
+#include "foc.h"
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "tim.h"
-#include "foc.h"
+
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
