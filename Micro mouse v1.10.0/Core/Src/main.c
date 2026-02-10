@@ -168,51 +168,51 @@ int main(void) {
 		DRV8316C_ReadRegister(&DRV8316C_L, DRV_REG_STATUS_2, &ctrl2_val);
 		LCD_Printf(0, 6, ST7789_WHITE, ST7789_BLACK, "ST2: 0x%02X", ctrl2_val);
 		static uint8_t step = 0;
-		uint16_t pwm_val = htim1.Instance->ARR / 20; // 힘을 좀 더 강하게 (약 64%)
+		uint16_t pwm_val = htim8.Instance->ARR / 20; // 힘을 좀 더 강하게 (약 64%)
+//		uint16_t mid = pwm_val / 2; // 전기적 중성점 역할
 
 		// 1. 상태 모니터링
-//		int fault = HAL_GPIO_ReadPin(MTR_L_nFAULT_GPIO_Port, MTR_L_nFAULT_Pin);
+		int fault = HAL_GPIO_ReadPin(MTR_L_nFAULT_GPIO_Port, MTR_R_nFAULT_Pin);
 //		uint32_t moe = (TIM8->BDTR & TIM_BDTR_MOE); // MOE 비트 확인
 
 		LCD_Printf(0, 0, ST7789_WHITE, ST7789_BLACK, "MTR Check");
-//		LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "FAULT:%d MOE:%d", fault,
-//				(moe > 0));
+		LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "FAULT:%d", fault);
 		LCD_Printf(0, 2, ST7789_WHITE, ST7789_BLACK, "Step:%d PWM:%d", step,
 				pwm_val);
 
 		// 2. 강제 3상 스텝 구동 (0.5초마다 이동)
 		switch (step) {
-		case 0: // [Step 1] U: High / V: Low / W: Low (1 High)
+		case 0: // [Step 1] 0°: U-High (V, W는 Low로 전류가 빠져나감)
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, pwm_val);
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0);
 			break;
 
-		case 1: // [Step 2] U: High / V: High / W: Low (2 High)
+		case 1: // [Step 2] 60°: U-High, V-High
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, pwm_val);
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, pwm_val);
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0);
 			break;
 
-		case 2: // [Step 3] V: High / U: Low / W: Low (1 High)
+		case 2: // [Step 3] 120°: V-High
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, pwm_val);
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0);
 			break;
 
-		case 3: // [Step 4] V: High / W: High / U: Low (2 High)
+		case 3: // [Step 4] 180°: V-High, W-High
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, pwm_val);
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, pwm_val);
 			break;
 
-		case 4: // [Step 5] W: High / U: Low / V: Low (1 High)
+		case 4: // [Step 5] 240°: W-High
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, pwm_val);
 			break;
 
-		case 5: // [Step 6] W: High / U: High / V: Low (2 High)
+		case 5: // [Step 6] 300°: W-High, U-High
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, pwm_val);
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, pwm_val);
@@ -221,7 +221,7 @@ int main(void) {
 
 		step = (step + 1) % 6;
 		TRIG_TOGGLE;
-		HAL_Delay(500);
+		HAL_Delay(100);
 	}
 	/* USER CODE END 3 */
 }
