@@ -8,9 +8,11 @@
 #ifndef SENSOR_H_
 #define SENSOR_H_
 
-void ADC1_Start();
-void ADC2_Start();
+#include "main.h"
 
-void Calc_DRV8316C_Current();
+extern uint16_t sensor_L;
+extern uint16_t sensor_CL;
+extern uint16_t sensor_CR;
+extern uint16_t sensor_R;
 
 #endif /* SENSOR_H_ */

@@ -10,6 +10,7 @@
 
 #include "main.h"
 #include "mt6701.h"
+#include "drv8316crq1.h"
 
 // --- Constants ---
 #define PWM_PERIOD      1000    // Timer Period (ARR + 1), 예: 1000 (TIM1/8 설정에 맞춤)
@@ -40,6 +41,7 @@ typedef struct {
     uint16_t w_tim_channel;
 
     MT6701_Data_t *encoder;       // Encoder Handle
+    DRV8316C_Handle_t *hdrv;
 
     // --- Configuration ---
     float pole_pairs;             // 극쌍수
@@ -78,7 +80,7 @@ extern FOC_Handle_t focL;
 extern FOC_Handle_t focR;
 
 // --- Functions ---
-void FOC_Init(FOC_Handle_t *hfoc, TIM_HandleTypeDef *htim, MT6701_Data_t *enc,
+void FOC_Init(FOC_Handle_t *hfoc, TIM_HandleTypeDef *htim, MT6701_Data_t *enc, DRV8316C_Handle_t *hdrv,
 		uint16_t u_tim_channel, uint16_t v_tim_channel, uint16_t w_tim_channel);
 void FOC_Start(FOC_Handle_t *hfoc);
 void FOC_Calibrate_ADC_Offset(FOC_Handle_t *hfoc);

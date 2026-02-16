@@ -70,7 +70,16 @@ void MX_TIM15_Init(void);
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
 /* USER CODE BEGIN Prototypes */
-
+__weak void TIM1_IRQ_Handle();
+__weak void TIM2_IRQ_Handle();
+__weak void TIM3_IRQ_Handle();
+__weak void TIM4_IRQ_Handle();
+__weak void TIM5_IRQ_Handle();
+__weak void TIM6_IRQ_Handle();
+__weak void TIM7_IRQ_Handle();
+__weak void TIM8_IRQ_Handle();
+__weak void TIM12_IRQ_Handle();
+__weak void TIM15_IRQ_Handle();
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

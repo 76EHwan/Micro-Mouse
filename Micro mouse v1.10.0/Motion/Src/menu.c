@@ -26,21 +26,21 @@ void Show_IMU() {
 
 void Show_Current() {
 	Calc_DRV8316C_Current();
-	LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "L U: %.2f ",
+	LCD_Printf(0, 4, ST7789_WHITE, ST7789_BLACK, "L U: %.2f ",
 			focL.Iu);
-	LCD_Printf(11, 1, ST7789_WHITE, ST7789_BLACK, "V: %.2f ",
+	LCD_Printf(11, 4, ST7789_WHITE, ST7789_BLACK, "V: %.2f ",
 			focL.Iv);
-	LCD_Printf(20, 1, ST7789_WHITE, ST7789_BLACK, "W: %.2f ",
+	LCD_Printf(20, 4, ST7789_WHITE, ST7789_BLACK, "W: %.2f ",
 			focL.Iw);
-	LCD_Printf(0, 2, ST7789_WHITE, ST7789_BLACK, "R U: %.2f ",
+	LCD_Printf(0, 5, ST7789_WHITE, ST7789_BLACK, "R U: %.2f ",
 			focR.Iu);
-	LCD_Printf(11, 2, ST7789_WHITE, ST7789_BLACK, "V: %.2f ",
+	LCD_Printf(11, 5, ST7789_WHITE, ST7789_BLACK, "V: %.2f ",
 			focR.Iv);
-	LCD_Printf(20, 2, ST7789_WHITE, ST7789_BLACK, "W: %.2f ",
+	LCD_Printf(20, 5, ST7789_WHITE, ST7789_BLACK, "W: %.2f ",
 			focR.Iw);
 }
 
 void Show_IR() {
 	LCD_Printf(0, 3, ST7789_WHITE, ST7789_BLACK, "%04X %04X %04X %04X",
-			adc2_buffer[0], adc2_buffer[1], adc2_buffer[2], adc2_buffer[3]);
+			sensor_L, sensor_CL, sensor_CR, sensor_R);
 }
