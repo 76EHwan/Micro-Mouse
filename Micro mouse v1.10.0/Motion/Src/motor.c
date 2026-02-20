@@ -22,7 +22,7 @@ void Simple_6_step_Control(FOC_Handle_t *foc) {
 		HAL_GPIO_WritePin(MTR_INLx_GPIO_Port, MTR_INLx_Pin, GPIO_PIN_SET);
 	}
 	static uint8_t step = 0;
-	uint16_t pwm_val = foc->htim_pwm->Instance->ARR / 20; // 힘을 좀 더 강하게 (약 64%)
+	uint16_t pwm_val = foc->htim_pwm->Instance->ARR / 10; // 힘을 좀 더 강하게 (약 64%)
 
 	// 1. 상태 모니터링
 	int fault = HAL_GPIO_ReadPin(foc->hdrv->nFAULT_Port, foc->hdrv->nFAULT_Pin);

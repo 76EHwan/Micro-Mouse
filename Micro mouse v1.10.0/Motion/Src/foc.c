@@ -208,9 +208,9 @@ void FOC_Update(FOC_Handle_t *hfoc) {
 	float Vbeta = Vd * s + Vq * c;
 
 	// 7. SVPWM Output
-    SVPWM_Generate(hfoc, Valpha, Vbeta);
+//    SVPWM_Generate(hfoc, Valpha, Vbeta);
 }
 
 void TIM3_IRQ_Handle() {
-	FOC_Update(&focR);
+	FOC_Update(&focL);
 }

@@ -24,7 +24,7 @@ typedef struct {
 extern MT6701_Data_t encDataL;
 extern MT6701_Data_t encDataR;
 
-HAL_StatusTypeDef MT6701_Init(MT6701_Data_t *encData);
+HAL_StatusTypeDef MT6701_Init(MT6701_Data_t *encData, uint8_t *rxBuffer);
 void MT6701_ReadSSI(MT6701_Data_t *encData);
 
 #endif /* INC_MT6701_H_ */
