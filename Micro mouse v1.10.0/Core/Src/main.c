@@ -141,7 +141,7 @@ int main(void)
 	TRIG_OFF;
 	LCD_Printf(0, 0, ST7789_WHITE, ST7789_BLACK, "Hello world!");
 	HAL_Delay(1000);
-	ST7789_FillScreen(ST7789_BLACK);
+//	ST7789_FillScreen(ST7789_BLACK);
 	HAL_GPIO_WritePin(MTR_L_DRVOFF_GPIO_Port, MTR_L_DRVOFF_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(MTR_R_DRVOFF_GPIO_Port, MTR_R_DRVOFF_Pin, GPIO_PIN_RESET);
 	HAL_Delay(10);
@@ -149,8 +149,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	ADC1_Start();
-	ADC2_Start();
+	Sensor_Start();
 //	IMU_Start();
 //	HAL_TIM_Base_Start_IT(&htim3);
 //	FOC_Start(&focL);
@@ -158,6 +157,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+		Show_IR();
 //		Simple_6_step_Control(&focL);
 //		Show_Current();
 //		TRIG_TOGGLE;

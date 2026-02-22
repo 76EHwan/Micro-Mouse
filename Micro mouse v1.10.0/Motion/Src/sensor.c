@@ -42,6 +42,7 @@ void TIM6_IRQ_Handle() {
 void TIM15_IRQ_Handle() {
 	HAL_GPIO_WritePin(IR_EN_GPIO_Port, IR_EN_Pin, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(PT_EN_GPIO_Port, PT_EN_Pin, GPIO_PIN_SET);
+	TRIG_TOGGLE;
 }
 
 void ADC2_Callback_Handle() {

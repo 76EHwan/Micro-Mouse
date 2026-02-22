@@ -19,7 +19,7 @@
 #define IMU_EN
 #define DRV8316C_L_EN
 #define DRV8316C_R_EN
-#define ENCODER_L_EN
+//#define ENCODER_L_EN
 //#define ENCODER_R_EN
 //#define SENSOR_TOF_EN
 #define FOC_EN
@@ -106,14 +106,15 @@ void MX_User_Init() {
 
 #ifdef ENCODER_L_EN
 	uint8_t rxBuffer[3] = {0,0,0};
-	if (MT6701_Init(&encDataL, &rxBuffer) != HAL_OK) {
+	if (MT6701_Init(&encDataL, rxBuffer) != HAL_OK) {
 		sprintf(error_log, " %2x %2x %2x", rxBuffer[2], rxBuffer[1], rxBuffer[0]);
 		Error_Handler();
 	}
 #endif
 #ifdef ENCODER_R_EN
-	if (MT6701_Init(&encDataR) != HAL_OK) {
-		sprintf(error_log, " Encoder RIGHT ERROR!");
+	uint8_t rxBuffer[3] = {0,0,0};
+	if (MT6701_Init(&encDataR, rxBuffer) != HAL_OK) {
+		sprintf(error_log, " %2x %2x %2x", rxBuffer[2], rxBuffer[1], rxBuffer[0]);
 		Error_Handler();
 	}
 #endif
