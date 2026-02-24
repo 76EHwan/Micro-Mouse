@@ -26,7 +26,7 @@ uint8_t NewDataReady = 0;
 int no_of_object_found = 0, j;
 
 HAL_StatusTypeDef VL53L4CX_Init(VL53LX_DEV Dev, GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin,
-		uint16_t new_address) {
+		uint16_t new_address, uint8_t i) {
 	Dev->I2cHandle = VL53L4CX_I2C;
 	Dev->I2cDevAddr = VL53LX_SLAVE_ADDRESS_DEFAULT;
 
@@ -36,13 +36,13 @@ HAL_StatusTypeDef VL53L4CX_Init(VL53LX_DEV Dev, GPIO_TypeDef *GPIOx, uint16_t GP
 	HAL_Delay(10);
 	status = VL53LX_WaitDeviceBooted(Dev);
 	if (status != 0) {
-		sprintf(error_log, " ToF Device boot fail");
+		sprintf(error_log, " %dToF Device boot fail", i);
 		Error_Handler();
 		return HAL_ERROR;
 	}
 	status = VL53LX_DataInit(Dev);
 	if (status != 0) {
-		sprintf(error_log, " ToF Data init fail");
+		sprintf(error_log, " %dToF Data init fail", i);
 		Error_Handler();
 		return HAL_ERROR;
 	}
@@ -53,7 +53,11 @@ HAL_StatusTypeDef VL53L4CX_Init(VL53LX_DEV Dev, GPIO_TypeDef *GPIOx, uint16_t GP
 }
 
 HAL_StatusTypeDef MX_VL53L4CX_Init() {
-	VL53L4CX_Init(vl53lx, XSHUT0_GPIO_Port, XSHUT0_Pin, 0x54);
+	VL53L4CX_Init(vl53lx + 0, XSHUT0_GPIO_Port, XSHUT0_Pin, VL53LX_SLAVE_ADDRESS_DEFAULT + 6, 1);
+	VL53L4CX_Init(vl53lx + 1, XSHUT1_GPIO_Port, XSHUT1_Pin, VL53LX_SLAVE_ADDRESS_DEFAULT + 4, 2);
+	VL53L4CX_Init(vl53lx + 2, XSHUT2_GPIO_Port, XSHUT2_Pin, VL53LX_SLAVE_ADDRESS_DEFAULT + 2, 3);
+	VL53L4CX_Init(vl53lx + 3, XSHUT3_GPIO_Port, XSHUT3_Pin, VL53LX_SLAVE_ADDRESS_DEFAULT + 0, 4);
+
 	return HAL_OK;
 }
 
