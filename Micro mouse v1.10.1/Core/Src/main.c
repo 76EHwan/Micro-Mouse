@@ -153,8 +153,10 @@ int main(void)
 
 	while (1) {
     /* USER CODE END WHILE */
-		LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "%d", MultiRangingData[0].RangeData[0].RangeStatus);
-    /* USER CODE BEGIN 3 */
+		LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "D: %d", MultiRangingData[0].RangeData[0].RangeMilliMeter);
+		LCD_Printf(0, 2, ST7789_WHITE, ST7789_BLACK, "S: %d", MultiRangingData[0].RangeData[0].RangeStatus);
+
+		/* USER CODE BEGIN 3 */
 
 	}
   /* USER CODE END 3 */

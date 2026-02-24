@@ -10,7 +10,7 @@
 #include "tim.h"
 #include "error.h"
 
-#define VL53L4CX_I2C &hi2c2
+#define VL53L4CX_I2C &hi2c1
 
 VL53LX_Dev_t dev[VL53L4CX_NUM];
 VL53LX_DEV vl53lx = dev;
