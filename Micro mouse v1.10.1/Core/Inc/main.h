@@ -143,6 +143,10 @@ void delay_us(uint32_t us);
 #define LCD_DC_GPIO_Port GPIOB
 #define LCD_MOSI_Pin GPIO_PIN_5
 #define LCD_MOSI_GPIO_Port GPIOB
+#define ToF_SCL_Pin GPIO_PIN_6
+#define ToF_SCL_GPIO_Port GPIOB
+#define ToF_SDA_Pin GPIO_PIN_7
+#define ToF_SDA_GPIO_Port GPIOB
 #define LCD_BK_Pin GPIO_PIN_8
 #define LCD_BK_GPIO_Port GPIOB
 
