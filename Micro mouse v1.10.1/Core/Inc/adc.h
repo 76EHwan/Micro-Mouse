@@ -1,9 +1,9 @@
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-  * @file    gpdma.h
+  * @file    adc.h
   * @brief   This file contains all the function prototypes for
-  *          the gpdma.c file
+  *          the adc.c file
   ******************************************************************************
   * @attention
   *
@@ -18,8 +18,8 @@
   */
 /* USER CODE END Header */
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __GPDMA_H__
-#define __GPDMA_H__
+#ifndef __ADC_H__
+#define __ADC_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,13 +32,23 @@ extern "C" {
 
 /* USER CODE END Includes */
 
+extern ADC_HandleTypeDef hadc1;
+
 /* USER CODE BEGIN Private defines */
+extern uint32_t adc1_buffer[7];
+extern uint32_t adc2_buffer[4];
+extern float vbattery;
 
 /* USER CODE END Private defines */
 
-void MX_GPDMA1_Init(void);
+void MX_ADC1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
+void ADC1_Start(void);
+void Calc_DRV8316C_Current(void);
+
+__weak void ADC1_Callback_Handle();
+
 
 /* USER CODE END Prototypes */
 
@@ -46,5 +56,5 @@ void MX_GPDMA1_Init(void);
 }
 #endif
 
-#endif /* __GPDMA_H__ */
+#endif /* __ADC_H__ */
 

@@ -39,31 +39,9 @@ void TIM6_IRQ_Handle() {
 		imu_data.Yaw_Angle += 360.0f;
 }
 
-void TIM15_IRQ_Handle() {
-	HAL_GPIO_WritePin(IR_EN_GPIO_Port, IR_EN_Pin, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(PT_EN_GPIO_Port, PT_EN_Pin, GPIO_PIN_SET);
-	TRIG_TOGGLE;
-}
-
-void ADC2_Callback_Handle() {
-	HAL_ADC_Stop_DMA(&hadc2);
-	HAL_GPIO_WritePin(IR_EN_GPIO_Port, IR_EN_Pin, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(PT_EN_GPIO_Port, PT_EN_Pin, GPIO_PIN_RESET);
-
-	sensor_L = (uint16_t) adc2_buffer[0];
-	sensor_CL = (uint16_t) adc2_buffer[1];
-	sensor_CR = (uint16_t) adc2_buffer[2];
-	sensor_R = (uint16_t) adc2_buffer[3];
-
-
-	HAL_ADC_Start_DMA(&hadc2, adc2_buffer, 4);
-	// Calculate_Line_Position();
-}
 
 void Sensor_Start(){
-	ADC2_Start();
-	HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_1);
-	HAL_TIM_Base_Start_IT(&htim15);
+
 }
 
 
