@@ -21,8 +21,11 @@ void Simple_6_step_Control(FOC_Handle_t *foc) {
 		DRV8316C_LockRegister(foc->hdrv);
 		HAL_GPIO_WritePin(MTR_INLx_GPIO_Port, MTR_INLx_Pin, GPIO_PIN_SET);
 	}
-	static uint8_t step = 0;
-	uint16_t pwm_val = foc->htim_pwm->Instance->ARR / 10; // 힘을 좀 더 강하게 (약 64%)
+	DRV8316C_ReadRegister(foc->hdrv, DRV_REG_CTRL_2, &ctrl2_val);
+	LCD_Printf(0, 3, ST7789_WHITE, ST7789_BLACK, "CTRL2: 0x%02X", ctrl2_val);
+
+	static uint8_t step = 1;
+	uint16_t pwm_val = foc->htim_pwm->Instance->ARR / 3 * 2; // 힘을 좀 더 강하게 (약 64%)
 
 	// 1. 상태 모니터링
 	int fault = HAL_GPIO_ReadPin(foc->hdrv->nFAULT_Port, foc->hdrv->nFAULT_Pin);
@@ -71,5 +74,5 @@ void Simple_6_step_Control(FOC_Handle_t *foc) {
 		break;
 	}
 
-	step = (step + 1) % 6;
+//	step = (step + 1) % 6;
 }

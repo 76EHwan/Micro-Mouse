@@ -40,7 +40,7 @@ void Show_Current() {
 			focR.Iw);
 }
 
-void Show_IR() {
-	LCD_Printf(0, 3, ST7789_WHITE, ST7789_BLACK, "%04X %04X %04X %04X",
+void Show_ToF() {
+	LCD_Printf(0, 6, ST7789_WHITE, ST7789_BLACK, "L:%4d CL:%4d CR:%4d R:%4d ",
 			sensor_L, sensor_CL, sensor_CR, sensor_R);
 }

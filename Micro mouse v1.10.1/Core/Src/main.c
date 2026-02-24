@@ -144,39 +144,25 @@ int main(void)
 	HAL_GPIO_WritePin(MTR_L_DRVOFF_GPIO_Port, MTR_L_DRVOFF_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(MTR_R_DRVOFF_GPIO_Port, MTR_R_DRVOFF_Pin, GPIO_PIN_RESET);
 	HAL_Delay(10);
-	VL53L4CX_Start();
 	TRIG_OFF;
+	ADC1_Start();
+	Sensor_Start();
+	FOC_Start(&focL);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
 	while (1) {
+		Sensor_Get_Dist();
+		Show_ToF();
+		Show_Current();
+		Simple_6_step_Control(&focL);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+//		HAL_Delay(100);
 
-		for (uint8_t i = 0; i < VL53L4CX_NUM; i++) {
-			uint8_t dataReady = 0;
-
-			// 1. 데이터가 준비되었는지 확인 (비차단 방식)
-			HAL_StatusTypeDef status = VL53LX_GetMeasurementDataReady(
-					vl53lx + i, &dataReady);
-
-			if ((status == 0) && (dataReady == 1)) {
-				// 2. 준비되었다면 데이터 읽어오기 (MultiRangingData 변수 업데이트)
-				VL53LX_GetMultiRangingData(vl53lx + i, &MultiRangingData[i]);
-
-				// 3. 인터럽트 클리어 (이걸 해야 다음 측정이 시작됩니다!)
-				VL53LX_ClearInterruptAndStartMeasurement(vl53lx + i);
-
-				LCD_Printf(0, i + 1, ST7789_WHITE, ST7789_BLACK,
-						"D: %4d S: %3d",
-						(pMultiRangingData + i)->RangeData[0].RangeMilliMeter,
-						(pMultiRangingData + i)->RangeData[0].RangeStatus);
-			}
-		}
-		LCD_Printf(0, 6, ST7789_WHITE, ST7789_BLACK, "%.4f", encDataL.wheel_angle_deg);
 	}
   /* USER CODE END 3 */
 }

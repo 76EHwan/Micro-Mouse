@@ -23,6 +23,7 @@ MT6701_Data_t encDataR = { .cs_port = ENC_R_CS_GPIO_Port, .cs_pin = ENC_R_CS_Pin
 HAL_StatusTypeDef MT6701_Init(MT6701_Data_t *encData, uint8_t *rxBuffer) {
 //    uint8_t rxBuffer[3] = {0,0,0};
     HAL_GPIO_WritePin(encData->cs_port, encData->cs_pin, GPIO_PIN_RESET);
+    for (volatile int i = 0; i < 200; i++);
     HAL_SPI_Receive(ENC_SPI, rxBuffer, 3, 10);
     HAL_GPIO_WritePin(encData->cs_port, encData->cs_pin, GPIO_PIN_SET);
 

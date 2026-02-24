@@ -15,6 +15,8 @@ extern uint16_t sensor_CL;
 extern uint16_t sensor_CR;
 extern uint16_t sensor_R;
 
+
 void Sensor_Start();
+void Sensor_Get_Dist();
 
 #endif /* SENSOR_H_ */
