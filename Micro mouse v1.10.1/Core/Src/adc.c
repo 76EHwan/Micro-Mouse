@@ -211,7 +211,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
     NodeConfig.Init.BlkHWRequest = DMA_BREQ_SINGLE_BURST;
     NodeConfig.Init.Direction = DMA_PERIPH_TO_MEMORY;
     NodeConfig.Init.SrcInc = DMA_SINC_FIXED;
-    NodeConfig.Init.DestInc = DMA_DINC_FIXED;
+    NodeConfig.Init.DestInc = DMA_DINC_INCREMENTED;
     NodeConfig.Init.SrcDataWidth = DMA_SRC_DATAWIDTH_WORD;
     NodeConfig.Init.DestDataWidth = DMA_DEST_DATAWIDTH_WORD;
     NodeConfig.Init.SrcBurstLength = 1;

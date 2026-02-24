@@ -30,7 +30,6 @@ void Simple_6_step_Control(FOC_Handle_t *foc) {
 	// 1. 상태 모니터링
 	int fault = HAL_GPIO_ReadPin(foc->hdrv->nFAULT_Port, foc->hdrv->nFAULT_Pin);
 
-	LCD_Printf(0, 0, ST7789_WHITE, ST7789_BLACK, "MTR Check");
 	LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "FAULT:%d", fault);
 	LCD_Printf(0, 2, ST7789_WHITE, ST7789_BLACK, "Step:%d PWM:%d", step,
 			pwm_val);
