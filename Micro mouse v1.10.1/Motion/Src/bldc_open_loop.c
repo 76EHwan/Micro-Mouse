@@ -16,7 +16,7 @@
 #define POLE_PAIRS      1.0f
 
 // 2. 배터리 전압 (실제 전압과 비슷하게 설정)
-#define VBUS_VOLTAGE    7.4f
+#define VBUS_VOLTAGE    5.f
 
 // 3. 타이머 주기 (tim.c의 Counter Period 값)
 #define PWM_PERIOD      9999.0f

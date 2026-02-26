@@ -165,8 +165,8 @@ HAL_StatusTypeDef DRV8316C_ApplyDefaultConfig(DRV8316C_Handle_t *hdrv) {
 	if (status != HAL_OK)
 		return status;
 
-	reg_val = DRV_CTRL4_OCP_MODE_RETRY | DRV_CTRL4_OCP_LVL_16A
-			| DRV_CTRL4_OCP_DEG_0_6us;
+	reg_val = DRV_CTRL4_OCP_MODE_RETRY | DRV_CTRL4_OCP_LVL_24A
+			| DRV_CTRL4_OCP_DEG_0_6us | DRV_CTRL4_OCP_MODE_REPORT;
 	status = DRV8316C_WriteRegister(hdrv, DRV_REG_CTRL_4, reg_val);
 	if (status != HAL_OK)
 		return status;
@@ -208,8 +208,8 @@ DRV8316C_REG_Typedef DRV8316C_VerifyConfig(DRV8316C_Handle_t *hdrv) {
 	if (status != REG_OK || read_val != expected_val)
 		return REG_FAULT_CTRL3;
 
-	expected_val = DRV_CTRL4_OCP_MODE_RETRY | DRV_CTRL4_OCP_LVL_16A
-			| DRV_CTRL4_OCP_DEG_0_6us;
+	expected_val = DRV_CTRL4_OCP_MODE_RETRY | DRV_CTRL4_OCP_LVL_24A
+			| DRV_CTRL4_OCP_DEG_0_6us | DRV_CTRL4_OCP_MODE_REPORT;
 	status = DRV8316C_ReadRegister(hdrv, DRV_REG_CTRL_4, &read_val);
 	if (status != REG_OK || read_val != expected_val)
 		return REG_FAULT_CTRL4;
@@ -231,49 +231,49 @@ DRV8316C_REG_Typedef DRV8316C_VerifyConfig(DRV8316C_Handle_t *hdrv) {
 
 void Test_DRV8316C_Read_Status(DRV8316C_Handle_t *hdrv) {
 	uint8_t status;
-	LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, " nFAULT: %d",
-			HAL_GPIO_ReadPin(hdrv->nFAULT_Port, hdrv->nFAULT_Pin));
+//	LCD_Printf(0, 4, ST7789_WHITE, ST7789_BLACK, " nFAULT: %d",
+//			HAL_GPIO_ReadPin(hdrv->nFAULT_Port, hdrv->nFAULT_Pin));
 	DRV8316C_ReadRegister(hdrv, DRV_REG_IC_STATUS, &status);
-	LCD_Printf(0, 2, ST7789_WHITE, ST7789_BLACK, "IC STATUS: %02X (%02X)",
+	LCD_Printf(0, 4, ST7789_WHITE, ST7789_BLACK, "IC STATUS: %02X (%02X)",
 			status, 0x00);
 	DRV8316C_ReadRegister(hdrv, DRV_REG_STATUS_1, &status);
-	LCD_Printf(0, 3, ST7789_WHITE, ST7789_BLACK, "STATUS 1: %02X (%02X)",
+	LCD_Printf(0, 5, ST7789_WHITE, ST7789_BLACK, "STATUS 1: %02X (%02X)",
 			status, 0x00);
 	DRV8316C_ReadRegister(hdrv, DRV_REG_STATUS_2, &status);
-	LCD_Printf(0, 4, ST7789_WHITE, ST7789_BLACK, "STATUS 2: %02X (%02X)",
+	LCD_Printf(0, 6, ST7789_WHITE, ST7789_BLACK, "STATUS 2: %02X (%02X)",
 			status, 0x80);
-	while (1) {
-		DRV8316C_ReadRegister(hdrv, DRV_REG_CTRL_1, &status);
-		LCD_Printf(0, 5, ST7789_WHITE, ST7789_BLACK, "CTRL 1: %02X (06)",
-				status);
-		DRV8316C_ReadRegister(hdrv, DRV_REG_CTRL_2, &status);
-		LCD_Printf(0, 6, ST7789_WHITE, ST7789_BLACK, "CTRL 2: %02X (%02X)",
-				status,
-				DRV_CTRL2_SDO_MODE_PP | DRV_CTRL2_SLEW_125V_us
-						| DRV_CTRL2_PWM_MODE_3X);
-		DRV8316C_ReadRegister(hdrv, DRV_REG_CTRL_3, &status);
-		LCD_Printf(0, 7, ST7789_WHITE, ST7789_BLACK, "CTRL 3: %02X (%02X)",
-				status,
-				DRV_CTRL3_PWM_100_DUTY_40KHZ | DRV_CTRL3_OVP_SEL_22V
-						| DRV_CTRL3_OVP_EN | DRV_CTRL3_SPI_FLT_REP
-						| DRV_CTRL3_OTW_REP);
-		HAL_Delay(2000);
-		DRV8316C_ReadRegister(hdrv, DRV_REG_CTRL_4, &status);
-		LCD_Printf(0, 5, ST7789_WHITE, ST7789_BLACK, "CTRL 4: %02X (%02X)",
-				status,
-				DRV_CTRL4_OCP_MODE_RETRY | DRV_CTRL4_OCP_LVL_16A
-						| DRV_CTRL4_OCP_DEG_0_6us);
-		DRV8316C_ReadRegister(hdrv, DRV_REG_CTRL_5, &status);
-		LCD_Printf(0, 6, ST7789_WHITE, ST7789_BLACK, "CTRL 5: %02X (%02X)",
-				status,
-				DRV_CTRL5_CSA_GAIN_0_6 | DRV_CTRL5_EN_ASR_BIT
-						| DRV_CTRL5_EN_AAR_BIT);
-		DRV8316C_ReadRegister(hdrv, DRV_REG_CTRL_6, &status);
-		LCD_Printf(0, 7, ST7789_WHITE, ST7789_BLACK, "CTRL 6: %02X (%02X)",
-				status,
-				DRV_CTRL6_BUCK_PS_DIS | DRV_CTRL6_BUCK_SEL_5V
-						| DRV_CTRL6_BUCK_DIS);
-		HAL_Delay(2000);
-	}
+//	while (1) {
+//		DRV8316C_ReadRegister(hdrv, DRV_REG_CTRL_1, &status);
+//		LCD_Printf(0, 5, ST7789_WHITE, ST7789_BLACK, "CTRL 1: %02X (06)",
+//				status);
+//		DRV8316C_ReadRegister(hdrv, DRV_REG_CTRL_2, &status);
+//		LCD_Printf(0, 6, ST7789_WHITE, ST7789_BLACK, "CTRL 2: %02X (%02X)",
+//				status,
+//				DRV_CTRL2_SDO_MODE_PP | DRV_CTRL2_SLEW_125V_us
+//						| DRV_CTRL2_PWM_MODE_3X);
+//		DRV8316C_ReadRegister(hdrv, DRV_REG_CTRL_3, &status);
+//		LCD_Printf(0, 7, ST7789_WHITE, ST7789_BLACK, "CTRL 3: %02X (%02X)",
+//				status,
+//				DRV_CTRL3_PWM_100_DUTY_40KHZ | DRV_CTRL3_OVP_SEL_22V
+//						| DRV_CTRL3_OVP_EN | DRV_CTRL3_SPI_FLT_REP
+//						| DRV_CTRL3_OTW_REP);
+//		HAL_Delay(2000);
+//		DRV8316C_ReadRegister(hdrv, DRV_REG_CTRL_4, &status);
+//		LCD_Printf(0, 5, ST7789_WHITE, ST7789_BLACK, "CTRL 4: %02X (%02X)",
+//				status,
+//				DRV_CTRL4_OCP_MODE_RETRY | DRV_CTRL4_OCP_LVL_16A
+//						| DRV_CTRL4_OCP_DEG_0_6us);
+//		DRV8316C_ReadRegister(hdrv, DRV_REG_CTRL_5, &status);
+//		LCD_Printf(0, 6, ST7789_WHITE, ST7789_BLACK, "CTRL 5: %02X (%02X)",
+//				status,
+//				DRV_CTRL5_CSA_GAIN_0_6 | DRV_CTRL5_EN_ASR_BIT
+//						| DRV_CTRL5_EN_AAR_BIT);
+//		DRV8316C_ReadRegister(hdrv, DRV_REG_CTRL_6, &status);
+//		LCD_Printf(0, 7, ST7789_WHITE, ST7789_BLACK, "CTRL 6: %02X (%02X)",
+//				status,
+//				DRV_CTRL6_BUCK_PS_DIS | DRV_CTRL6_BUCK_SEL_5V
+//						| DRV_CTRL6_BUCK_DIS);
+//		HAL_Delay(2000);
+//	}
 }
 

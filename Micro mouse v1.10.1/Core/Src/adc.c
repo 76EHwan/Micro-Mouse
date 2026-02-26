@@ -27,8 +27,8 @@
 #include "foc.h"
 #include "drv8316crq1.h"
 
-uint32_t adc1_buffer[7];
-uint32_t adc2_buffer[4];
+volatile uint32_t adc1_buffer[7];
+volatile uint32_t adc2_buffer[4];
 
 float vbattery;
 
@@ -93,7 +93,6 @@ void MX_ADC1_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_10;
   sConfig.Rank = ADC_REGULAR_RANK_2;
-  sConfig.SamplingTime = ADC_SAMPLETIME_2CYCLES_5;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -301,7 +300,7 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 /* USER CODE BEGIN 1 */
 void ADC1_Start() {
 	HAL_ADCEx_Calibration_Start(&hadc1, ADC_SINGLE_ENDED);
-	HAL_ADC_Start_DMA(&hadc1, adc1_buffer, 7);
+	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc1_buffer, 7);
 }
 
 void Calc_DRV8316C_Current() {

@@ -129,12 +129,23 @@ void FOC_Start(FOC_Handle_t *hfoc) {
 
 //    HAL_TIM_Base_Start_IT(&htim3);
 
-	__HAL_TIM_MOE_ENABLE(hfoc->htim_pwm);
+//	__HAL_TIM_MOE_ENABLE(hfoc->htim_pwm);
 
 	__HAL_TIM_SET_COMPARE(hfoc->htim_pwm, hfoc->u_tim_channel, 0);
 	__HAL_TIM_SET_COMPARE(hfoc->htim_pwm, hfoc->v_tim_channel, 0);
 	__HAL_TIM_SET_COMPARE(hfoc->htim_pwm, hfoc->w_tim_channel, 0);
 	HAL_GPIO_WritePin(MTR_INLx_GPIO_Port, MTR_INLx_Pin, GPIO_PIN_SET);
+}
+
+void FOC_Stop(FOC_Handle_t *hfoc) {
+	__HAL_TIM_SET_COMPARE(hfoc->htim_pwm, hfoc->u_tim_channel, 0);
+	__HAL_TIM_SET_COMPARE(hfoc->htim_pwm, hfoc->v_tim_channel, 0);
+	__HAL_TIM_SET_COMPARE(hfoc->htim_pwm, hfoc->w_tim_channel, 0);
+	HAL_GPIO_WritePin(MTR_INLx_GPIO_Port, MTR_INLx_Pin, GPIO_PIN_RESET);
+
+	HAL_TIM_PWM_Stop(hfoc->htim_pwm, hfoc->u_tim_channel);
+	HAL_TIM_PWM_Stop(hfoc->htim_pwm, hfoc->v_tim_channel);
+	HAL_TIM_PWM_Stop(hfoc->htim_pwm, hfoc->w_tim_channel);
 }
 
 // 모터가 정지해 있을 때(0A)의 ADC 값을 읽어 오프셋으로 저장
@@ -178,9 +189,9 @@ void FOC_Update(FOC_Handle_t *hfoc) {
 	// DRV8316: V_so = V_ref/2 + G * I
 	// I = (V_adc - V_offset) / G
 	float volts_per_count = ADC_REF_VOLT / ADC_RES;
-	float V_adc_u = (hfoc->adc_raw_u - hfoc->offset_iu_adc) * volts_per_count;
-	float V_adc_v = (hfoc->adc_raw_v - hfoc->offset_iv_adc) * volts_per_count;
-	float V_adc_w = (hfoc->adc_raw_w - hfoc->offset_iw_adc) * volts_per_count; // 2션트 사용시 계산으로 대체 가능
+	float V_adc_u = (hfoc->adc_raw_u - 2048) * volts_per_count;
+	float V_adc_v = (hfoc->adc_raw_v - 2048) * volts_per_count;
+	float V_adc_w = (hfoc->adc_raw_w - 2048) * volts_per_count; // 2션트 사용시 계산으로 대체 가능
 
 	hfoc->Iu = V_adc_u / CSA_GAIN;
 	hfoc->Iv = V_adc_v / CSA_GAIN;

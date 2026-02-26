@@ -36,6 +36,8 @@
 #include "sensor.h"
 #include "vl53l4cx.h"
 #include "motor.h"
+#include "bldc_open_loop.h"
+#include "drive.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -146,25 +148,35 @@ int main(void)
 	HAL_Delay(10);
 	TRIG_OFF;
 	ADC1_Start();
-	Sensor_Start();
-	FOC_Start(&focL);
+	FOC_Start(&focR);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
 	while (1) {
-		Show_Battery();
-		Sensor_Get_Dist();
-		Show_ToF();
+		if(!HAL_GPIO_ReadPin(MTR_R_nFAULT_GPIO_Port, MTR_R_nFAULT_Pin)){
+			static uint32_t num = 0;
+			LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "%d", num);
+			num++;
+		}
+		FOC_Update(&focR);
 		Show_Current();
-		Simple_6_step_Control(&focL);
+		Simple_6_step_Control(&focR);
+//		Test_DRV8316C_Read_Status(&DRV8316C_R);
+		LCD_Printf(0, 4, ST7789_WHITE, ST7789_BLACK, "%4d", focR.htim_pwm->Instance->CCR1);
+		LCD_Printf(0, 5, ST7789_WHITE, ST7789_BLACK, "%4d", focR.htim_pwm->Instance->CCR2);
+		LCD_Printf(0, 6, ST7789_WHITE, ST7789_BLACK, "%4d", focR.htim_pwm->Instance->CCR3);
+		HAL_Delay(100);
+
+//		__HAL_TIM_SET_COMPARE(focR.htim_pwm, focR.u_tim_channel, 500);
+//		__HAL_TIM_SET_COMPARE(focR.htim_pwm, focR.v_tim_channel, 000);
+//		__HAL_TIM_SET_COMPARE(focR.htim_pwm, focR.w_tim_channel, 250);
+	}
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-//		HAL_Delay(100);
 
-	}
   /* USER CODE END 3 */
 }
 

@@ -68,9 +68,9 @@ typedef struct {
     float offset_iw_adc;
 
     // --- ADC Raw Values (from DMA buffer) ---
-    uint16_t adc_raw_u;
-    uint16_t adc_raw_v;
-    uint16_t adc_raw_w;
+    int16_t adc_raw_u;
+    int16_t adc_raw_v;
+    int16_t adc_raw_w;
 
     PI_Controller pid_speed;
 } FOC_Handle_t;
@@ -83,6 +83,7 @@ extern FOC_Handle_t focR;
 void FOC_Init(FOC_Handle_t *hfoc, TIM_HandleTypeDef *htim, MT6701_Data_t *enc, DRV8316C_Handle_t *hdrv,
 		uint16_t u_tim_channel, uint16_t v_tim_channel, uint16_t w_tim_channel);
 void FOC_Start(FOC_Handle_t *hfoc);
+void FOC_Stop(FOC_Handle_t *hfoc);
 void FOC_Calibrate_ADC_Offset(FOC_Handle_t *hfoc);
 void FOC_Set_Torque(FOC_Handle_t *hfoc, float iq_target);
 void FOC_Update(FOC_Handle_t *hfoc); // Call this in Timer Interrupt (10kHz+)
