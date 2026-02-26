@@ -99,7 +99,7 @@ HAL_StatusTypeDef DRV8316C_WriteRegister(DRV8316C_Handle_t *hdrv,
     // [FAULT 강제 유발 테스트 코드]
     // 정상적으로 계산된 패리티 비트를 강제로 반전시킵니다.
     // DRV8316-Q1은 이를 SPI 에러로 인식하여 nFAULT를 즉시 출력합니다.
-    tx_frame ^= DRV_PARITY_BIT;
+//    tx_frame ^= DRV_PARITY_BIT;
     // =========================================================
 
     // 3. 전송

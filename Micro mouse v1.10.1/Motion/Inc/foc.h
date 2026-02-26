@@ -14,7 +14,7 @@
 
 // --- Constants ---
 #define PWM_PERIOD      1000    // Timer Period (ARR + 1), 예: 1000 (TIM1/8 설정에 맞춤)
-#define VBUS            7.4f    // Battery Voltage
+#define VBUS            9.f    // Battery Voltage
 #define SQRT3_INV       0.577350269f // 1/sqrt(3)
 #define POLE_PAIRS      1       // Pole pairs (데이터시트 확인 필요)
 

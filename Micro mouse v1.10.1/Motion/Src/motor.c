@@ -44,36 +44,45 @@ void Simple_6_step_Control(FOC_Handle_t *foc) {
 
 	// 2. 강제 3상 스텝 구동 (0.5초마다 이동)
 
-	switch(step){
+	switch (step) {
 	case 0:
-		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->u_tim_channel, pwm_val * modulation_factor);
+		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->u_tim_channel,
+				pwm_val * modulation_factor);
 		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->v_tim_channel, 0);
 		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->w_tim_channel, 0);
 		break;
 	case 1:
-		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->u_tim_channel, pwm_val * modulation_factor);
-		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->v_tim_channel, pwm_val * modulation_factor);
+		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->u_tim_channel,
+				pwm_val * modulation_factor);
+		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->v_tim_channel,
+				pwm_val * modulation_factor);
 		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->w_tim_channel, 0);
 		break;
 	case 2:
 		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->u_tim_channel, 0);
-		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->v_tim_channel, pwm_val * modulation_factor);
+		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->v_tim_channel,
+				pwm_val * modulation_factor);
 		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->w_tim_channel, 0);
 		break;
 	case 3:
 		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->u_tim_channel, 0);
-		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->v_tim_channel, pwm_val * modulation_factor);
-		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->w_tim_channel, pwm_val * modulation_factor);
+		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->v_tim_channel,
+				pwm_val * modulation_factor);
+		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->w_tim_channel,
+				pwm_val * modulation_factor);
 		break;
 	case 4:
 		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->u_tim_channel, 0);
 		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->v_tim_channel, 0);
-		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->w_tim_channel, pwm_val * modulation_factor);
+		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->w_tim_channel,
+				pwm_val * modulation_factor);
 		break;
 	case 5:
-		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->u_tim_channel, pwm_val * modulation_factor);
+		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->u_tim_channel,
+				pwm_val * modulation_factor);
 		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->v_tim_channel, 0);
-		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->w_tim_channel, pwm_val * modulation_factor);
+		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->w_tim_channel,
+				pwm_val * modulation_factor);
 		break;
 	}
 
@@ -81,33 +90,38 @@ void Simple_6_step_Control(FOC_Handle_t *foc) {
 }
 
 void Simple_SVPWM_Control(FOC_Handle_t *foc) {
-    // [핵심] 제어 루프 안에서는 레지스터 읽기(SPI)를 절대 하지 마세요!
-    // 노이즈가 튀면 MCU가 멈춥니다. 오직 계산만 수행합니다.
+	static uint16_t step = 0;
+	uint16_t arr = foc->htim_pwm->Instance->ARR;
 
-    static uint16_t step = 0;
-    uint16_t pwm_val = foc->htim_pwm->Instance->ARR;
+	float modulation_factor = 0.06f;
 
-    // 테스트 성공했던 안전한 변조율 유지
-    float modulation_factor = 0.16f;
+	uint16_t PWM_MAX = (uint16_t) (arr * 0.95f);  // ✅ 이것만 추가
 
-    // 1. 각도 계산 (라디안 변환)
-    float rad_u = step * 3.141592f / 180.0f;
-    float rad_v = ((step + 120) % 360) * 3.141592f / 180.0f;
-    float rad_w = ((step + 240) % 360) * 3.141592f / 180.0f;
+	float rad_u = step * 3.141592f / 180.0f;
+	float rad_v = ((step + 120) % 360) * 3.141592f / 180.0f;
+	float rad_w = ((step + 240) % 360) * 3.141592f / 180.0f;
 
-    // 2. SVPWM 듀티 계산
-    uint16_t pwm_u = (uint16_t)(pwm_val * (0.5f + 0.5f * sinf(rad_u) * modulation_factor));
-    uint16_t pwm_v = (uint16_t)(pwm_val * (0.5f + 0.5f * sinf(rad_v) * modulation_factor));
-    uint16_t pwm_w = (uint16_t)(pwm_val * (0.5f + 0.5f * sinf(rad_w) * modulation_factor));
+	uint16_t pwm_u = (uint16_t) (arr
+			* (0.5f + 0.5f * sinf(rad_u) * modulation_factor));
+	uint16_t pwm_v = (uint16_t) (arr
+			* (0.5f + 0.5f * sinf(rad_v) * modulation_factor));
+	uint16_t pwm_w = (uint16_t) (arr
+			* (0.5f + 0.5f * sinf(rad_w) * modulation_factor));
 
-    // 3. Bottom Clamping (최솟값을 0으로 끌어내림 -> V or W가 0이 되어 접지 역할)
-    uint16_t min_pwm = MIN3(pwm_u, pwm_v, pwm_w);
+	uint16_t min_pwm = MIN3(pwm_u, pwm_v, pwm_w);
 
-    // 4. 타이머 레지스터에 적용
-    __HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->u_tim_channel, pwm_u - min_pwm);
-    __HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->v_tim_channel, pwm_v - min_pwm);
-    __HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->w_tim_channel, pwm_w - min_pwm);
+	pwm_u = pwm_u - min_pwm;
+	pwm_v = pwm_v - min_pwm;
+	pwm_w = pwm_w - min_pwm;
 
-    // 5. 각도 증가 (속도는 main의 delay로 조절)
-    step = (step + 1) % 360;
+	// ✅ 이것만 추가: 상한 클램핑
+	pwm_u = (pwm_u > PWM_MAX) ? PWM_MAX : pwm_u;
+	pwm_v = (pwm_v > PWM_MAX) ? PWM_MAX : pwm_v;
+	pwm_w = (pwm_w > PWM_MAX) ? PWM_MAX : pwm_w;
+
+	__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->u_tim_channel, pwm_u);
+	__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->v_tim_channel, pwm_v);
+	__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->w_tim_channel, pwm_w);
+
+	step = (step + 1) % 360;
 }
