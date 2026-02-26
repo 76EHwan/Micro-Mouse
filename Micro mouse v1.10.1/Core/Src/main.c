@@ -149,6 +149,7 @@ int main(void)
 	TRIG_OFF;
 	ADC1_Start();
 	FOC_Start(&focR);
+//	Sensor_Start();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -163,15 +164,20 @@ int main(void)
 		FOC_Update(&focR);
 		Show_Current();
 		Simple_6_step_Control(&focR);
-//		Test_DRV8316C_Read_Status(&DRV8316C_R);
-		LCD_Printf(0, 4, ST7789_WHITE, ST7789_BLACK, "%4d", focR.htim_pwm->Instance->CCR1);
-		LCD_Printf(0, 5, ST7789_WHITE, ST7789_BLACK, "%4d", focR.htim_pwm->Instance->CCR2);
-		LCD_Printf(0, 6, ST7789_WHITE, ST7789_BLACK, "%4d", focR.htim_pwm->Instance->CCR3);
+//		Simple_SVPWM_Control(&focR);
+		Test_DRV8316C_Read_Status(&DRV8316C_R);
+//		LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "%4d", focR.htim_pwm->Instance->CCR1);
+//		LCD_Printf(0, 2, ST7789_WHITE, ST7789_BLACK, "%4d", focR.htim_pwm->Instance->CCR2);
+//		LCD_Printf(0, 3, ST7789_WHITE, ST7789_BLACK, "%4d", focR.htim_pwm->Instance->CCR3);
 		HAL_Delay(100);
 
 //		__HAL_TIM_SET_COMPARE(focR.htim_pwm, focR.u_tim_channel, 500);
 //		__HAL_TIM_SET_COMPARE(focR.htim_pwm, focR.v_tim_channel, 000);
 //		__HAL_TIM_SET_COMPARE(focR.htim_pwm, focR.w_tim_channel, 250);
+
+//		Sensor_Get_Dist();
+//		Show_ToF();
+
 	}
     /* USER CODE END WHILE */
 

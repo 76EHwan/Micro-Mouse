@@ -17,6 +17,7 @@ void Simple_6_step_Control(FOC_Handle_t *foc) {
 
 //	LCD_Printf(0, 3, ST7789_WHITE, ST7789_BLACK, "CTRL2: 0x%02X", ctrl2_val);
 	if (ctrl2_val != 0x34) {
+		TRIG_TOGGLE;
 		FOC_Stop(foc);
 		DRV8316C_UnlockRegister(foc->hdrv);
 		DRV8316C_ApplyDefaultConfig(foc->hdrv);
@@ -26,9 +27,9 @@ void Simple_6_step_Control(FOC_Handle_t *foc) {
 	DRV8316C_ReadRegister(foc->hdrv, DRV_REG_CTRL_2, &ctrl2_val);
 	LCD_Printf(0, 3, ST7789_WHITE, ST7789_BLACK, "CTRL2: 0x%02X", ctrl2_val);
 
-	static uint16_t step = 0;
+	static uint16_t step = 1;
 	uint16_t pwm_val = foc->htim_pwm->Instance->ARR; // 힘을 좀 더 강하게 (약 64%)
-	float modulation_factor = 0.16;
+	float modulation_factor = 0.1;
 
 // 1. 상태 모니터링
 //	uint32_t ccer = foc->htim_pwm->Instance->CCER;
@@ -43,19 +44,70 @@ void Simple_6_step_Control(FOC_Handle_t *foc) {
 
 	// 2. 강제 3상 스텝 구동 (0.5초마다 이동)
 
-	float rad_u = step * M_PI / 180.f;
-	float rad_v = (step + 120) * M_PI / 180.f;
-	float rad_w = (step + 240) * M_PI / 180.f;
+	switch(step){
+	case 0:
+		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->u_tim_channel, pwm_val * modulation_factor);
+		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->v_tim_channel, 0);
+		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->w_tim_channel, 0);
+		break;
+	case 1:
+		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->u_tim_channel, pwm_val * modulation_factor);
+		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->v_tim_channel, pwm_val * modulation_factor);
+		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->w_tim_channel, 0);
+		break;
+	case 2:
+		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->u_tim_channel, 0);
+		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->v_tim_channel, pwm_val * modulation_factor);
+		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->w_tim_channel, 0);
+		break;
+	case 3:
+		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->u_tim_channel, 0);
+		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->v_tim_channel, pwm_val * modulation_factor);
+		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->w_tim_channel, pwm_val * modulation_factor);
+		break;
+	case 4:
+		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->u_tim_channel, 0);
+		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->v_tim_channel, 0);
+		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->w_tim_channel, pwm_val * modulation_factor);
+		break;
+	case 5:
+		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->u_tim_channel, pwm_val * modulation_factor);
+		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->v_tim_channel, 0);
+		__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->w_tim_channel, pwm_val * modulation_factor);
+		break;
+	}
 
-	uint16_t pwm_u = pwm_val * ((0.5 + 0.5 * sinf(rad_u) * modulation_factor));
-	uint16_t pwm_v = pwm_val * ((0.5 + 0.5 * sinf(rad_v) * modulation_factor));
-	uint16_t pwm_w = pwm_val * ((0.5 + 0.5 * sinf(rad_w) * modulation_factor));
+//	step = (step + 1) % 6;
+}
 
-	uint16_t min_pwm = MIN3(pwm_u, pwm_v, pwm_w);
+void Simple_SVPWM_Control(FOC_Handle_t *foc) {
+    // [핵심] 제어 루프 안에서는 레지스터 읽기(SPI)를 절대 하지 마세요!
+    // 노이즈가 튀면 MCU가 멈춥니다. 오직 계산만 수행합니다.
 
-	__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->u_tim_channel, pwm_u - min_pwm);
-	__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->v_tim_channel, pwm_v - min_pwm);
-	__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->w_tim_channel, pwm_w - min_pwm);
+    static uint16_t step = 0;
+    uint16_t pwm_val = foc->htim_pwm->Instance->ARR;
 
-	step = (step + 1) % 360;
+    // 테스트 성공했던 안전한 변조율 유지
+    float modulation_factor = 0.16f;
+
+    // 1. 각도 계산 (라디안 변환)
+    float rad_u = step * 3.141592f / 180.0f;
+    float rad_v = ((step + 120) % 360) * 3.141592f / 180.0f;
+    float rad_w = ((step + 240) % 360) * 3.141592f / 180.0f;
+
+    // 2. SVPWM 듀티 계산
+    uint16_t pwm_u = (uint16_t)(pwm_val * (0.5f + 0.5f * sinf(rad_u) * modulation_factor));
+    uint16_t pwm_v = (uint16_t)(pwm_val * (0.5f + 0.5f * sinf(rad_v) * modulation_factor));
+    uint16_t pwm_w = (uint16_t)(pwm_val * (0.5f + 0.5f * sinf(rad_w) * modulation_factor));
+
+    // 3. Bottom Clamping (최솟값을 0으로 끌어내림 -> V or W가 0이 되어 접지 역할)
+    uint16_t min_pwm = MIN3(pwm_u, pwm_v, pwm_w);
+
+    // 4. 타이머 레지스터에 적용
+    __HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->u_tim_channel, pwm_u - min_pwm);
+    __HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->v_tim_channel, pwm_v - min_pwm);
+    __HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->w_tim_channel, pwm_w - min_pwm);
+
+    // 5. 각도 증가 (속도는 main의 delay로 조절)
+    step = (step + 1) % 360;
 }
