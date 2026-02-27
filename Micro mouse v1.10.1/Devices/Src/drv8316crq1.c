@@ -168,8 +168,7 @@ HAL_StatusTypeDef DRV8316C_ApplyDefaultConfig(DRV8316C_Handle_t *hdrv) {
     if (status != HAL_OK) return status;
 
     // [CTRL 5] 전류 센싱 게인 설정 (0.6V/A) + ASR/AAR 켜기
-    reg_val = DRV_CTRL5_CSA_GAIN_0_6 | DRV_CTRL5_EN_ASR_BIT
-            | DRV_CTRL5_EN_AAR_BIT;
+    reg_val = DRV_CTRL5_CSA_GAIN_0_6;
     status = DRV8316C_WriteRegister(hdrv, DRV_REG_CTRL_5, reg_val);
     if (status != HAL_OK) return status;
 
@@ -209,7 +208,7 @@ DRV8316C_REG_Typedef DRV8316C_VerifyConfig(DRV8316C_Handle_t *hdrv) {
     if (status != HAL_OK || read_val != expected_val) return REG_FAULT_CTRL4;
 
     // CTRL5 확인
-    expected_val = DRV_CTRL5_CSA_GAIN_0_6 | DRV_CTRL5_EN_ASR_BIT | DRV_CTRL5_EN_AAR_BIT;
+    expected_val = DRV_CTRL5_CSA_GAIN_0_6;
     status = DRV8316C_ReadRegister(hdrv, DRV_REG_CTRL_5, &read_val);
     if (status != HAL_OK || read_val != expected_val) return REG_FAULT_CTRL5;
 

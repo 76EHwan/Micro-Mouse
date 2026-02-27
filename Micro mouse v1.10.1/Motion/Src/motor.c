@@ -93,7 +93,7 @@ void Simple_SVPWM_Control(FOC_Handle_t *foc) {
 	static uint16_t step = 0;
 	uint16_t arr = foc->htim_pwm->Instance->ARR;
 
-	float modulation_factor = 0.06f;
+	float modulation_factor = 0.4f;
 
 	uint16_t PWM_MAX = (uint16_t) (arr * 0.95f);  // ✅ 이것만 추가
 

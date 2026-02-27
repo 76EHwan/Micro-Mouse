@@ -157,19 +157,17 @@ int main(void)
 
 	while (1) {
 		if(!HAL_GPIO_ReadPin(MTR_R_nFAULT_GPIO_Port, MTR_R_nFAULT_Pin)){
-			static uint32_t num = 0;
-			LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "%d", num);
-			num++;
+			TRIG_TOGGLE;
 		}
 		FOC_Update(&focR);
-		Show_Current();
+//		Show_Current();
 //		Simple_6_step_Control(&focR);
 		Simple_SVPWM_Control(&focR);
-		Test_DRV8316C_Read_Status(&DRV8316C_R);
+//		Test_DRV8316C_Read_Status(&DRV8316C_R);
 //		LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "%4d", focR.htim_pwm->Instance->CCR1);
 //		LCD_Printf(0, 2, ST7789_WHITE, ST7789_BLACK, "%4d", focR.htim_pwm->Instance->CCR2);
 //		LCD_Printf(0, 3, ST7789_WHITE, ST7789_BLACK, "%4d", focR.htim_pwm->Instance->CCR3);
-		HAL_Delay(1);
+		delay_us(100);
 
 //		__HAL_TIM_SET_COMPARE(focR.htim_pwm, focR.u_tim_channel, 500);
 //		__HAL_TIM_SET_COMPARE(focR.htim_pwm, focR.v_tim_channel, 000);
