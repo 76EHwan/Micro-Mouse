@@ -204,4 +204,3 @@ void ADC2_Callback_Handle(){
 	FOC_Update(&focR);
 	SVPWM_Generate(&focR, focR.Valpha, focR.Vbeta);
 }
-
