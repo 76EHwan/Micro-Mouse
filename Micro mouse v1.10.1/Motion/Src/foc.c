@@ -21,8 +21,8 @@ FOC_Handle_t focR;
 void Calc_SOX_Current(FOC_Handle_t *hfoc, volatile uint16_t *pData){
 	hfoc->vBus = (float)*(pData + 0) * ADC_REF_VOLT * ADC_RES_INV;
 	hfoc->adc_raw_u = *(pData + 1);
-	hfoc->adc_raw_u = *(pData + 2);
-	hfoc->adc_raw_u = *(pData + 3);
+	hfoc->adc_raw_v = *(pData + 2);
+	hfoc->adc_raw_w = *(pData + 3);
 }
 
 // 0~2PI 범위로 각도 정규화

@@ -453,12 +453,12 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 /* USER CODE BEGIN 1 */
 void ADC1_Start() {
 	HAL_ADCEx_Calibration_Start(&hadc1, ADC_SINGLE_ENDED);
-	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc1_buffer, sizeof(adc1_buffer));
+	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc1_buffer, 4);
 }
 
 void ADC2_Start() {
 	HAL_ADCEx_Calibration_Start(&hadc2, ADC_SINGLE_ENDED);
-	HAL_ADC_Start_DMA(&hadc2, (uint32_t*)adc2_buffer, sizeof(adc2_buffer));
+	HAL_ADC_Start_DMA(&hadc2, (uint32_t*)adc2_buffer, 4);
 }
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc) {
