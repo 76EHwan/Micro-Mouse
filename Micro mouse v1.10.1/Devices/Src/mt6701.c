@@ -5,16 +5,6 @@
 
 #define ENC_SPI &hspi2
 
-// 기어비 (51 / 9)
-#define GEAR_RATIO (51.0f / 9.0f)
-// 극쌍수 1
-#define POLE_PAIRS 1.0f
-
-// 상수 미리 정의 (연산 속도 최적화)
-#define ENC_RES 16384.0f
-#define ENC_HALF 8192
-#define DEG_PER_TICK (360.0f / ENC_RES) // 0.02197...
-
 /* USER CODE BEGIN 0 */
 MT6701_Data_t encDataL = { .cs_port = ENC_L_CS_GPIO_Port, .cs_pin = ENC_L_CS_Pin };
 MT6701_Data_t encDataR = { .cs_port = ENC_R_CS_GPIO_Port, .cs_pin = ENC_R_CS_Pin };
@@ -23,7 +13,6 @@ MT6701_Data_t encDataR = { .cs_port = ENC_R_CS_GPIO_Port, .cs_pin = ENC_R_CS_Pin
 HAL_StatusTypeDef MT6701_Init(MT6701_Data_t *encData, uint8_t *rxBuffer) {
 //    uint8_t rxBuffer[3] = {0,0,0};
     HAL_GPIO_WritePin(encData->cs_port, encData->cs_pin, GPIO_PIN_RESET);
-    for (volatile int i = 0; i < 200; i++);
     HAL_SPI_Receive(ENC_SPI, rxBuffer, 3, 10);
     HAL_GPIO_WritePin(encData->cs_port, encData->cs_pin, GPIO_PIN_SET);
 

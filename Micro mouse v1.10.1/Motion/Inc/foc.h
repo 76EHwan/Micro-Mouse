@@ -13,15 +13,19 @@
 #include "drv8316crq1.h"
 
 // --- Constants ---
-#define PWM_PERIOD      1000    // Timer Period (ARR + 1), 예: 1000 (TIM1/8 설정에 맞춤)
-#define VBUS            9.f    // Battery Voltage
+#define PWM_PERIOD      (TIM1->ARR)    // Timer Period
+#define PWM_PERIOD_HALF	(PWM_PERIOD / 2)
+#define VBUS            8.4f    // Battery Voltage
 #define SQRT3_INV       0.577350269f // 1/sqrt(3)
-#define POLE_PAIRS      1       // Pole pairs (데이터시트 확인 필요)
+#define ANGLE_SCALER	(2 * M_PI / ENC_RES)
 
 // DRV8316 Current Sense Gain (Default 0.6 V/A)
 #define CSA_GAIN        0.6f
+#define CSA_GAIN_INV	(1.f / CSA_GAIN)
 #define ADC_REF_VOLT    3.3f
-#define ADC_RES         4096.0f
+#define ADC_RES         4096.f
+#define ADC_RES_HALF	(ADC_RES / 2.f)
+#define ADC_RES_INV		(1.f/ADC_RES)
 
 // --- PI Controller Struct ---
 typedef struct {
@@ -50,6 +54,7 @@ typedef struct {
 
     // --- State Variables ---
     float theta_e;                // 전기각 (Electrical Angle, rad)
+    float vBus;					  // 입력 전압 (V)
     float Iu, Iv, Iw;             // 상전류 (A)
     float Id, Iq;                 // d-q축 전류
     float I_alpha, I_beta;        // alpha-beta 전류
@@ -58,14 +63,17 @@ typedef struct {
     float Id_ref;                 // d축 전류 지령 (보통 0)
     float Iq_ref;                 // q축 전류 지령 (토크)
 
+    // --- Park Transform Variables ---
+    float Vd;
+    float Vq;
+
+    // --- Clarke Transform Variables ---
+    float Valpha;
+    float Vbeta;
+
     // --- Controllers ---
     PI_Controller pid_d;
     PI_Controller pid_q;
-
-    // --- ADC Offsets (Calibration) ---
-    float offset_iu_adc;
-    float offset_iv_adc;
-    float offset_iw_adc;
 
     // --- ADC Raw Values (from DMA buffer) ---
     int16_t adc_raw_u;

@@ -34,21 +34,25 @@ extern "C" {
 
 extern ADC_HandleTypeDef hadc1;
 
+extern ADC_HandleTypeDef hadc2;
+
 /* USER CODE BEGIN Private defines */
-extern volatile uint32_t adc1_buffer[7];
-extern volatile uint32_t adc2_buffer[4];
+extern volatile uint16_t adc1_buffer[4];
+extern volatile uint16_t adc2_buffer[4];
 extern float vbattery;
 
 /* USER CODE END Private defines */
 
 void MX_ADC1_Init(void);
+void MX_ADC2_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 void ADC1_Start(void);
-void Calc_DRV8316C_Current(void);
+void ADC2_Start(void);
 
 __weak void ADC1_Callback_Handle();
 
+__weak void ADC2_Callback_Handle();
 
 /* USER CODE END Prototypes */
 

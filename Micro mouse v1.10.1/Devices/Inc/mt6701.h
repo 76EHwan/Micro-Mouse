@@ -10,6 +10,16 @@
 
 #include "main.h"
 
+// 기어비 (51 / 9)
+#define GEAR_RATIO (51.0f / 9.0f)
+// 극쌍수 1
+#define POLE_PAIRS 1.0f
+
+// 상수 미리 정의 (연산 속도 최적화)
+#define ENC_RES 16384.0f
+#define ENC_HALF 8192
+#define DEG_PER_TICK (360.0f / ENC_RES) // 0.02197...
+
 typedef struct {
     uint16_t raw_angle;
     float wheel_angle_deg;

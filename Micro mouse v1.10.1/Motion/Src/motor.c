@@ -7,6 +7,8 @@
 
 #include "motor.h"
 #include "main.h"
+#include "foc.h"
+#include "mt6701.h"
 #include "st7789.h"
 
 #define MIN3(a,b,c) ((a) < (b) ? ((a) < (c) ? (a) : (c)) : ((b) < (c) ? (b) : (c)))
@@ -27,9 +29,9 @@ void Simple_6_step_Control(FOC_Handle_t *foc) {
 	DRV8316C_ReadRegister(foc->hdrv, DRV_REG_CTRL_2, &ctrl2_val);
 	LCD_Printf(0, 3, ST7789_WHITE, ST7789_BLACK, "CTRL2: 0x%02X", ctrl2_val);
 
-	static uint16_t step = 1;
+	static uint16_t step = 0;
 	uint16_t pwm_val = foc->htim_pwm->Instance->ARR; // 힘을 좀 더 강하게 (약 64%)
-	float modulation_factor = 0.1;
+	float modulation_factor = 0.3;
 
 // 1. 상태 모니터링
 //	uint32_t ccer = foc->htim_pwm->Instance->CCER;
@@ -108,12 +110,6 @@ void Simple_SVPWM_Control(FOC_Handle_t *foc) {
 	uint16_t pwm_w = (uint16_t) (arr
 			* (0.5f + 0.5f * sinf(rad_w) * modulation_factor));
 
-	uint16_t min_pwm = MIN3(pwm_u, pwm_v, pwm_w);
-
-	pwm_u = pwm_u - min_pwm;
-	pwm_v = pwm_v - min_pwm;
-	pwm_w = pwm_w - min_pwm;
-
 	// ✅ 이것만 추가: 상한 클램핑
 	pwm_u = (pwm_u > PWM_MAX) ? PWM_MAX : pwm_u;
 	pwm_v = (pwm_v > PWM_MAX) ? PWM_MAX : pwm_v;
@@ -124,4 +120,9 @@ void Simple_SVPWM_Control(FOC_Handle_t *foc) {
 	__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->w_tim_channel, pwm_w);
 
 	step = (step + 1) % 360;
+}
+
+void FOC_Control(FOC_Handle_t *foc){
+	MT6701_ReadSSI(foc->encoder);
+
 }

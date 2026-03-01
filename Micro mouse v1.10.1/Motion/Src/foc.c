@@ -6,13 +6,24 @@
  */
 #include "foc.h"
 #include "math.h"
+#include "adc.h"
 #include "tim.h" // htim1, htim8
+
+#define clamp(v, min, max) ((v) < (min) ? (min) : ((v) > (max) ? (max) : (v)))
 
 // FOC 인스턴스 정의
 FOC_Handle_t focL;
 FOC_Handle_t focR;
 
 // --- Helper Functions ---
+
+// ADC DMA 결과 업데이트
+void Calc_SOX_Current(FOC_Handle_t *hfoc, volatile uint16_t *pData){
+	hfoc->vBus = (float)*(pData + 0) * ADC_REF_VOLT * ADC_RES_INV;
+	hfoc->adc_raw_u = *(pData + 1);
+	hfoc->adc_raw_u = *(pData + 2);
+	hfoc->adc_raw_u = *(pData + 3);
+}
 
 // 0~2PI 범위로 각도 정규화
 static inline float normalize_angle(float angle) {
@@ -70,23 +81,14 @@ void SVPWM_Generate(FOC_Handle_t *hfoc, float Valpha, float Vbeta) {
 	// 4. Duty 계산 (VCOM을 더해서 SVPWM 구현)
 	// (Ua + Vcom)은 -VBUS/2 ~ +VBUS/2 범위이므로,
 	// VBUS/2를 더해 0 ~ VBUS 범위로 올린 뒤 비율을 계산합니다.
-	Ta = (Ua + Vcom + VBUS / 2.0f) / VBUS * PWM_PERIOD;
-	Tb = (Ub + Vcom + VBUS / 2.0f) / VBUS * PWM_PERIOD;
-	Tc = (Uc + Vcom + VBUS / 2.0f) / VBUS * PWM_PERIOD;
+	Ta = (Ua + Vcom + hfoc->vBus) / hfoc->vBus * PWM_PERIOD_HALF;
+	Tb = (Ub + Vcom + hfoc->vBus) / hfoc->vBus * PWM_PERIOD_HALF;
+	Tc = (Uc + Vcom + hfoc->vBus) / hfoc->vBus * PWM_PERIOD_HALF;
 
 	// 5. Saturation (0 ~ PWM_PERIOD 제한)
-	if (Ta < 0)
-		Ta = 0;
-	else if (Ta > PWM_PERIOD)
-		Ta = PWM_PERIOD;
-	if (Tb < 0)
-		Tb = 0;
-	else if (Tb > PWM_PERIOD)
-		Tb = PWM_PERIOD;
-	if (Tc < 0)
-		Tc = 0;
-	else if (Tc > PWM_PERIOD)
-		Tc = PWM_PERIOD;
+	Ta = clamp(Ta, 0, PWM_PERIOD);
+	Tb = clamp(Tb, 0, PWM_PERIOD);
+	Tc = clamp(Tc, 0, PWM_PERIOD);
 
 	// 6. Timer CCR 설정
 	__HAL_TIM_SET_COMPARE(hfoc->htim_pwm, hfoc->u_tim_channel, (uint32_t )Ta);
@@ -113,8 +115,6 @@ void FOC_Init(FOC_Handle_t *hfoc, TIM_HandleTypeDef *htim, MT6701_Data_t *enc,
 	// PID Init
 	hfoc->pid_d.Kp = 1.0f;  // 튜닝 필요
 	hfoc->pid_d.Ki = 0.05f; // 튜닝 필요
-	hfoc->pid_d.out_max = VBUS * 0.9f;
-	hfoc->pid_d.out_min = -VBUS * 0.9f;
 
 	hfoc->pid_q.Kp = 1.0f;  // 튜닝 필요
 	hfoc->pid_q.Ki = 0.05f; // 튜닝 필요
@@ -126,10 +126,6 @@ void FOC_Start(FOC_Handle_t *hfoc) {
 	HAL_TIM_PWM_Start(hfoc->htim_pwm, hfoc->u_tim_channel);
 	HAL_TIM_PWM_Start(hfoc->htim_pwm, hfoc->v_tim_channel);
 	HAL_TIM_PWM_Start(hfoc->htim_pwm, hfoc->w_tim_channel);
-
-//    HAL_TIM_Base_Start_IT(&htim3);
-
-//	__HAL_TIM_MOE_ENABLE(hfoc->htim_pwm);
 
 	__HAL_TIM_SET_COMPARE(hfoc->htim_pwm, hfoc->u_tim_channel, 0);
 	__HAL_TIM_SET_COMPARE(hfoc->htim_pwm, hfoc->v_tim_channel, 0);
@@ -148,25 +144,6 @@ void FOC_Stop(FOC_Handle_t *hfoc) {
 	HAL_TIM_PWM_Stop(hfoc->htim_pwm, hfoc->w_tim_channel);
 }
 
-// 모터가 정지해 있을 때(0A)의 ADC 값을 읽어 오프셋으로 저장
-void FOC_Calibrate_ADC_Offset(FOC_Handle_t *hfoc) {
-	float sum_u = 0, sum_v = 0, sum_w = 0;
-	int samples = 100;
-
-	for (int i = 0; i < samples; i++) {
-		// 실제로는 여기서 ADC 값을 새로 읽어와야 함 (HAL_ADC_PollForConversion 등)
-		// 현재는 외부 DMA 버퍼가 갱신된다고 가정
-		sum_u += hfoc->adc_raw_u;
-		sum_v += hfoc->adc_raw_v;
-		sum_w += hfoc->adc_raw_w;
-		HAL_Delay(1);
-	}
-
-	hfoc->offset_iu_adc = sum_u / samples;
-	hfoc->offset_iv_adc = sum_v / samples;
-	hfoc->offset_iw_adc = sum_w / samples;
-}
-
 void FOC_Set_Torque(FOC_Handle_t *hfoc, float iq_target) {
 	hfoc->Iq_ref = iq_target;
 }
@@ -174,13 +151,8 @@ void FOC_Set_Torque(FOC_Handle_t *hfoc, float iq_target) {
 // Main FOC Interrupt Handler (call at 10kHz~20kHz)
 void FOC_Update(FOC_Handle_t *hfoc) {
 	// 1. 전기각 계산 (Electrical Angle Calculation)
-	// MT6701의 raw_angle(0~16383) 사용
-	uint16_t raw = hfoc->encoder->raw_angle;
-	// 기구적 각도(rad) 변환
-	float theta_m = (raw / 16384.0f) * 2.0f * M_PI;
-	// 전기각 변환
-	hfoc->theta_e = normalize_angle(
-			hfoc->pole_pairs * theta_m - hfoc->zero_offset_angle);
+	// MT6701의 motor_elec_angle 사용
+	hfoc->theta_e = hfoc->encoder->motor_elec_angle;
 
 	if (hfoc->dir == -1)
 		hfoc->theta_e = normalize_angle(2.0f * M_PI - hfoc->theta_e);
@@ -188,14 +160,14 @@ void FOC_Update(FOC_Handle_t *hfoc) {
 	// 2. 전류 측정 및 단위 변환 (ADC -> Ampere)
 	// DRV8316: V_so = V_ref/2 + G * I
 	// I = (V_adc - V_offset) / G
-	float volts_per_count = ADC_REF_VOLT / ADC_RES;
+	float volts_per_count = ADC_REF_VOLT * ADC_RES_INV;
 	float V_adc_u = (hfoc->adc_raw_u - 2048) * volts_per_count;
 	float V_adc_v = (hfoc->adc_raw_v - 2048) * volts_per_count;
 	float V_adc_w = (hfoc->adc_raw_w - 2048) * volts_per_count; // 2션트 사용시 계산으로 대체 가능
 
-	hfoc->Iu = V_adc_u / CSA_GAIN;
-	hfoc->Iv = V_adc_v / CSA_GAIN;
-	hfoc->Iw = V_adc_w / CSA_GAIN;
+	hfoc->Iu = V_adc_u * CSA_GAIN_INV;
+	hfoc->Iv = V_adc_v * CSA_GAIN_INV;
+	hfoc->Iw = V_adc_w * CSA_GAIN_INV;
 
 	// 3. Clarke Transform (abc -> alpha,beta)
 	hfoc->I_alpha = hfoc->Iu;
@@ -210,18 +182,26 @@ void FOC_Update(FOC_Handle_t *hfoc) {
 
 	// 5. PID Control
 	// d축은 자속 제어 (일반적으로 0)
-	float Vd = PI_Update(&hfoc->pid_d, hfoc->Id_ref, hfoc->Id);
+	hfoc->Vd = PI_Update(&hfoc->pid_d, hfoc->Id_ref, hfoc->Id);
 	// q축은 토크 제어
-	float Vq = PI_Update(&hfoc->pid_q, hfoc->Iq_ref, hfoc->Iq);
+	hfoc->Vq = PI_Update(&hfoc->pid_q, hfoc->Iq_ref, hfoc->Iq);
 
 	// 6. Inverse Park Transform (d,q -> alpha,beta)
-	float Valpha = Vd * c - Vq * s;
-	float Vbeta = Vd * s + Vq * c;
-
-	// 7. SVPWM Output
-//    SVPWM_Generate(hfoc, Valpha, Vbeta);
+	hfoc->Valpha = hfoc->Vd * c - hfoc->Vq * s;
+	hfoc->Vbeta = hfoc->Vd * s + hfoc->Vq * c;
 }
 
-void TIM3_IRQ_Handle() {
+void ADC1_Callback_Handle(){
+	Calc_SOX_Current(&focL, adc1_buffer);
+	MT6701_ReadSSI(focL.encoder);
 	FOC_Update(&focL);
+	SVPWM_Generate(&focL, focL.Valpha, focL.Vbeta);
 }
+
+void ADC2_Callback_Handle(){
+	Calc_SOX_Current(&focR, adc2_buffer);
+	MT6701_ReadSSI(focR.encoder);
+	FOC_Update(&focR);
+	SVPWM_Generate(&focR, focR.Valpha, focR.Vbeta);
+}
+

@@ -36,7 +36,6 @@
 #include "sensor.h"
 #include "vl53l4cx.h"
 #include "motor.h"
-#include "bldc_open_loop.h"
 #include "drive.h"
 /* USER CODE END Includes */
 
@@ -136,6 +135,7 @@ int main(void)
   MX_TIM12_Init();
   MX_SPI3_Init();
   MX_I2C1_Init();
+  MX_ADC2_Init();
   /* USER CODE BEGIN 2 */
 	TRIG_ON;
 
@@ -148,7 +148,8 @@ int main(void)
 	HAL_Delay(10);
 	TRIG_OFF;
 	ADC1_Start();
-	FOC_Start(&focR);
+//	FOC_Start(&focL);
+//	FOC_Start(&focR);
 //	Sensor_Start();
   /* USER CODE END 2 */
 
@@ -156,18 +157,22 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 
 	while (1) {
-		if(!HAL_GPIO_ReadPin(MTR_R_nFAULT_GPIO_Port, MTR_R_nFAULT_Pin)){
-			TRIG_TOGGLE;
-		}
-		FOC_Update(&focR);
+//		if(!HAL_GPIO_ReadPin(MTR_R_nFAULT_GPIO_Port, MTR_R_nFAULT_Pin)){
+//			TRIG_TOGGLE;
+//		}
+//		FOC_Update(&focL);
+//		FOC_Update(&focR);
 //		Show_Current();
+//		Simple_6_step_Control(&focL);
 //		Simple_6_step_Control(&focR);
-		Simple_SVPWM_Control(&focR);
+//		Simple_SVPWM_Control(&focL);
+//		Simple_SVPWM_Control(&focR);
 //		Test_DRV8316C_Read_Status(&DRV8316C_R);
 //		LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "%4d", focR.htim_pwm->Instance->CCR1);
 //		LCD_Printf(0, 2, ST7789_WHITE, ST7789_BLACK, "%4d", focR.htim_pwm->Instance->CCR2);
 //		LCD_Printf(0, 3, ST7789_WHITE, ST7789_BLACK, "%4d", focR.htim_pwm->Instance->CCR3);
-		delay_us(100);
+//		delay_us(50);
+		LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "%d", PWM_PERIOD);
 
 //		__HAL_TIM_SET_COMPARE(focR.htim_pwm, focR.u_tim_channel, 500);
 //		__HAL_TIM_SET_COMPARE(focR.htim_pwm, focR.v_tim_channel, 000);
@@ -253,8 +258,19 @@ void PeriphCommonClock_Config(void)
 
   /** Initializes the peripherals clock
   */
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_CKPER;
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_CKPER|RCC_PERIPHCLK_ADCDAC;
+  PeriphClkInitStruct.PLL2.PLL2Source = RCC_PLL2_SOURCE_HSE;
+  PeriphClkInitStruct.PLL2.PLL2M = 5;
+  PeriphClkInitStruct.PLL2.PLL2N = 64;
+  PeriphClkInitStruct.PLL2.PLL2P = 2;
+  PeriphClkInitStruct.PLL2.PLL2Q = 2;
+  PeriphClkInitStruct.PLL2.PLL2R = 5;
+  PeriphClkInitStruct.PLL2.PLL2RGE = RCC_PLL2_VCIRANGE_2;
+  PeriphClkInitStruct.PLL2.PLL2VCOSEL = RCC_PLL2_VCORANGE_WIDE;
+  PeriphClkInitStruct.PLL2.PLL2FRACN = 0;
+  PeriphClkInitStruct.PLL2.PLL2ClockOut = RCC_PLL2_DIVR;
   PeriphClkInitStruct.CkperClockSelection = RCC_CLKPSOURCE_HSI;
+  PeriphClkInitStruct.AdcDacClockSelection = RCC_ADCDACCLKSOURCE_PLL2R;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {
     Error_Handler();

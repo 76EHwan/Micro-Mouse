@@ -25,7 +25,6 @@ void Show_IMU() {
 }
 
 void Show_Current() {
-	Calc_DRV8316C_Current();
 //	LCD_Printf(0, 7, ST7789_WHITE, ST7789_BLACK, "L U:%.3f ",
 //			focL.Iu);
 //	LCD_Printf(11, 7, ST7789_WHITE, ST7789_BLACK, "V:%.3f ",

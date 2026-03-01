@@ -127,7 +127,7 @@ void MX_User_Init() {
 #endif
 
 #ifdef FOC_EN
-	FOC_Init(&focL, &htim1, &encDataL, &DRV8316C_L, TIM_CHANNEL_1, TIM_CHANNEL_2, TIM_CHANNEL_2);
+	FOC_Init(&focL, &htim1, &encDataL, &DRV8316C_L, TIM_CHANNEL_1, TIM_CHANNEL_2, TIM_CHANNEL_3);
 	FOC_Init(&focR, &htim8, &encDataR, &DRV8316C_R, TIM_CHANNEL_1, TIM_CHANNEL_2, TIM_CHANNEL_3);
 #endif
 }
