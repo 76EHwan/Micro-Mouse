@@ -142,45 +142,23 @@ int main(void)
 	MX_User_Init();
 	LCD_Printf(0, 0, ST7789_WHITE, ST7789_BLACK, "Hello world!");
 	HAL_Delay(1000);
-//	ST7789_FillScreen(ST7789_BLACK);
+	ST7789_FillScreen(ST7789_BLACK);
 	HAL_GPIO_WritePin(MTR_L_DRVOFF_GPIO_Port, MTR_L_DRVOFF_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(MTR_R_DRVOFF_GPIO_Port, MTR_R_DRVOFF_Pin, GPIO_PIN_RESET);
 	HAL_Delay(10);
 	TRIG_OFF;
-	ADC1_Start();
-//	FOC_Start(&focL);
-//	FOC_Start(&focR);
-//	Sensor_Start();
-  /* USER CODE END 2 */
+
+	Sensor_Start();
+	/* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
 	while (1) {
-//		if(!HAL_GPIO_ReadPin(MTR_R_nFAULT_GPIO_Port, MTR_R_nFAULT_Pin)){
-//			TRIG_TOGGLE;
-//		}
-//		FOC_Update(&focL);
-//		FOC_Update(&focR);
-//		Show_Current();
-//		Simple_6_step_Control(&focL);
-//		Simple_6_step_Control(&focR);
-//		Simple_SVPWM_Control(&focL);
-//		Simple_SVPWM_Control(&focR);
-//		Test_DRV8316C_Read_Status(&DRV8316C_R);
-//		LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "%4d", focR.htim_pwm->Instance->CCR1);
-//		LCD_Printf(0, 2, ST7789_WHITE, ST7789_BLACK, "%4d", focR.htim_pwm->Instance->CCR2);
-//		LCD_Printf(0, 3, ST7789_WHITE, ST7789_BLACK, "%4d", focR.htim_pwm->Instance->CCR3);
-//		delay_us(50);
-		LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "%d", PWM_PERIOD);
-
-//		__HAL_TIM_SET_COMPARE(focR.htim_pwm, focR.u_tim_channel, 500);
-//		__HAL_TIM_SET_COMPARE(focR.htim_pwm, focR.v_tim_channel, 000);
-//		__HAL_TIM_SET_COMPARE(focR.htim_pwm, focR.w_tim_channel, 250);
-
-//		Sensor_Get_Dist();
-//		Show_ToF();
-
+		LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "L :%4dmm", sensor_L);
+		LCD_Printf(0, 2, ST7789_WHITE, ST7789_BLACK, "CL:%4dmm", sensor_CL);
+		LCD_Printf(0, 3, ST7789_WHITE, ST7789_BLACK, "CR:%4dmm", sensor_CR);
+		LCD_Printf(0, 4, ST7789_WHITE, ST7789_BLACK, "R :%4dmm", sensor_R);
 	}
     /* USER CODE END WHILE */
 

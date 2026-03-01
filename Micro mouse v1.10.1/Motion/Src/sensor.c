@@ -7,9 +7,9 @@
 
 #include "sensor.h"
 #include "adc.h"
+#include "tim.h"
 
 #include "foc.h"
-
 #include "lsm6ds3tr-c.h"
 #include "vl53l4cx.h"
 
@@ -41,28 +41,57 @@ void TIM6_IRQ_Handle() {
 		imu_data.Yaw_Angle += 360.0f;
 }
 
-void Sensor_Start() {
-	VL53L4CX_Start();
+__STATIC_INLINE void Clear_Distance() {
+	sensor_L = 0;
+	sensor_CL = 0;
+	sensor_CR = 0;
+	sensor_R = 0;
 }
 
-void Sensor_Get_Dist() {
-	for (uint8_t i = 0; i < VL53L4CX_NUM; i++) {
-		uint8_t dataReady = 0;
+void Sensor_Start() {
+	Clear_Distance();
+	VL53L4CX_Start();
 
-		// 1. 데이터가 준비되었는지 확인 (비차단 방식)
-		HAL_StatusTypeDef status = VL53LX_GetMeasurementDataReady(vl53lx + i,
-				&dataReady);
+	HAL_TIM_Base_Start_IT(&htim3);
+}
 
-		if ((status == 0) && (dataReady == 1)) {
-			// 2. 준비되었다면 데이터 읽어오기 (MultiRangingData 변수 업데이트)
-			VL53LX_GetMultiRangingData(vl53lx + i, &MultiRangingData[i]);
+void Sensor_Get_Dist(uint8_t i) {
+	uint8_t dataReady = 0;
 
-			// 3. 인터럽트 클리어 (이걸 해야 다음 측정이 시작됩니다!)
-			VL53LX_ClearInterruptAndStartMeasurement(vl53lx + i);
+	// 1. 데이터가 준비되었는지 확인 (비차단 방식)
+	HAL_StatusTypeDef status = VL53LX_GetMeasurementDataReady(vl53lx + i,
+			&dataReady);
+
+	if ((status == 0) && (dataReady == 1)) {
+		// 2. 준비되었다면 데이터 읽어오기 (MultiRangingData 변수 업데이트)
+		VL53LX_GetMultiRangingData(vl53lx + i, &MultiRangingData[i]);
+
+		// 3. 인터럽트 클리어 (이걸 해야 다음 측정이 시작됩니다!)
+		VL53LX_ClearInterruptAndStartMeasurement(vl53lx + i);
+
+		int16_t range_millimeter =
+				(pMultiRangingData + i)->RangeData[0].RangeMilliMeter;
+		if ((pMultiRangingData + i)->NumberOfObjectsFound) {
+			switch (i) {
+			case 0:
+				sensor_L = range_millimeter;
+				break;
+			case 1:
+				sensor_CL = range_millimeter;
+				break;
+			case 2:
+				sensor_CR = range_millimeter;
+				break;
+			case 3:
+				sensor_R = range_millimeter;
+				break;
+			}
 		}
 	}
-	sensor_L = (pMultiRangingData + 0)->RangeData[0].RangeMilliMeter;
-	sensor_CL = (pMultiRangingData + 1)->RangeData[0].RangeMilliMeter;
-	sensor_CR = (pMultiRangingData + 2)->RangeData[0].RangeMilliMeter;
-	sensor_R = (pMultiRangingData + 3)->RangeData[0].RangeMilliMeter;
+}
+
+void TIM3_IRQ_Handle() {
+	static uint8_t i = 0;
+	Sensor_Get_Dist(i);
+	i = (i + 1) & 0x03;
 }

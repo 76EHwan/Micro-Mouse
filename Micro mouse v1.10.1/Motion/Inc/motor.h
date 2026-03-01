@@ -11,6 +11,8 @@
 #include "foc.h"
 
 void Simple_6_step_Control(FOC_Handle_t *foc);
-void Simple_SVPWM_Control(FOC_Handle_t *foc);
+void Simple_SVPWM_Control(FOC_Handle_t *foc, uint16_t step);
+
+void Motor_Start(void);
 
 #endif /* INC_MOTOR_H_ */

@@ -6,7 +6,9 @@
  */
 
 #include "motor.h"
+#include "adc.h"
 #include "main.h"
+
 #include "foc.h"
 #include "mt6701.h"
 #include "st7789.h"
@@ -16,8 +18,6 @@
 void Simple_6_step_Control(FOC_Handle_t *foc) {
 	uint8_t ctrl2_val = 0;
 	DRV8316C_ReadRegister(foc->hdrv, DRV_REG_CTRL_2, &ctrl2_val);
-
-//	LCD_Printf(0, 3, ST7789_WHITE, ST7789_BLACK, "CTRL2: 0x%02X", ctrl2_val);
 	if (ctrl2_val != 0x34) {
 		TRIG_TOGGLE;
 		FOC_Stop(foc);
@@ -33,14 +33,6 @@ void Simple_6_step_Control(FOC_Handle_t *foc) {
 	uint16_t pwm_val = foc->htim_pwm->Instance->ARR; // 힘을 좀 더 강하게 (약 64%)
 	float modulation_factor = 0.3;
 
-// 1. 상태 모니터링
-//	uint32_t ccer = foc->htim_pwm->Instance->CCER;
-//	uint32_t ccr1 = foc->htim_pwm->Instance->CCR1;
-
-	// CCER이 0이면 안 됩니다! (보통 0x111 같은 값이어야 함)
-//	LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "CCER:%3x CCR:%4d", ccer,
-//			ccr1);
-//
 	LCD_Printf(0, 2, ST7789_WHITE, ST7789_BLACK, "Step:%3d PWM:%4d", step,
 			pwm_val);
 
@@ -91,8 +83,7 @@ void Simple_6_step_Control(FOC_Handle_t *foc) {
 //	step = (step + 1) % 6;
 }
 
-void Simple_SVPWM_Control(FOC_Handle_t *foc) {
-	static uint16_t step = 0;
+void Simple_SVPWM_Control(FOC_Handle_t *foc, uint16_t step) {
 	uint16_t arr = foc->htim_pwm->Instance->ARR;
 
 	float modulation_factor = 0.4f;
@@ -118,11 +109,14 @@ void Simple_SVPWM_Control(FOC_Handle_t *foc) {
 	__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->u_tim_channel, pwm_u);
 	__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->v_tim_channel, pwm_v);
 	__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->w_tim_channel, pwm_w);
-
-	step = (step + 1) % 360;
 }
 
-void FOC_Control(FOC_Handle_t *foc){
-	MT6701_ReadSSI(foc->encoder);
+void Motor_Start(){
+	ADC2_Start();
+	ADC1_Start();
 
+	FOC_Start(&focR);
+	__HAL_TIM_SET_COUNTER(&htim8, PWM_PERIOD);
+
+	FOC_Start(&focL);
 }
