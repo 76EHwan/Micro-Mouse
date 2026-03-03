@@ -86,7 +86,7 @@ void Simple_6_step_Control(FOC_Handle_t *foc) {
 void Simple_SVPWM_Control(FOC_Handle_t *foc, uint16_t step) {
 	uint16_t arr = foc->htim_pwm->Instance->ARR;
 
-	float modulation_factor = 0.4f;
+	float modulation_factor = 0.6f;
 
 	uint16_t PWM_MAX = (uint16_t) (arr * 0.95f);  // ✅ 이것만 추가
 
@@ -112,6 +112,7 @@ void Simple_SVPWM_Control(FOC_Handle_t *foc, uint16_t step) {
 }
 
 void Motor_Start(){
+	HAL_TIM_Base_Start_IT(&htim7);
 	ADC2_Start();
 	ADC1_Start();
 
@@ -119,4 +120,8 @@ void Motor_Start(){
 	__HAL_TIM_SET_COUNTER(&htim8, PWM_PERIOD);
 
 	FOC_Start(&focL);
+}
+
+void Calc_PI_Iqref(FOC_Handle_t *hfoc){
+
 }

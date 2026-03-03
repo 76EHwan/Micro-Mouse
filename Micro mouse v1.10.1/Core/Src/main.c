@@ -148,17 +148,21 @@ int main(void)
 	HAL_Delay(10);
 	TRIG_OFF;
 
-	Sensor_Start();
+	FOC_Start(&focR);
+	FOC_Start(&focL);
 	/* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
 	while (1) {
-		LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "L :%4dmm", sensor_L);
-		LCD_Printf(0, 2, ST7789_WHITE, ST7789_BLACK, "CL:%4dmm", sensor_CL);
-		LCD_Printf(0, 3, ST7789_WHITE, ST7789_BLACK, "CR:%4dmm", sensor_CR);
-		LCD_Printf(0, 4, ST7789_WHITE, ST7789_BLACK, "R :%4dmm", sensor_R);
+		static uint16_t step = 0;
+//		FOC_Update(&focR);
+		Simple_SVPWM_Control(&focR, step);
+		Simple_SVPWM_Control(&focL, 360-step);
+//		Show_Current();
+		step = (step + 1) % 360;
+		delay_us(50);
 	}
     /* USER CODE END WHILE */
 
