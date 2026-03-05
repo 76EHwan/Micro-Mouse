@@ -63,6 +63,7 @@ extern DMA_QListTypeDef List_GPDMA1_Channel1;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel1;
 extern ADC_HandleTypeDef hadc1;
 extern ADC_HandleTypeDef hadc2;
+extern DMA_HandleTypeDef handle_GPDMA2_Channel0;
 extern SPI_HandleTypeDef hspi1;
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim4;
@@ -334,6 +335,20 @@ void ADC2_IRQHandler(void)
   /* USER CODE BEGIN ADC2_IRQn 1 */
 
   /* USER CODE END ADC2_IRQn 1 */
+}
+
+/**
+  * @brief This function handles GPDMA2 Channel 0 global interrupt.
+  */
+void GPDMA2_Channel0_IRQHandler(void)
+{
+  /* USER CODE BEGIN GPDMA2_Channel0_IRQn 0 */
+
+  /* USER CODE END GPDMA2_Channel0_IRQn 0 */
+  HAL_DMA_IRQHandler(&handle_GPDMA2_Channel0);
+  /* USER CODE BEGIN GPDMA2_Channel0_IRQn 1 */
+
+  /* USER CODE END GPDMA2_Channel0_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */

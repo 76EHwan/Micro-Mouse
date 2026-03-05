@@ -413,5 +413,10 @@ void SPI1_Config_For_ST7735(void)
     __HAL_SPI_ENABLE(&hspi1);
 }
 
+void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi) {
+    if (hspi->Instance == SPI1) {
+    	SPI1_Tx_IRQ();
+    }
+}
 
 /* USER CODE END 1 */

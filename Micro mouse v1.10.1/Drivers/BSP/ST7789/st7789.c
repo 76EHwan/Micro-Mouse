@@ -147,13 +147,6 @@ void ST7789_UpdateScreen(void) {
 	// 주의: CS Pin UnSelect는 아래 콜백 함수에서 수행됨
 }
 
-// DMA 전송 완료 인터럽트 콜백
-void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi) {
-	if (hspi->Instance == ST7789_SPI_PORT.Instance) {
-		ST7789_UnSelect(); // 전송 끝, CS 해제
-	}
-}
-
 // ==========================================================
 // [그리기 함수] 이제 SPI를 안 쓰고 RAM(버퍼)만 건드립니다. (매우 빠름)
 // ==========================================================
@@ -278,3 +271,8 @@ void TIM4_IRQ_Handle() {
 		TRIG_TOGGLE;
 	}
 }
+
+void SPI1_Tx_IRQ(){
+	ST7789_UnSelect();
+}
+

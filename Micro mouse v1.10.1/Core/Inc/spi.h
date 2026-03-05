@@ -50,6 +50,8 @@ void MX_SPI3_Init(void);
 void SPI1_Config_For_DRV8316(void);
 void SPI1_Config_For_ST7735(void);
 
+__weak void SPI1_Tx_IRQ();
+
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

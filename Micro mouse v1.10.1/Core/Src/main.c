@@ -150,23 +150,22 @@ int main(void)
 	TRIG_OFF;
 //
 //	FOC_Start(&focR);
-//	FOC_Start(&focL);
+	FOC_Start(&focL);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
 	while (1) {
-//		static uint16_t step = 0;
+		static uint16_t step = 0;
 		MT6701_ReadSSI(focL.encoder);
 		MT6701_ReadSSI(focR.encoder);
 //		Simple_SVPWM_Control(&focR, step);
-//		Simple_SVPWM_Control(&focL, 360-step);
+		Simple_SVPWM_Control(&focL, 360-step);
 //		Show_Current();
-//		step = (step + 1) % 360;
-//		delay_us(50);
-		LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "L: %.3f", focL.encoder->motor_elec_angle);
-		LCD_Printf(0, 2, ST7789_WHITE, ST7789_BLACK, "R: %.3f", focR.encoder->motor_elec_angle);
+		step = (step + 1) % 360;
+		delay_us(100);
+//		LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "L: %.3f  ", focL.encoder->motor_elec_angle);
 
 	}
     /* USER CODE END WHILE */
