@@ -39,8 +39,9 @@ void MX_User_Init() {
 	DWT_Init();
 	ST7789_Init();
 	ST7789_FillScreen(ST7789_BLACK);
+	HAL_TIM_Base_Start_IT(&htim4);
 	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
-	__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3, 200);
+	__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3, 2000);
 
 	HAL_Delay(10);
 

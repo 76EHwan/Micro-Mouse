@@ -5,204 +5,276 @@
  *      Author: kth59
  */
 
-
 #include "st7789.h"
-#include "spi.h" // spi.h가 포함되어야 hspi1을 인식합니다.
+#include "spi.h"
 #include <stdio.h>
 #include <stdarg.h>
+#include <string.h> // memset 사용을 위해 추가
 
+// ==========================================================
+// [설정] 프레임버퍼 정의
+// ==========================================================
+// 240 * 135 * 2 bytes = 약 64.8 KB
+// DMA 전송을 위해 volatile 선언 및 32비트 정렬 권장
+#if defined(__GNUC__)
+__attribute__((aligned(32)))
+
+
+
+
+#endif
+volatile uint16_t st7789_framebuffer[ST7789_WIDTH * ST7789_HEIGHT];
+
+// 색상 엔디언 변환 매크로 (Little Endian MCU -> Big Endian LCD)
+#define SWAP_BYTES(color) ((uint16_t)(((color) >> 8) | ((color) << 8)))
+
+// SPI 핸들 (st7789.h에서 define으로 설정된 이름 사용)
 extern SPI_HandleTypeDef ST7789_SPI_PORT;
 
-// 간단한 딜레이 매크로
+// ==========================================================
+// [내부 함수] 기본 제어
+// ==========================================================
+
 static void ST7789_Delay(uint32_t ms) {
-    HAL_Delay(ms);
+	HAL_Delay(ms);
 }
 
-// CS 핀 제어
 static void ST7789_Select(void) {
-    HAL_GPIO_WritePin(ST7789_CS_PORT, ST7789_CS_PIN, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(ST7789_CS_PORT, ST7789_CS_PIN, GPIO_PIN_RESET);
 }
+
 static void ST7789_UnSelect(void) {
-    HAL_GPIO_WritePin(ST7789_CS_PORT, ST7789_CS_PIN, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(ST7789_CS_PORT, ST7789_CS_PIN, GPIO_PIN_SET);
 }
 
-// 커맨드 전송 (DC = 0)
+// 초기화 명령 전송용 (Blocking 모드 유지)
 void ST7789_WriteCommand(uint8_t cmd) {
-    ST7789_Select();
-    HAL_GPIO_WritePin(ST7789_DC_PORT, ST7789_DC_PIN, GPIO_PIN_RESET); // Command Mode
-    HAL_SPI_Transmit(&ST7789_SPI_PORT, &cmd, 1, HAL_MAX_DELAY);
-    ST7789_UnSelect();
+	ST7789_Select();
+	HAL_GPIO_WritePin(ST7789_DC_PORT, ST7789_DC_PIN, GPIO_PIN_RESET); // Command
+	HAL_SPI_Transmit(&ST7789_SPI_PORT, &cmd, 1, HAL_MAX_DELAY);
+	ST7789_UnSelect();
 }
 
-// 데이터 전송 (DC = 1)
 void ST7789_WriteData(uint8_t *buff, size_t buff_size) {
-    ST7789_Select();
-    HAL_GPIO_WritePin(ST7789_DC_PORT, ST7789_DC_PIN, GPIO_PIN_SET); // Data Mode
-    HAL_SPI_Transmit(&ST7789_SPI_PORT, buff, buff_size, HAL_MAX_DELAY);
-    ST7789_UnSelect();
+	ST7789_Select();
+	HAL_GPIO_WritePin(ST7789_DC_PORT, ST7789_DC_PIN, GPIO_PIN_SET); // Data
+	HAL_SPI_Transmit(&ST7789_SPI_PORT, buff, buff_size, HAL_MAX_DELAY);
+	ST7789_UnSelect();
 }
 
-// 1바이트 데이터 전송 래퍼
 static void ST7789_WriteSmallData(uint8_t data) {
-    ST7789_WriteData(&data, 1);
+	ST7789_WriteData(&data, 1);
 }
 
-// 윈도우 설정 (핵심: Offset 적용)
-static void ST7789_SetAddressWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {
-    uint16_t x_start = x0 + ST7789_X_SHIFT;
-    uint16_t x_end = x1 + ST7789_X_SHIFT;
-    uint16_t y_start = y0 + ST7789_Y_SHIFT;
-    uint16_t y_end = y1 + ST7789_Y_SHIFT;
+static void ST7789_SetAddressWindow(uint16_t x0, uint16_t y0, uint16_t x1,
+		uint16_t y1) {
+	uint16_t x_start = x0 + ST7789_X_SHIFT;
+	uint16_t x_end = x1 + ST7789_X_SHIFT;
+	uint16_t y_start = y0 + ST7789_Y_SHIFT;
+	uint16_t y_end = y1 + ST7789_Y_SHIFT;
 
-    ST7789_WriteCommand(0x2A); // CASET
-    {
-        uint8_t data[] = { (x_start >> 8) & 0xFF, x_start & 0xFF, (x_end >> 8) & 0xFF, x_end & 0xFF };
-        ST7789_WriteData(data, sizeof(data));
-    }
+	ST7789_WriteCommand(0x2A); // CASET
+	{
+		uint8_t data[] = { (x_start >> 8) & 0xFF, x_start & 0xFF, (x_end >> 8)
+				& 0xFF, x_end & 0xFF };
+		ST7789_WriteData(data, sizeof(data));
+	}
 
-    ST7789_WriteCommand(0x2B); // RASET
-    {
-        uint8_t data[] = { (y_start >> 8) & 0xFF, y_start & 0xFF, (y_end >> 8) & 0xFF, y_end & 0xFF };
-        ST7789_WriteData(data, sizeof(data));
-    }
+	ST7789_WriteCommand(0x2B); // RASET
+	{
+		uint8_t data[] = { (y_start >> 8) & 0xFF, y_start & 0xFF, (y_end >> 8)
+				& 0xFF, y_end & 0xFF };
+		ST7789_WriteData(data, sizeof(data));
+	}
 
-    ST7789_WriteCommand(0x2C); // RAMWR
+	ST7789_WriteCommand(0x2C); // RAMWR
 }
 
-// 초기화 함수
+// ==========================================================
+// [초기화] ST7789_Init
+// ==========================================================
 void ST7789_Init(void) {
-    ST7789_WriteCommand(0x01); // SWRESET
-    ST7789_Delay(150);
+	ST7789_WriteCommand(0x01); // SWRESET
+	ST7789_Delay(150);
 
-    ST7789_WriteCommand(0x11); // SLPOUT (Sleep Out)
-    ST7789_Delay(255);
+	ST7789_WriteCommand(0x11); // SLPOUT
+	ST7789_Delay(255);
 
-    ST7789_WriteCommand(0x3A); // COLMOD (Color Mode)
-    ST7789_WriteSmallData(0x55); // 16-bit color (65k)
+	ST7789_WriteCommand(0x3A); // COLMOD
+	ST7789_WriteSmallData(0x55); // 16-bit color
 
-    // [중요] 방향 설정 (MADCTL) - 가로 모드 예시
-    // 0x36 레지스터 비트: MY MX MV ML RGB MH ...
-    // 가로 모드(LandScape) 설정 값: 보통 0x70 또는 0xA0 등을 사용
-    ST7789_WriteCommand(0x36);
-    ST7789_WriteSmallData(0xA0); // 방향에 따라 0x00, 0x60, 0x70, 0xC0 등으로 변경 필요
+	ST7789_WriteCommand(0x36); // MADCTL
+	ST7789_WriteSmallData(0xA0); // 가로 모드 (필요시 0x70 등 변경)
 
-    // [중요] 색상 반전 (IPS 패널은 보통 반전 켜야 함)
-    ST7789_WriteCommand(0x21); // INVON (Inversion On) -> 색이 이상하면 0x20(OFF)으로 변경
+	ST7789_WriteCommand(0x21); // INVON (색상 반전)
 
-    ST7789_WriteCommand(0x29); // DISPON (Display On)
-    ST7789_Delay(10);
+	ST7789_WriteCommand(0x29); // DISPON
+	ST7789_Delay(10);
 
-    // 화면 검은색으로 클리어
-    ST7789_FillScreen(ST7789_BLACK);
+	// 프레임버퍼 초기화 및 화면 클리어
+	ST7789_FillScreen(ST7789_BLACK);
+	ST7789_UpdateScreen(); // 초기 검은 화면 즉시 전송
 }
 
-// 화면 전체 채우기
+// ==========================================================
+// [핵심] 화면 갱신 함수 (DMA 사용)
+// 메인 루프나 타이머에서 주기적으로 호출해주세요.
+// ==========================================================
+void ST7789_UpdateScreen(void) {
+	// 이전 DMA 전송이 진행 중이라면 대기하거나 리턴 (여기서는 안전하게 대기)
+	if (ST7789_SPI_PORT.State != HAL_SPI_STATE_READY) {
+		return;
+	}
+
+	// 1. 전체 화면 윈도우 설정 (Blocking Command)
+	ST7789_SetAddressWindow(0, 0, ST7789_WIDTH - 1, ST7789_HEIGHT - 1);
+
+	// 2. 데이터 전송 준비
+	ST7789_Select();
+	HAL_GPIO_WritePin(ST7789_DC_PORT, ST7789_DC_PIN, GPIO_PIN_SET); // Data Mode
+
+	// 3. D-Cache Clean (메모리 -> RAM 동기화, H5 필수)
+	// SCB_CleanDCache_by_Addr((uint32_t*)st7789_framebuffer, sizeof(st7789_framebuffer));
+//    SCB_CleanDCache(); // 전체 클린 (간단한 방법)
+
+	// 4. DMA 전송 시작 (Non-Blocking)
+	// 16비트 배열이지만 SPI는 8비트 모드이므로 길이는 *2
+	if (HAL_SPI_Transmit_DMA(&ST7789_SPI_PORT, (uint8_t*) st7789_framebuffer,
+			sizeof(st7789_framebuffer)) != HAL_OK) {
+		ST7789_UnSelect(); // 에러 시 CS 해제
+	}
+
+	// 주의: CS Pin UnSelect는 아래 콜백 함수에서 수행됨
+}
+
+// DMA 전송 완료 인터럽트 콜백
+void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi) {
+	if (hspi->Instance == ST7789_SPI_PORT.Instance) {
+		ST7789_UnSelect(); // 전송 끝, CS 해제
+	}
+}
+
+// ==========================================================
+// [그리기 함수] 이제 SPI를 안 쓰고 RAM(버퍼)만 건드립니다. (매우 빠름)
+// ==========================================================
+
+// 화면 채우기 (memset 사용 최적화 시도 가능하나 루프가 안전)
 void ST7789_FillScreen(uint16_t color) {
-    ST7789_SetAddressWindow(0, 0, ST7789_WIDTH - 1, ST7789_HEIGHT - 1);
-
-    // 버퍼를 사용해 한 번에 쏘는 것이 빠름 (메모리 부족 시 루프로 변경)
-    // 여기서는 간단히 픽셀 단위 전송을 예시로 들거나, 라인 버퍼를 쓸 수 있음
-    // 아래는 단순 무식한 방법 (최적화 필요 시 DMA 권장)
-    uint16_t i, j;
-    uint8_t data[2] = { (color >> 8) & 0xFF, color & 0xFF };
-
-    ST7789_Select();
-    HAL_GPIO_WritePin(ST7789_DC_PORT, ST7789_DC_PIN, GPIO_PIN_SET);
-
-    for(i = 0; i < ST7789_WIDTH; i++) {
-        for(j = 0; j < ST7789_HEIGHT; j++) {
-             HAL_SPI_Transmit(&ST7789_SPI_PORT, data, 2, 10);
-        }
-    }
-    ST7789_UnSelect();
+	uint16_t swapped_color = SWAP_BYTES(color);
+	for (int i = 0; i < ST7789_WIDTH * ST7789_HEIGHT; i++) {
+		st7789_framebuffer[i] = swapped_color;
+	}
 }
 
 // 점 찍기
 void ST7789_DrawPixel(uint16_t x, uint16_t y, uint16_t color) {
-    if(x >= ST7789_WIDTH || y >= ST7789_HEIGHT) return;
+	if (x >= ST7789_WIDTH || y >= ST7789_HEIGHT)
+		return;
 
-    ST7789_SetAddressWindow(x, y, x, y);
-    uint8_t data[2] = { (color >> 8) & 0xFF, color & 0xFF };
-    ST7789_WriteData(data, 2);
+	// 인덱스 계산 및 색상 변환 후 저장
+	st7789_framebuffer[y * ST7789_WIDTH + x] = SWAP_BYTES(color);
 }
 
-// 사용자 정의 8x16 폰트 전용 출력 함수
-// [최종] 8x16 폰트 (초기 코드 로직 + 90도 회전 적용)
-// [진짜 최종] 8x16 폰트 (세로 방향 + MSB First)
-// 데이터 구조: [Col 0 Top] [Col 0 Bot] [Col 1 Top] [Col 1 Bot] ...
-void ST7789_DrawUser8x16(uint16_t x, uint16_t y, char *str, uint16_t color, uint16_t bgcolor) {
-    uint8_t i, j;
-    char ch;
-    // 글자 하나(8x16)를 담을 버퍼 (128 픽셀 * 2바이트)
-    uint16_t char_buf[8 * 16];
+// 이미지 그리기 (배열 복사)
+void ST7789_DrawImage(uint16_t x, uint16_t y, uint16_t w, uint16_t h,
+		const uint16_t *data) {
+	if ((x >= ST7789_WIDTH) || (y >= ST7789_HEIGHT))
+		return;
+	if ((x + w) > ST7789_WIDTH)
+		w = ST7789_WIDTH - x;
+	if ((y + h) > ST7789_HEIGHT)
+		h = ST7789_HEIGHT - y;
 
-    // 색상 데이터 엔디언 변환 (ST7789는 Big-Endian 사용 가능성이 높음)
-    uint16_t color_le = (color >> 8) | (color << 8);
-    uint16_t bgcolor_le = (bgcolor >> 8) | (bgcolor << 8);
-
-    while (*str) {
-        ch = *str;
-        if (ch < 32 || ch > 126) { str++; continue; }
-
-        const uint8_t *pData = asc2_1608[ch - 32];
-
-        // 1. 버퍼에 픽셀 데이터 채우기 (세로 방향 MSB First 대응)
-        for (i = 0; i < 8; i++) {
-            uint8_t top = pData[i * 2];
-            uint8_t bot = pData[i * 2 + 1];
-
-            for (j = 0; j < 8; j++) {
-                // 상단 8비트
-                char_buf[i + (j * 8)] = (top & (0x80 >> j)) ? color_le : bgcolor_le;
-                // 하단 8비트
-                char_buf[i + ((j + 8) * 8)] = (bot & (0x80 >> j)) ? color_le : bgcolor_le;
-            }
-        }
-
-        // 2. 글자 영역 윈도우 설정 (한 번만 수행)
-        ST7789_SetAddressWindow(x, y, x + 8 - 1, y + 16 - 1);
-
-        // 3. 통째로 전송
-        ST7789_Select();
-        HAL_GPIO_WritePin(ST7789_DC_PORT, ST7789_DC_PIN, GPIO_PIN_SET);
-        HAL_SPI_Transmit(&ST7789_SPI_PORT, (uint8_t*)char_buf, sizeof(char_buf), HAL_MAX_DELAY);
-        ST7789_UnSelect();
-
-        x += 8;
-        str++;
-    }
+	for (uint16_t row = 0; row < h; row++) {
+		for (uint16_t col = 0; col < w; col++) {
+			// 원본 데이터가 이미 Big Endian(Byte swapped)되어 있는지 확인 필요.
+			// 보통 이미지 배열은 0xRRGGBB -> RGB565 변환된 값이므로
+			// 여기서는 원본 데이터를 그대로 쓴다고 가정하고, 필요시 SWAP_BYTES 추가
+			// 일반적인 변환 툴은 Little Endian으로 줄 수 있으므로 SWAP 적용
+			st7789_framebuffer[(y + row) * ST7789_WIDTH + (x + col)] =
+					SWAP_BYTES(data[row * w + col]);
+		}
+	}
 }
 
-void ST7789_DrawImage(uint16_t x, uint16_t y, uint16_t w, uint16_t h, const uint16_t *data) {
-    if((x >= ST7789_WIDTH) || (y >= ST7789_HEIGHT)) return;
-    if((x + w - 1) >= ST7789_WIDTH) return;
-    if((y + h - 1) >= ST7789_HEIGHT) return;
+// 8x16 폰트 그리기 (버퍼에 쓰기)
+void ST7789_DrawUser8x16(uint16_t x, uint16_t y, char *str, uint16_t color,
+		uint16_t bgcolor) {
+	uint8_t i, j;
+	char ch;
+	uint16_t color_swapped = SWAP_BYTES(color);
+	uint16_t bgcolor_swapped = SWAP_BYTES(bgcolor);
 
-    // 1. 이미지가 들어갈 사각형 영역(Window)을 잡습니다.
-    ST7789_Select();
-    ST7789_SetAddressWindow(x, y, x+w-1, y+h-1);
+	while (*str) {
+		ch = *str;
+		if (ch < 32 || ch > 126) {
+			str++;
+			continue;
+		}
 
-    // 2. 데이터를 전송합니다.
-    // (RGB565는 픽셀당 2바이트이므로, 전체 크기 * 2 만큼 보냅니다)
-    ST7789_WriteData((uint8_t*)data, sizeof(uint16_t) * w * h);
+		// 화면 밖으로 나가면 그리지 않음
+		if (x + 8 > ST7789_WIDTH || y + 16 > ST7789_HEIGHT) {
+			str++;
+			continue; // 혹은 break;
+		}
 
-    ST7789_UnSelect();
+		const uint8_t *pData = asc2_1608[ch - 32];
+
+		for (i = 0; i < 8; i++) { // 8 Columns
+			uint8_t top = pData[i * 2];
+			uint8_t bot = pData[i * 2 + 1];
+
+			for (j = 0; j < 8; j++) { // 8 Rows (Top part)
+				if (top & (0x80 >> j))
+					st7789_framebuffer[(y + j) * ST7789_WIDTH + (x + i)] =
+							color_swapped;
+				else
+					st7789_framebuffer[(y + j) * ST7789_WIDTH + (x + i)] =
+							bgcolor_swapped;
+			}
+			for (j = 0; j < 8; j++) { // 8 Rows (Bottom part)
+				if (bot & (0x80 >> j))
+					st7789_framebuffer[(y + j + 8) * ST7789_WIDTH + (x + i)] =
+							color_swapped;
+				else
+					st7789_framebuffer[(y + j + 8) * ST7789_WIDTH + (x + i)] =
+							bgcolor_swapped;
+			}
+		}
+		x += 8;
+		str++;
+	}
 }
 
-void LCD_Printf(uint16_t x, uint16_t y, uint16_t fontcolor, uint16_t bgcolor, const char* fmt, ...) {
-    static char buf[128]; // 텍스트를 저장할 버퍼 (필요에 따라 크기 조절, 보통 128이면 충분)
-    va_list args;
+// Printf 함수
+void LCD_Printf(uint16_t x, uint16_t y, uint16_t fontcolor, uint16_t bgcolor,
+		const char *fmt, ...) {
+	static char buf[128];
+	va_list args;
+	va_start(args, fmt);
+	vsnprintf(buf, sizeof(buf), fmt, args);
+	va_end(args);
 
-    // 가변 인자 처리 시작
-    va_start(args, fmt);
+	ST7789_DrawUser8x16(x * 8, y * 16, buf, fontcolor, bgcolor);
+}
 
-    // 포맷 문자열과 변수들을 결합하여 문자열(buf)로 변환
-    vsnprintf(buf, sizeof(buf), fmt, args);
+void TIM4_IRQ_Handle() {
+	static uint16_t lcd_frame_count = 0;
+	lcd_frame_count++;
 
-    // 가변 인자 처리 끝
-    va_end(args);
+	if (lcd_frame_count >= 833) {
+		lcd_frame_count = 0;
 
-    // 만들어진 문자열을 기존 문자열 출력 함수로 전달
+		// 화면 갱신 요청
+		ST7789_UpdateScreen();
 
-    ST7789_DrawUser8x16(8*x, 16*y, buf, fontcolor, bgcolor);
+		// [디버깅] SPI 상태 확인 (만약 BUSY라면 인터럽트 설정 문제)
+		if (HAL_SPI_GetState(&ST7789_SPI_PORT) != HAL_SPI_STATE_READY) {
+			// 여기에 브레이크포인트를 걸거나 LED를 켜보세요.
+			// 이 안으로 들어온다면 100% SPI 인터럽트가 안 켜진 것입니다.
+			HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+		}
+
+		TRIG_TOGGLE;
+	}
 }

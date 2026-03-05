@@ -116,6 +116,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_GPDMA1_Init();
+  MX_GPDMA2_Init();
   MX_ADC1_Init();
   MX_FLASH_Init();
   MX_I2C2_Init();

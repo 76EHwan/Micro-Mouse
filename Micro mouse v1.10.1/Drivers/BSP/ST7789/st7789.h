@@ -51,6 +51,7 @@
 // 함수 선언
 // ==========================================================
 void ST7789_Init(void);
+void ST7789_UpdateScreen(void);
 void ST7789_FillScreen(uint16_t color);
 void ST7789_DrawPixel(uint16_t x, uint16_t y, uint16_t color);
 void ST7789_WriteCommand(uint8_t cmd);

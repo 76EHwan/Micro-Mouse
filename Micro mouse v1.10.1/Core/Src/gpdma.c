@@ -49,6 +49,25 @@ void MX_GPDMA1_Init(void)
   /* USER CODE END GPDMA1_Init 2 */
 
 }
+/* GPDMA2 init function */
+void MX_GPDMA2_Init(void)
+{
+
+  /* USER CODE BEGIN GPDMA2_Init 0 */
+
+  /* USER CODE END GPDMA2_Init 0 */
+
+  /* Peripheral clock enable */
+  __HAL_RCC_GPDMA2_CLK_ENABLE();
+
+  /* USER CODE BEGIN GPDMA2_Init 1 */
+
+  /* USER CODE END GPDMA2_Init 1 */
+  /* USER CODE BEGIN GPDMA2_Init 2 */
+
+  /* USER CODE END GPDMA2_Init 2 */
+
+}
 
 /* USER CODE BEGIN 1 */
 
