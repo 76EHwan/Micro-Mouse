@@ -27,6 +27,11 @@
 #define ADC_RES_HALF	(ADC_RES / 2.f)
 #define ADC_RES_INV		(1.f/ADC_RES)
 
+// --- MOTOR Parameter ---
+#define MOTOR_RES 		1.9 // Motor Resister
+#define MOTOR_IND 		0.000024f // Motor Inductance
+#define CUR_BW			(250000000.f / (PWM_PERIOD + 1)) //Current Bandwidth
+
 // --- PI Controller Struct ---
 typedef struct {
     float Kp;

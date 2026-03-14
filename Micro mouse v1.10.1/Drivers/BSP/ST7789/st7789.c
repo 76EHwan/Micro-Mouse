@@ -22,6 +22,8 @@ __attribute__((aligned(32)))
 
 
 
+
+
 #endif
 volatile uint16_t st7789_framebuffer[ST7789_WIDTH * ST7789_HEIGHT];
 
@@ -121,30 +123,25 @@ void ST7789_Init(void) {
 // 메인 루프나 타이머에서 주기적으로 호출해주세요.
 // ==========================================================
 void ST7789_UpdateScreen(void) {
-	// 이전 DMA 전송이 진행 중이라면 대기하거나 리턴 (여기서는 안전하게 대기)
+	// [중요] SPI가 현재 전송 중(BUSY)이라면 기다리지 말고 함수를 바로 종료(Skip)합니다.
+	// 이렇게 해야 모터 제어 루프가 멈추지 않습니다.
 	if (ST7789_SPI_PORT.State != HAL_SPI_STATE_READY) {
 		return;
 	}
 
-	// 1. 전체 화면 윈도우 설정 (Blocking Command)
+	// --- 아래는 기존 코드 ---
 	ST7789_SetAddressWindow(0, 0, ST7789_WIDTH - 1, ST7789_HEIGHT - 1);
-
-	// 2. 데이터 전송 준비
 	ST7789_Select();
-	HAL_GPIO_WritePin(ST7789_DC_PORT, ST7789_DC_PIN, GPIO_PIN_SET); // Data Mode
+	HAL_GPIO_WritePin(ST7789_DC_PORT, ST7789_DC_PIN, GPIO_PIN_SET);
 
-	// 3. D-Cache Clean (메모리 -> RAM 동기화, H5 필수)
-	// SCB_CleanDCache_by_Addr((uint32_t*)st7789_framebuffer, sizeof(st7789_framebuffer));
-//    SCB_CleanDCache(); // 전체 클린 (간단한 방법)
+	// 캐시 클린 (H5 시리즈 D-Cache가 켜져있을 경우)
+	// SCB_CleanDCache();
 
-	// 4. DMA 전송 시작 (Non-Blocking)
-	// 16비트 배열이지만 SPI는 8비트 모드이므로 길이는 *2
+	// DMA 전송 시작
 	if (HAL_SPI_Transmit_DMA(&ST7789_SPI_PORT, (uint8_t*) st7789_framebuffer,
 			sizeof(st7789_framebuffer)) != HAL_OK) {
-		ST7789_UnSelect(); // 에러 시 CS 해제
+		ST7789_UnSelect();
 	}
-
-	// 주의: CS Pin UnSelect는 아래 콜백 함수에서 수행됨
 }
 
 // ==========================================================
@@ -272,7 +269,7 @@ void TIM4_IRQ_Handle() {
 	}
 }
 
-void SPI1_Tx_IRQ(){
+void SPI1_Tx_IRQ() {
 	ST7789_UnSelect();
 }
 

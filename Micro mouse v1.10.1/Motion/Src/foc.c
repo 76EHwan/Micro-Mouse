@@ -113,6 +113,8 @@ void FOC_Init(FOC_Handle_t *hfoc, TIM_HandleTypeDef *htim, MT6701_Data_t *enc,
 	hfoc->dir = 1;
 
 	// PID Init
+
+
 	hfoc->pid_d.Kp = 1.0f;  // 튜닝 필요
 	hfoc->pid_d.Ki = 0.05f; // 튜닝 필요
 
