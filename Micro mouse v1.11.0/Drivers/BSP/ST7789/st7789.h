@@ -20,8 +20,8 @@
 #define ST7789_HEIGHT 135
 
 // [수정] 세로 모드 오프셋 (화면이 한쪽으로 쏠리면 이 값을 조절하세요)
-#define ST7789_X_SHIFT 40
-#define ST7789_Y_SHIFT 52
+#define ST7789_X_SHIFT 0
+#define ST7789_Y_SHIFT 0
 
 // ==========================================================
 // [사용자 설정] 핀 정의 (main.h의 define에 맞춰 수정하세요)

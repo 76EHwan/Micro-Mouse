@@ -220,7 +220,7 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* spiHandle)
     }
 
     /* SPI3 interrupt Init */
-    HAL_NVIC_SetPriority(SPI3_IRQn, 0, 0);
+    HAL_NVIC_SetPriority(SPI3_IRQn, 5, 0);
     HAL_NVIC_EnableIRQ(SPI3_IRQn);
   /* USER CODE BEGIN SPI3_MspInit 1 */
 
@@ -279,8 +279,9 @@ void HAL_SPI_MspDeInit(SPI_HandleTypeDef* spiHandle)
 
 /* USER CODE BEGIN 1 */
 void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi) {
-    if (hspi->Instance == SPI3) {
-    	SPI3_Tx_IRQ();
-    }
+	// 사용 중인 SPI 핸들(hspi3)의 전송이 끝났을 때만 CS 핀 해제
+	if (hspi->Instance == SPI3) {
+		SPI3_Tx_IRQ();
+	}
 }
 /* USER CODE END 1 */
