@@ -264,7 +264,7 @@ void TIM4_IRQ_Handle() {
 	}
 }
 
-void SPI1_Tx_IRQ() {
+void SPI3_Tx_IRQ() {
 	ST7789_UnSelect();
 }
 

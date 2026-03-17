@@ -281,6 +281,7 @@ void Error_Handler(void)
 //	__disable_irq();
 	ST7789_FillScreen(ST7789_RED);
 	LCD_Printf(0, 0, ST7789_BLACK, ST7789_RED, error_log);
+	LCD_Printf(0, 7, ST7789_BLACK, ST7789_RED, "%d", 7);
 	while (1) {
 		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 		HAL_Delay(100);
