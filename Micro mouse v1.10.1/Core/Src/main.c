@@ -164,7 +164,7 @@ int main(void)
 //		Simple_SVPWM_Control(&focR, step);
 		Simple_SVPWM_Control(&focL, 360-step);
 //		Show_Current();
-		step = (step + 2s) % 360;
+		step = (step + 1) % 360;
 		delay_us(40);
 //		LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "L: %.3f  ", focL.encoder->motor_elec_angle);
 
@@ -245,18 +245,20 @@ void PeriphCommonClock_Config(void)
 
   /** Initializes the peripherals clock
   */
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_CKPER|RCC_PERIPHCLK_ADCDAC;
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_CKPER|RCC_PERIPHCLK_ADCDAC
+                              |RCC_PERIPHCLK_LPTIM1;
   PeriphClkInitStruct.PLL2.PLL2Source = RCC_PLL2_SOURCE_HSE;
   PeriphClkInitStruct.PLL2.PLL2M = 5;
   PeriphClkInitStruct.PLL2.PLL2N = 64;
-  PeriphClkInitStruct.PLL2.PLL2P = 2;
+  PeriphClkInitStruct.PLL2.PLL2P = 5;
   PeriphClkInitStruct.PLL2.PLL2Q = 2;
   PeriphClkInitStruct.PLL2.PLL2R = 5;
   PeriphClkInitStruct.PLL2.PLL2RGE = RCC_PLL2_VCIRANGE_2;
   PeriphClkInitStruct.PLL2.PLL2VCOSEL = RCC_PLL2_VCORANGE_WIDE;
   PeriphClkInitStruct.PLL2.PLL2FRACN = 0;
-  PeriphClkInitStruct.PLL2.PLL2ClockOut = RCC_PLL2_DIVR;
+  PeriphClkInitStruct.PLL2.PLL2ClockOut = RCC_PLL2_DIVP|RCC_PLL2_DIVR;
   PeriphClkInitStruct.CkperClockSelection = RCC_CLKPSOURCE_HSI;
+  PeriphClkInitStruct.Lptim1ClockSelection = RCC_LPTIM1CLKSOURCE_PLL2P;
   PeriphClkInitStruct.AdcDacClockSelection = RCC_ADCDACCLKSOURCE_PLL2R;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {

@@ -114,12 +114,11 @@ void FOC_Init(FOC_Handle_t *hfoc, TIM_HandleTypeDef *htim, MT6701_Data_t *enc,
 
 	// PID Init
 
+	hfoc->pid_d.Kp = FOC_CURRENT_KP;  // 튜닝 필요
+	hfoc->pid_d.Ki = FOC_CURRENT_KI; // 튜닝 필요
 
-	hfoc->pid_d.Kp = 1.0f;  // 튜닝 필요
-	hfoc->pid_d.Ki = 0.05f; // 튜닝 필요
-
-	hfoc->pid_q.Kp = 1.0f;  // 튜닝 필요
-	hfoc->pid_q.Ki = 0.05f; // 튜닝 필요
+	hfoc->pid_q.Kp = FOC_CURRENT_KP;  // 튜닝 필요
+	hfoc->pid_q.Ki = FOC_CURRENT_KI; // 튜닝 필요
 	hfoc->pid_q.out_max = VBUS * 0.9f;
 	hfoc->pid_q.out_min = -VBUS * 0.9f;
 }
@@ -139,11 +138,11 @@ void FOC_Stop(FOC_Handle_t *hfoc) {
 	__HAL_TIM_SET_COMPARE(hfoc->htim_pwm, hfoc->u_tim_channel, 0);
 	__HAL_TIM_SET_COMPARE(hfoc->htim_pwm, hfoc->v_tim_channel, 0);
 	__HAL_TIM_SET_COMPARE(hfoc->htim_pwm, hfoc->w_tim_channel, 0);
-	HAL_GPIO_WritePin(MTR_INLx_GPIO_Port, MTR_INLx_Pin, GPIO_PIN_RESET);
 
 	HAL_TIM_PWM_Stop(hfoc->htim_pwm, hfoc->u_tim_channel);
 	HAL_TIM_PWM_Stop(hfoc->htim_pwm, hfoc->v_tim_channel);
 	HAL_TIM_PWM_Stop(hfoc->htim_pwm, hfoc->w_tim_channel);
+	HAL_GPIO_WritePin(MTR_INLx_GPIO_Port, MTR_INLx_Pin, GPIO_PIN_RESET);
 }
 
 void FOC_Set_Torque(FOC_Handle_t *hfoc, float iq_target) {
