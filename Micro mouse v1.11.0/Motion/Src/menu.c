@@ -30,13 +30,13 @@ void Show_Current() {
 	LCD_Printf(11, 7, ST7789_WHITE, ST7789_BLACK, "V:%.3f ",
 			focL.Iv);
 	LCD_Printf(20, 7, ST7789_WHITE, ST7789_BLACK, "W:%.3f ",
-			focL.Iw);
+			-focL.Iu-focL.Iv);
 //	LCD_Printf(0, 7, ST7789_WHITE, ST7789_BLACK, "R U:%.3f ",
 //			focR.Iu);
 //	LCD_Printf(11, 7, ST7789_WHITE, ST7789_BLACK, "V:%.3f ",
 //			focR.Iv);
 //	LCD_Printf(20, 7, ST7789_WHITE, ST7789_BLACK, "W:%.3f ",
-//			focR.Iw);
+//			-focR.Iu-focR.Iv);
 }
 
 void Show_ToF() {

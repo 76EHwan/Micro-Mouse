@@ -19,10 +19,10 @@
 #define IMU_EN
 #define DRV8316C_L_EN
 #define DRV8316C_R_EN
-#define ENCODER_L_EN
-//#define ENCODER_R_EN
-#define SENSOR_TOF_EN
-#define FOC_EN
+//#define ENCODER_L_EN
+#define ENCODER_R_EN
+//#define SENSOR_TOF_EN
+//#define FOC_EN
 
 void DWT_Init(void) {
     // 1. DWT 유닛 활성화 (CoreDebug->DEMCR)
@@ -38,10 +38,6 @@ void DWT_Init(void) {
 void MX_User_Init() {
 	DWT_Init();
 	ST7789_Init();
-	ST7789_FillScreen(ST7789_BLACK);
-	HAL_LPTIM_PWM_Start(&hlptim1, LPTIM_CHANNEL_2);
-	__HAL_LPTIM_COMPARE_SET(&hlptim1, LPTIM_CHANNEL_2, 200);
-
 	HAL_Delay(10);
 
 #ifdef IMU_EN

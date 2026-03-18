@@ -39,17 +39,16 @@ static uint8_t DRV8316C_CalculateEvenParity(uint16_t data) {
 }
 
 /**
- * @brief  Internal helper for SPI Tx/Rx (Native 16-bit)
+ * @brief  Internal helper for SPI Tx/Rx (8-bit x 2 Transfer)
  */
 static HAL_StatusTypeDef DRV8316C_SPI_TxRx(DRV8316C_Handle_t *hdrv,
-        uint16_t *pTxData, uint16_t *pRxData) {
+        uint8_t *pTxData, uint8_t *pRxData) {
     HAL_StatusTypeDef status;
 
     DRV8316C_CS_LOW(hdrv);
 
-    // 16-bit 모드: Size = 1 (16비트 한 덩어리 전송)
-    status = HAL_SPI_TransmitReceive(hdrv->hspi, (uint8_t*) pTxData,
-            (uint8_t*) pRxData, 1, 100);
+    // 8-bit 모드: Size = 2 (8비트 배열 2개 전송)
+    status = HAL_SPI_TransmitReceive(hdrv->hspi, pTxData, pRxData, 2, 100);
 
     DRV8316C_CS_HIGH(hdrv);
 
@@ -79,12 +78,13 @@ void DRV8316C_Init(DRV8316C_Handle_t *hdrv, SPI_HandleTypeDef *hspi,
 }
 
 /**
- * @brief  Writes 16-bit frame with CORRECT Bit Packing
+ * @brief  Writes 16-bit frame with CORRECT Bit Packing (8-bit x 2 Transfer)
  */
 HAL_StatusTypeDef DRV8316C_WriteRegister(DRV8316C_Handle_t *hdrv,
         uint8_t regAddr, uint8_t data) {
     uint16_t tx_frame = 0;
-    uint16_t rx_frame = 0;
+    uint8_t tx_data[2] = {0,};
+    uint8_t rx_data[2] = {0,};
 
     // 1. 프레임 생성 (Write=0, Address Shift=9, Data)
     tx_frame = ((uint16_t) (regAddr & 0x3F) << DRV_ADDR_SHIFT)
@@ -102,17 +102,22 @@ HAL_StatusTypeDef DRV8316C_WriteRegister(DRV8316C_Handle_t *hdrv,
 //    tx_frame ^= DRV_PARITY_BIT;
     // =========================================================
 
-    // 3. 전송
-    return DRV8316C_SPI_TxRx(hdrv, &tx_frame, &rx_frame);
+    // 3. 16비트 데이터를 8비트 2개로 분할 (MSB First)
+    tx_data[0] = (uint8_t)((tx_frame >> 8) & 0xFF); // 상위 8비트
+    tx_data[1] = (uint8_t)(tx_frame & 0xFF);        // 하위 8비트
+
+    // 4. 전송
+    return DRV8316C_SPI_TxRx(hdrv, tx_data, rx_data);
 }
 
 /**
- * @brief  Reads 16-bit frame with CORRECT Bit Packing
+ * @brief  Reads 16-bit frame with CORRECT Bit Packing (8-bit x 2 Transfer)
  */
 HAL_StatusTypeDef DRV8316C_ReadRegister(DRV8316C_Handle_t *hdrv,
         uint8_t regAddr, uint8_t *pData) {
     uint16_t tx_frame = 0;
-    uint16_t rx_frame = 0;
+    uint8_t tx_data[2] = {0,};
+    uint8_t rx_data[2] = {0,};
     HAL_StatusTypeDef status;
 
     // 1. Read 프레임 생성 (Read=1, Address Shift=9)
@@ -124,11 +129,18 @@ HAL_StatusTypeDef DRV8316C_ReadRegister(DRV8316C_Handle_t *hdrv,
         tx_frame |= DRV_PARITY_BIT;
     }
 
-    // 3. 전송 및 수신
-    status = DRV8316C_SPI_TxRx(hdrv, &tx_frame, &rx_frame);
+    // 3. 16비트 데이터를 8비트 2개로 분할 (MSB First)
+    tx_data[0] = (uint8_t)((tx_frame >> 8) & 0xFF); // 상위 8비트
+    tx_data[1] = (uint8_t)(tx_frame & 0xFF);        // 하위 8비트
+
+    // 4. 전송 및 수신
+    status = DRV8316C_SPI_TxRx(hdrv, tx_data, rx_data);
 
     if (status == HAL_OK) {
-        // 4. 데이터 추출 (하위 8비트)
+        // 5. 수신된 8비트 2개를 다시 16비트로 조립
+        uint16_t rx_frame = ((uint16_t)rx_data[0] << 8) | rx_data[1];
+
+        // 6. 데이터 추출 (하위 8비트)
         *pData = (uint8_t) (rx_frame & DRV_DATA_MASK);
     }
 

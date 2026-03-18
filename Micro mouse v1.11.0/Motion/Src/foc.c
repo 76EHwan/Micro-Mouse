@@ -22,7 +22,6 @@ void Calc_SOX_Current(FOC_Handle_t *hfoc, volatile uint16_t *pData){
 	hfoc->vBus = (float)*(pData + 0) * ADC_REF_VOLT * ADC_RES_INV;
 	hfoc->adc_raw_u = *(pData + 1);
 	hfoc->adc_raw_v = *(pData + 2);
-	hfoc->adc_raw_w = *(pData + 3);
 }
 
 // 0~2PI 범위로 각도 정규화
@@ -164,15 +163,13 @@ void FOC_Update(FOC_Handle_t *hfoc) {
 	float volts_per_count = ADC_REF_VOLT * ADC_RES_INV;
 	float V_adc_u = (hfoc->adc_raw_u - 2048) * volts_per_count;
 	float V_adc_v = (hfoc->adc_raw_v - 2048) * volts_per_count;
-	float V_adc_w = (hfoc->adc_raw_w - 2048) * volts_per_count; // 2션트 사용시 계산으로 대체 가능
 
 	hfoc->Iu = V_adc_u * CSA_GAIN_INV;
 	hfoc->Iv = V_adc_v * CSA_GAIN_INV;
-	hfoc->Iw = V_adc_w * CSA_GAIN_INV;
 
 	// 3. Clarke Transform (abc -> alpha,beta)
 	hfoc->I_alpha = hfoc->Iu;
-	hfoc->I_beta = (hfoc->Iv - hfoc->Iw) * SQRT3_INV;
+	hfoc->I_beta = (2.f * hfoc->Iv + hfoc->Iu) * SQRT3_INV;
 
 	// 4. Park Transform (alpha,beta -> d,q)
 	float s = sinf(hfoc->theta_e);

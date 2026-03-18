@@ -16,7 +16,7 @@ extern "C" {
 #include "spi.h"
 #include "tim.h"
 
-#define DRV8316C_SPI &hspi3
+#define DRV8316C_SPI &hspi2
 #define DRV8316C_L_TIM &htim1
 #define DRV8316C_R_TIM &htim8
 

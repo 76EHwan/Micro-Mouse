@@ -69,7 +69,7 @@ typedef struct {
     // --- State Variables ---
     float theta_e;                // 전기각 (Electrical Angle, rad)
     float vBus;					  // 입력 전압 (V)
-    float Iu, Iv, Iw;             // 상전류 (A)
+    float Iu, Iv;                 // 상전류 (A)
     float Id, Iq;                 // d-q축 전류
     float I_alpha, I_beta;        // alpha-beta 전류
 
@@ -92,7 +92,6 @@ typedef struct {
     // --- ADC Raw Values (from DMA buffer) ---
     int16_t adc_raw_u;
     int16_t adc_raw_v;
-    int16_t adc_raw_w;
 
     PI_Controller pid_speed;
 } FOC_Handle_t;

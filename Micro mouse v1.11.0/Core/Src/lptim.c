@@ -54,7 +54,7 @@ void MX_LPTIM1_Init(void)
     Error_Handler();
   }
   sConfig1.Pulse = 0;
-  sConfig1.OCPolarity = LPTIM_OCPOLARITY_HIGH;
+  sConfig1.OCPolarity = LPTIM_OCPOLARITY_LOW;
   if (HAL_LPTIM_OC_ConfigChannel(&hlptim1, &sConfig1, LPTIM_CHANNEL_2) != HAL_OK)
   {
     Error_Handler();
@@ -87,6 +87,10 @@ void HAL_LPTIM_MspInit(LPTIM_HandleTypeDef* lptimHandle)
 
     /* LPTIM1 clock enable */
     __HAL_RCC_LPTIM1_CLK_ENABLE();
+
+    /* LPTIM1 interrupt Init */
+    HAL_NVIC_SetPriority(LPTIM1_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(LPTIM1_IRQn);
   /* USER CODE BEGIN LPTIM1_MspInit 1 */
 
   /* USER CODE END LPTIM1_MspInit 1 */
@@ -131,6 +135,9 @@ void HAL_LPTIM_MspDeInit(LPTIM_HandleTypeDef* lptimHandle)
   /* USER CODE END LPTIM1_MspDeInit 0 */
     /* Peripheral clock disable */
     __HAL_RCC_LPTIM1_CLK_DISABLE();
+
+    /* LPTIM1 interrupt Deinit */
+    HAL_NVIC_DisableIRQ(LPTIM1_IRQn);
   /* USER CODE BEGIN LPTIM1_MspDeInit 1 */
 
   /* USER CODE END LPTIM1_MspDeInit 1 */
@@ -138,5 +145,11 @@ void HAL_LPTIM_MspDeInit(LPTIM_HandleTypeDef* lptimHandle)
 }
 
 /* USER CODE BEGIN 1 */
+
+void HAL_LPTIM_AutoReloadMatchCallback(LPTIM_HandleTypeDef *hlptim){
+	if(hlptim == &hlptim1){
+		LPTIM1_IRQ_Handle();
+	}
+}
 
 /* USER CODE END 1 */

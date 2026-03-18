@@ -44,6 +44,8 @@ void HAL_LPTIM_MspPostInit(LPTIM_HandleTypeDef *hlptim);
 
 /* USER CODE BEGIN Prototypes */
 
+__weak void LPTIM1_IRQ_Handle();
+
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
