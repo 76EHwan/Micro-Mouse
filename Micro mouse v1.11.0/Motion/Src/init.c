@@ -20,7 +20,7 @@
 #define DRV8316C_L_EN
 #define DRV8316C_R_EN
 //#define ENCODER_L_EN
-#define ENCODER_R_EN
+//#define ENCODER_R_EN
 //#define SENSOR_TOF_EN
 //#define FOC_EN
 
@@ -101,18 +101,22 @@ void MX_User_Init() {
 #endif
 
 #ifdef ENCODER_L_EN
-	uint8_t rxBufferL[3] = {0,0,0};
-	if (MT6701_Init(&encDataL, rxBufferL) != HAL_OK) {
-		sprintf(error_log, " L: %2x %2x %2x", rxBufferL[2], rxBufferL[1], rxBufferL[0]);
-		Error_Handler();
+	uint8_t rxBufferL[3] = {0, 0, 0};
+	MT6701_Init(&encDataL, rxBufferL);
+
+	if (encDataL.status != HAL_OK) {
+	    // %02X를 사용하여 0을 채우고, rxBufferL[0]부터 순서대로 출력
+	    sprintf(error_log, " L: %02X  %02X%02X%02X", encDataL.status, rxBufferL[0], rxBufferL[1], rxBufferL[2]);
+	    Error_Handler();
 	}
 #endif
 #ifdef ENCODER_R_EN
 	uint8_t rxBufferR[3] = {0,0,0};
-	if (MT6701_Init(&encDataR, rxBufferR) != HAL_OK) {
-		sprintf(error_log, " R: %2x %2x %2x", rxBufferR[2], rxBufferR[1], rxBufferR[0]);
-		Error_Handler();
-	}
+		MT6701_Init(&encDataR, rxBufferR);
+		if (encDataR.status != HAL_OK) {
+			sprintf(error_log, " L: %X", encDataR.status);
+			Error_Handler();
+		}
 #endif
 
 #ifdef SENSOR_TOF_EN

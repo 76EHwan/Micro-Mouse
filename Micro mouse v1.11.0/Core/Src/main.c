@@ -148,26 +148,30 @@ int main(void)
 	HAL_Delay(10);
 	TRIG_OFF;
 
-	ADC1_Start();
+//	ADC1_Start();
 //	FOC_Start(&focR);
-	FOC_Start(&focL);
+//	FOC_Start(&focL);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
 	while (1) {
+		LCD_Printf(0, 0, ST7789_WHITE, ST7789_BLACK, "%f", 0.1f);
+//		LCD_Printf(0, 0, ST7789_WHITE, ST7789_BLACK, "%d", 1);
 //		static uint16_t step = 0;
-		MT6701_ReadSSI(focL.encoder);
-		MT6701_ReadSSI(focR.encoder);
+//		MT6701_ReadSSI(focL.encoder);
+//		MT6701_ReadSSI(focR.encoder);
 //		Simple_SVPWM_Control(&focR, step);
 //		Simple_SVPWM_Control(&focL, 360-step);
 //		Show_Current();
+//		LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "L: %.3f  ", focL.encoder->motor_elec_angle);
+//		LCD_Printf(0, 2, ST7789_WHITE, ST7789_BLACK, "L: %.3f  ", focR.encoder->motor_elec_angle);
+//		Test_DRV8316C_Read_Status(&DRV8316C_L);
 //		step = (step + 1) % 360;
+		TRIG_TOGGLE;
+		HAL_Delay(100);
 //		delay_us(40);
-		LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "L: %.3f  ", focL.encoder->motor_elec_angle);
-		LCD_Printf(0, 2, ST7789_WHITE, ST7789_BLACK, "L: %.3f  ", focR.encoder->motor_elec_angle);
-
 	}
     /* USER CODE END WHILE */
 
@@ -282,9 +286,10 @@ void Error_Handler(void)
 //	__disable_irq();
 	ST7789_FillScreen(ST7789_RED);
 	LCD_Printf(0, 0, ST7789_BLACK, ST7789_RED, error_log);
+
 	while (1) {
-		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-		HAL_Delay(100);
+		TRIG_TOGGLE;
+		HAL_Delay(500);
 	}
   /* USER CODE END Error_Handler_Debug */
 }

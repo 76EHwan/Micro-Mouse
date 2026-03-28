@@ -120,7 +120,7 @@ void ST7789_Init(void) {
 	ST7789_Delay(50);
 
 	HAL_LPTIM_PWM_Start(&hlptim1, LPTIM_CHANNEL_2);
-	__HAL_LPTIM_COMPARE_SET(&hlptim1, LPTIM_CHANNEL_2, 100);
+	__HAL_LPTIM_COMPARE_SET(&hlptim1, LPTIM_CHANNEL_2, 300);
 }
 
 // ==========================================================
