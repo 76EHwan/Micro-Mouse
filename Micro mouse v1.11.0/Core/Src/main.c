@@ -170,7 +170,7 @@ int main(void)
 //		Test_DRV8316C_Read_Status(&DRV8316C_L);
 //		step = (step + 1) % 360;
 		TRIG_TOGGLE;
-		HAL_Delay(100);
+		HAL_Delay(500);
 //		delay_us(40);
 	}
     /* USER CODE END WHILE */
