@@ -29,9 +29,9 @@ void Simple_6_step_Control(FOC_Handle_t *foc) {
 	DRV8316C_ReadRegister(foc->hdrv, DRV_REG_CTRL_2, &ctrl2_val);
 	LCD_Printf(0, 3, ST7789_WHITE, ST7789_BLACK, "CTRL2: 0x%02X", ctrl2_val);
 
-	static uint16_t step = 0;
+	static uint16_t step = 1;
 	uint16_t pwm_val = foc->htim_pwm->Instance->ARR; // 힘을 좀 더 강하게 (약 64%)
-	float modulation_factor = 0.3;
+	float modulation_factor = 0.6;
 
 	LCD_Printf(0, 2, ST7789_WHITE, ST7789_BLACK, "Step:%3d PWM:%4d", step,
 			pwm_val);
@@ -80,7 +80,7 @@ void Simple_6_step_Control(FOC_Handle_t *foc) {
 		break;
 	}
 
-//	step = (step + 1) % 6;
+	step = (step + 1) % 6;
 }
 
 void Simple_SVPWM_Control(FOC_Handle_t *foc, uint16_t step) {

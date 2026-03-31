@@ -255,13 +255,6 @@ void LPTIM1_IRQ_Handle() {
 
 		// 화면 갱신 요청
 		ST7789_UpdateScreen();
-
-		// [디버깅] SPI 상태 확인
-		if (HAL_SPI_GetState(&ST7789_SPI_PORT) != HAL_SPI_STATE_READY) {
-			HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
-		}
-
-		TRIG_TOGGLE;
 	}
 }
 
