@@ -49,6 +49,9 @@ extern "C" {
 #define TRIG_ON		HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET)
 #define TRIG_OFF	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET)
 #define TRIG_TOGGLE HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin)
+
+#define SWL_INPUT 	(HAL_GPIO_ReadPin(SWL_GPIO_Port, SWL_Pin) == GPIO_PIN_RESET) ? 1 : 0
+#define SWR_INPUT 	(HAL_GPIO_ReadPin(SWR_GPIO_Port, SWR_Pin) == GPIO_PIN_RESET) ? 1 : 0
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/

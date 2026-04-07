@@ -22,7 +22,7 @@
 //#define ENCODER_L_EN
 //#define ENCODER_R_EN
 //#define SENSOR_TOF_EN
-//#define FOC_EN
+#define FOC_EN
 
 void DWT_Init(void) {
     // 1. DWT 유닛 활성화 (CoreDebug->DEMCR)

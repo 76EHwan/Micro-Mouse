@@ -148,7 +148,7 @@ int main(void)
 	HAL_Delay(10);
 	TRIG_OFF;
 
-	ADC1_Start();
+//	ADC1_Start();
 	FOC_Start(&focR);
 	FOC_Start(&focL);
   /* USER CODE END 2 */
@@ -158,21 +158,32 @@ int main(void)
 //		LCD_Printf(0, 0, ST7789_WHITE, ST7789_BLACK, "%f", 0.1f);
 //		LCD_Printf(0, 4, ST7789_WHITE, ST7789_BLACK, "%d", 1);
 
+
 	while (1) {
-//		static uint16_t step = 0;
+		static float_t step = 0;
+		static uint32_t dt = 100;
+		if(SWL_INPUT) dt = 90;
+		if(SWR_INPUT) dt = 81;
 //		MT6701_ReadSSI(&encDataL);
 //		MT6701_ReadSSI(&encDataR);
-		Simple_6_step_Control(&focR);
-//		Simple_SVPWM_Control(&focR, step);
-//		Simple_SVPWM_Control(&focL, 360-step);
+//		Simple_6_step_Control(&focL);
+//		Simple_6_step_Control(&focR);
+//		Simple_SVPWM_Control(&focL, step);
+		Simple_SVPWM_Control(&focR, 360-step);
 //		Show_Current();
 //		LCD_Printf(0, 1, ST7789_WHITE, ST7789_BLACK, "L: %.3f  ", encDataL.motor_elec_angle);
 //		LCD_Printf(0, 2, ST7789_WHITE, ST7789_BLACK, "R: %.3f  ", encDataR.motor_elec_angle);
-//		Test_DRV8316C_Read_Status(&DRV8316C_R);
-//		step = (step + 1) % 6;
-		delay_us(1000);
+//		Test_DRV8316C_Read_Status(&DRV8316C_L);
+		step = (step + 0.2);
+		step = fmodf(step, 360.f);
+//		if(dt > 1100) dt -= 1000;
+		delay_us(dt);
 		TRIG_TOGGLE;
-//		HAL_Delay(2000);
+//		LCD_Printf(0, 0, ST7789_WHITE, ST7789_BLACK, "%3d", step);
+//		HAL_Delay(100);
+//		if(HAL_GPIO_ReadPin(SWL_GPIO_Port, SWL_Pin) != GPIO_PIN_SET) TRIG_ON;
+//		else if(HAL_GPIO_ReadPin(SWR_GPIO_Port, SWR_Pin) != GPIO_PIN_SET) TRIG_ON;
+//		else TRIG_OFF;
 	}
     /* USER CODE END WHILE */
 

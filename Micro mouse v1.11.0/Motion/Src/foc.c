@@ -193,12 +193,12 @@ void ADC1_Callback_Handle(){
 	Calc_SOX_Current(&focL, adc1_buffer);
 	MT6701_ReadSSI(focL.encoder);
 	FOC_Update(&focL);
-//	SVPWM_Generate(&focL, focL.Valpha, focL.Vbeta);
+	SVPWM_Generate(&focL, focL.Valpha, focL.Vbeta);
 }
 
 void ADC2_Callback_Handle(){
 	Calc_SOX_Current(&focR, adc2_buffer);
 	MT6701_ReadSSI(focR.encoder);
 	FOC_Update(&focR);
-//	SVPWM_Generate(&focR, focR.Valpha, focR.Vbeta);
+	SVPWM_Generate(&focR, focR.Valpha, focR.Vbeta);
 }
