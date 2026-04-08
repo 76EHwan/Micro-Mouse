@@ -87,7 +87,7 @@ void Simple_SVPWM_Control(FOC_Handle_t *foc, float_t step) {
 	uint16_t arr = foc->htim_pwm->Instance->ARR;
 
 	// SVPWM에서는 최대 1.154 (2/√3) 까지 선형 변조가 가능하여 전압 이용률이 약 15% 상승합니다.
-	float modulation_factor = 0.8f;
+	float modulation_factor = 0.45f;
 
 	uint16_t PWM_MAX = (uint16_t) (arr * 0.95f);  // ✅ 상한 클램핑 기준
 
@@ -120,7 +120,7 @@ void Simple_SVPWM_Control(FOC_Handle_t *foc, float_t step) {
 	__HAL_TIM_SET_COMPARE(foc->htim_pwm, foc->w_tim_channel, pwm_w);
 }
 
-void Motor_Start(){
+void Motor_Start() {
 	HAL_TIM_Base_Start_IT(&htim7);
 	ADC2_Start();
 	ADC1_Start();
@@ -131,6 +131,6 @@ void Motor_Start(){
 	FOC_Start(&focL);
 }
 
-void Calc_PI_Iqref(FOC_Handle_t *hfoc){
+void Calc_PI_Iqref(FOC_Handle_t *hfoc) {
 
 }

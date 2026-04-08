@@ -62,6 +62,7 @@ extern DMA_NodeTypeDef Node_GPDMA1_Channel1;
 extern DMA_QListTypeDef List_GPDMA1_Channel1;
 extern DMA_HandleTypeDef handle_GPDMA1_Channel1;
 extern ADC_HandleTypeDef hadc1;
+extern ADC_HandleTypeDef hadc2;
 extern LPTIM_HandleTypeDef hlptim1;
 extern DMA_HandleTypeDef handle_GPDMA2_Channel0;
 extern SPI_HandleTypeDef hspi3;
@@ -351,6 +352,20 @@ void LPTIM1_IRQHandler(void)
   /* USER CODE BEGIN LPTIM1_IRQn 1 */
 
   /* USER CODE END LPTIM1_IRQn 1 */
+}
+
+/**
+  * @brief This function handles ADC2 global interrupt.
+  */
+void ADC2_IRQHandler(void)
+{
+  /* USER CODE BEGIN ADC2_IRQn 0 */
+
+  /* USER CODE END ADC2_IRQn 0 */
+  HAL_ADC_IRQHandler(&hadc2);
+  /* USER CODE BEGIN ADC2_IRQn 1 */
+
+  /* USER CODE END ADC2_IRQn 1 */
 }
 
 /**
