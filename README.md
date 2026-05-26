@@ -12,7 +12,7 @@
 
 ---
 
-## 🚀 코어 제어 기술: Field-Oriented Control (FOC)
+## 코어 제어 기술: Field-Oriented Control (FOC)
 
 이 마이크로마우스의 핵심은 하드웨어 타이머와 고해상도 엔코더를 이용해 3상 모터를 직류 모터처럼 손쉽고 정밀하게 제어하는 **독자적인 FOC (Field-Oriented Control) 제어기**(`foc.c`)입니다.
 
