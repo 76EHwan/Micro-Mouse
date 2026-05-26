@@ -1,9 +1,9 @@
 # STM32H533RETX BLDC FOC MicroMouse
 
-이 프로젝트는 고성능 ARM Cortex-M33 코어를 탑재한 STM32H533RETX 보드를 기반으로 제작된 전문가용 마이크로마우스(MicroMouse)입니다. 기존의 스테핑 모터나 코어리스 DC 모터를 넘어서, **3상 BLDC 모터와 고해상도 자기식 엔코더(Magnetic Encoder)를 결합한 FOC(Field-Oriented Control)** 를 구현하여 극한의 주행 응답성과 부드러운 가감속 성능을 목표로 합니다. 여러 개의 다채널 ToF 센서와 6축 IMU를 융합한 정밀한 미로 탐색 및 자세 보정 알고리즘이 탑재되어 있습니다.
+이 프로젝트는 고성능 ARM Cortex-M33 코어를 탑재한 STM32H533RET6 보드를 기반으로 제작된 전문가용 마이크로마우스(MicroMouse)입니다. 기존의 스테핑 모터나 코어리스 DC 모터를 넘어서, **3상 BLDC 모터와 고해상도 자기식 엔코더(Magnetic Encoder)를 결합한 FOC(Field-Oriented Control)** 를 구현하여 극한의 주행 응답성과 부드러운 가감속 성능을 목표로 합니다. 여러 개의 다채널 ToF 센서와 6축 IMU를 융합한 정밀한 미로 탐색 및 자세 보정 알고리즘이 탑재되어 있습니다.
 
 ## 주요 하드웨어 구성 (Hardware Components)
-* **MCU**: STM32H533RETX (ARM Cortex-M33, 250MHz, TrustZone 지원 고성능 마이크로컨트롤러)
+* **MCU**: STM32H533RET6 (ARM Cortex-M33, 250MHz, TrustZone 지원 고성능 마이크로컨트롤러)
 * **모터 드라이버**: DRV8316CRQ1 (Texas Instruments, 고신뢰성 3-Phase BLDC 전용 드라이버, SPI 파라미터 설정 지원)
 * **자기식 엔코더**: MT6701 (MagnTek, 14-bit Absolute Magnetic Encoder, 회전자 전기각 파악용)
 * **IMU 센서**: LSM6DS3TR-C (6축 가속도 및 자이로 센서)
@@ -32,7 +32,7 @@
 
 ### 1. 다중 센서 융합 기반 미로 인식 (`sensor.c`)
 * **VL53L4CX ToF 다중 폴링 (`vl53l4cx.c`)**:
-  * 전방 및 좌우 방향을 바라보는 ToF 센서를 지속적으로 트리거하여, 밀리미터(mm) 단위로 벽과의 거리를 측정합니다.
+  * 전방 및 45도 좌우 방향을 바라보는 ToF 센서를 지속적으로 트리거하여, 밀리미터(mm) 단위로 벽과의 거리를 측정합니다.
   * 벽의 유무를 판단할 뿐만 아니라 벽과의 평행도를 계산하여 차체가 미로의 정중앙을 유지하며 달리게 하는 **자세 보정(Wall Following)** 의 핵심 지표로 사용됩니다.
 * **LSM6DS3TR-C 자이로 오도메트리 (`lsm6ds3tr-c.c`)**:
   * 고속 주행 시 휠 슬립으로 인해 발생하는 엔코더 오도메트리 오차를 자이로 센서의 Yaw 적분 값을 통해 상호 보완(Sensor Fusion)하여 직선 및 회전 궤적의 신뢰도를 높입니다.
